@@ -26,9 +26,10 @@ export interface dadosFormulario {
     pcd: boolean;
     trabalhando: boolean;
     sexo: "MASCULINO" | "FEMININO";
-    foto?: File | null;
+    foto: File | null;
     curriculo?: File | null;
 }
+
 
 export const formValidation = yup.object().shape({
     cpf: yup.string().trim("Campo obrigatorio"),
@@ -43,4 +44,4 @@ export const formValidation = yup.object().shape({
 
 })
 
-export const valoresIniciais: dadosFormulario = { cpf: "88899", cep: "440954", descricao: "hhhhhhhhhhh", email: "p@ww", nome: "ppp", senha: "123", sexo: 'FEMININO', tel: "75991995516", pcd: false, trabalhando: false }
+export const valoresIniciais: dadosFormulario = { foto: null, cpf: "88899", cep: "44094018", descricao: "hhhhhhhhhhh", email: "p@ww", nome: "ppp", senha: "123", sexo: 'FEMININO', tel: "75991995516", pcd: false, trabalhando: false }
