@@ -4,9 +4,11 @@ import * as yup from 'yup';
 
 
 export interface dadosLogin {
-    cpfOuEmail: string;
+    login: string;
     senha: string;
 }
+
+export const valoresIniciais: dadosLogin = { login: '', senha: '' }
 
 export const formLoginValidator = yup.object().shape({
     login: yup.string().trim("Campo obrigatório"),

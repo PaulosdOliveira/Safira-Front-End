@@ -37,7 +37,7 @@ export default function cadastroCandidato() {
         if (resultado.status === 201) {
             alert("Cadastro realizado com sucesso")
             const login: dadosLogin = {
-                cpfOuEmail: values.email,
+                login: values.email,
                 senha: values.senha
             }
             const token: accessToken = await service.logar(login);

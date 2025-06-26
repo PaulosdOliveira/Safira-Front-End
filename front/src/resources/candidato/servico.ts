@@ -89,7 +89,7 @@ export const candidatoService = () => new ServiceClass();
 
 
 
-interface erroResposta {
+export interface erroResposta {
     erro?: string;
     status: number;
 }
