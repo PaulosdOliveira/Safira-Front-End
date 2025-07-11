@@ -1,5 +1,6 @@
 import { dadosCadastroCandidato } from "@/app/candidato/cadastro/formSchema";
 import { dadosLogin } from "../sessao/sessao";
+import { qualificacaoUsuario } from "../qualificacao/qualificacaoResource";
 
 class ServiceClass {
 
@@ -56,7 +57,7 @@ class ServiceClass {
         const dados = new FormData;
         dados.append("foto", foto ? foto : '');
         const resultado = await fetch(this.urlBase + "/foto", {
-            method: 'PUT',
+            method: 'POST',
             body: dados,
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -80,6 +81,22 @@ class ServiceClass {
         })
     }
 
+
+    // Salvando qualificações do usuário
+    async salvarQualificacoes(qualificacoes: qualificacaoUsuario[], token: string) {
+        const url = this.urlBase + "/qualificacao-candidato";
+        await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(qualificacoes),
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+
+        })
+    }
+
+    
 }
 
 

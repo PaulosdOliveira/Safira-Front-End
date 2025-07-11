@@ -1,103 +1,229 @@
-import Image from "next/image";
+'use client'
+
+import "@/app/styles/main-candidato.css"
+import { ServicoSessao } from "@/resources/sessao/sessao";
+import { dadosConsultaVagaDTO, initConsultaVaga } from "@/resources/vaga_emprego/DadosConsultaVaga";
+import { VagaService } from "@/resources/vaga_emprego/service";
+import { useFormik } from "formik";
+import { useEffect, useState } from "react";
+import { CardVaga, cardVagaProps } from "./components/cardvaga";
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+    <div className="">
+      <MainCandidato />
     </div>
   );
+}
+
+
+const MainCandidato = () => {
+
+  const { values, handleChange } = useFormik<dadosConsultaVagaDTO>({
+    initialValues: initConsultaVaga,
+    onSubmit: pesquisar
+  })
+  const vagaService = VagaService();
+  const sessao = ServicoSessao();
+  const [estados, setEstado] = useState<string[]>([]);
+  const [cidades, setCidades] = useState<string[]>([]);
+  const [vagas, setVagas] = useState<cardVagaProps[]>([]);
+
+
+
+  //CRIANDO CARD DE VAGA
+  function criarCardVaga(dados: cardVagaProps, key: number) {
+    return <CardVaga cidade={dados.cidade} nome_empresa={dados.nome_empresa}
+      estado={dados.estado} exclusivo_pcd={dados.exclusivo_pcd} modelo={dados.modelo}
+      nivel={dados.nivel} salario={dados.salario} tipo_contrato={dados.tipo_contrato}
+      titulo={dados.titulo} sexo_exclusivo={dados.sexo_exclusivo} periodo={dados.periodo} key={key} />
+  }
+
+
+  // RENDERIZANDO CARDS DE VAGAS
+  function renderizarCards() {
+    return vagas.map(criarCardVaga);
+  }
+
+  useEffect(() => {
+    (async () => {
+      const estadosEncontados: string[] = await vagaService.buscarEstados();
+      setEstado(estadosEncontados);
+    })();
+
+  }, [])
+
+
+  useEffect(() => {
+    (async () => {
+      const vagasSugeridas: cardVagaProps[] = await vagaService.buscarVagasAlinhadas(sessao.getSessao()?.accessToken + "");
+      setVagas(vagasSugeridas);
+    })();
+
+
+  }, [])
+
+  async function buscarCidades(estado: string) {
+    const cidadesEncontradas = await vagaService.buscaCidadesDoEstado(estado);
+    setCidades(cidadesEncontradas);
+  }
+
+
+  // CORRIGIR DEPOIS
+  async function selecionarEstado(estado: string) {
+    values.estado = estado;
+    values.cidade = "";
+    if (estado.trim()) await buscarCidades(estado);
+  }
+
+
+  // PESQUISAR POR VAGAS  <<<<< --------------
+  async function pesquisar() {
+    const dados: dadosConsultaVagaDTO = {
+      titulo: values.titulo,
+      cidade: values.cidade,
+      estado: values.estado,
+      modelo: values.modelo,
+      senioridade: values.senioridade,
+      tipo_contrato: values.tipo_contrato
+    }
+    const lista: cardVagaProps[] = await vagaService.buscarVaga(dados, sessao.getSessao()?.accessToken + "")
+    setVagas(lista);
+
+  }
+
+  // Criando options 
+  function criaOption(texto: string, key: number) {
+    return (
+      <Option key={key} texto={texto} />
+    )
+  }
+
+  // Renderizando os options de cidades
+  function renderizarOptionsCidade() {
+    return (
+      cidades.map(criaOption)
+    )
+  }
+
+  // Renderizando os options de estados
+  function renderizarOptionEstados() {
+    return estados.map(criaOption);
+  }
+
+  return (
+    <div className="h-[400vh]">
+      <header className="  shadow-lg shadow-gray-400  rounded-lg ">
+
+        <div className="shadow-lg shadow-gray-700 py-8 h-24 ">
+
+          <div id="logo" className=" inline-block w-[20%]">
+            <h1 className="inline-block">Logo Vagas</h1>
+          </div>
+
+          <nav className=" inline-block w-[80%] text-right">
+            <h2 className="inline-block">Quem somos?</h2>
+            <h2 className="inline-block">Fale com o suporte</h2>
+            <h2 className="inline-block">Central de ajuda</h2>
+            <h2 className="inline-block">Menu</h2>
+          </nav>
+        </div>
+
+
+        <div id="imagem" className="pt-6">
+
+          <div id="search" className=" w-[70%] m-auto border border-gray-500 rounded-lg shadow-lg shadow-gray-700">
+            <h1 style={{ fontSize: '1.2em' }}
+              className="text-black text-center font-bold py-3 ">Busque o seu Rumo Profissional</h1>
+
+            <div className="border border-gray-500 box-border  bg-gray-500 rounded-full flex items-center w-[50%] h-[5.4vh] m-auto">
+              <input id="titulo" onChange={handleChange} type="text" placeholder="Titulo da vaga" className="bg-white  rounded-bl-full rounded-tl-full w-[85%] " />
+              <div onClick={() => pesquisar()} className="material-symbols cursor-pointer scale-125 text-white ml-3">search</div>
+            </div>
+            <div id="filtro" className="mt-2">
+
+              <div className="select">
+                <h2>Estado:</h2>
+                <select onChange={(event) => selecionarEstado(event.target.value)} id="estado">
+                  <Todos />
+                  {renderizarOptionEstados()}
+                </select>
+              </div>
+
+              <div className="select">
+                <h2>Cidade:</h2>
+                <select onChange={handleChange} id="cidade" value={values.cidade}>
+                  <Todos />
+                  {renderizarOptionsCidade()}
+                </select>
+
+              </div>
+
+
+              <div className="select">
+
+                <h2>Nivel:</h2>
+                <select onChange={handleChange} id="senioridade">
+                  <Todos />
+                  <option value="ESTAGIARIO">Estagiario</option>
+                  <option value="JUNIOR">Junior</option>
+                  <option>Pleno</option>
+                  <option>Senior</option>
+                </select>
+              </div>
+
+
+
+              <div className="select">
+                <h2>Modelo:</h2>
+                <select onChange={handleChange} id="modelo">
+                  <Todos />
+                  <option value="PRESENCIAL">Presencial</option>
+                  <option>Híbrido</option>
+                  <option>Remoto</option>
+                </select>
+              </div>
+
+              <div className="select">
+                <h2>Contrato:</h2>
+                <select onChange={handleChange} id="tipo_contrato" value={values.tipo_contrato}>
+                  <Todos />
+                  <option>ESTAGIO</option>
+                  <option>CLT</option>
+                  <option>PJ</option>
+                  <option>TEMPORARIO</option>
+                </select>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </header>
+      <main>
+        <section className=" p-3 grid grid-cols-2 ">
+
+          {renderizarCards()}
+
+        </section>
+      </main>
+    </div>
+  )
+}
+
+
+const Todos = () => {
+  return (
+    <option value="">Todos</option>
+  )
+}
+
+interface optionProps {
+  texto: string
+}
+
+const Option: React.FC<optionProps> = ({ texto }) => {
+  return (
+    <option>{texto}</option>
+  )
 }

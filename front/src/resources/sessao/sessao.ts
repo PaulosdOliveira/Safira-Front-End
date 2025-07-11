@@ -30,7 +30,7 @@ export class Sessao {
 
 class SessaoService {
 
-    async criarSessao(token: accessToken) {
+    criarSessao(token: accessToken) {
         if (token.token) {
             const tokenDecodificado: any = jwtDecode(token.token);
             const sessao: Sessao = {
@@ -48,6 +48,16 @@ class SessaoService {
     setSessao(sessao: Sessao) {
         try {
             localStorage.setItem("sessao", JSON.stringify(sessao));
+        } catch (erro) {
+            alert(erro)
+        }
+    }
+
+    getSessao() {
+        try {
+            const sessao = localStorage.getItem("sessao");
+            const login: Sessao = JSON.parse(sessao ? sessao : '');
+            return login;
         } catch (erro) {
             alert(erro)
         }
