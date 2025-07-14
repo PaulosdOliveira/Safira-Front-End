@@ -1,4 +1,4 @@
-import { dadosConsultaVagaDTO } from "./DadosConsultaVaga";
+import { dadosConsultaVagaDTO } from "./DadosVaga";
 
 class Service {
     urlBase: string = "http://localhost:8080/vaga"
@@ -52,6 +52,27 @@ class Service {
             method: 'GET'
         })
         return resultado.json();
+    }
+
+    async carregarVaga(id: string, token: string) {
+
+        const resultado = await fetch(`${this.urlBase}/buscar/${id}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+
+        return resultado.json();
+    }
+
+    async candidatar_a_vaga(token: string, idVaga: string){
+        await fetch(`${this.urlBase}/candidatar/${idVaga}`,{
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
     }
 
 }

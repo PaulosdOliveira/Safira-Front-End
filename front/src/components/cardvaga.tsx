@@ -1,4 +1,5 @@
 export interface cardVagaProps {
+    id: number;
     nome_empresa: string;
     titulo: string;
     cidade: string;
@@ -12,9 +13,10 @@ export interface cardVagaProps {
     periodo: string;
 }
 
-export const CardVaga: React.FC<cardVagaProps> = ({ cidade, nome_empresa, estado, modelo, nivel, salario, tipo_contrato, titulo, exclusivo_pcd, sexo_exclusivo, periodo }) => {
+export const CardVaga: React.FC<cardVagaProps> = ({id, cidade, nome_empresa, estado, modelo, nivel, salario, tipo_contrato, titulo, exclusivo_pcd, sexo_exclusivo, periodo }) => {
     return (
-        <div className="border border-gray-200 w-72  p-3 m-auto rounded-2xl bg-white shadow shadow-gray-300 cursor-pointer">
+        <a href={`/vaga/${id}`} target="_blank"
+        className="border vaga border-gray-200 w-72  p-3  rounded-2xl bg-white shadow shadow-gray-300 cursor-pointer">
             <div>
                 <i className="material-symbols">Domain</i>
                 <h2 className=" min-h-10 inline-block">{nome_empresa}</h2>
@@ -71,6 +73,6 @@ export const CardVaga: React.FC<cardVagaProps> = ({ cidade, nome_empresa, estado
                 </div>
             )}
 
-        </div>
+        </a>
     )
 }

@@ -25,12 +25,42 @@
     }
 
     div#search {
-        background-color: rgba(255,255,255, 0.900);
+        background-color: rgba(255, 255, 255, 0.900);
         padding: 6px;
     }
 
-    main{
+    main {
         background-color: #FFFF;
-        height: 100%;
+        
+    }
+}
+
+
+@media screen and (max-width: 575px) {
+    section {
+        background-color: blue;
+    }
+
+    div.vaga{
+        margin: auto;
+    }
+}
+
+@media screen and (min-width: 575px) and (max-width: 767px) {
+    section {
+        background-color: pink;
+    }
+}
+
+@media screen and (min-width: 767px) and (max-width: 991px) {
+
+    section {
+        background-color: darkcyan;
+    }
+}
+
+@media screen and (min-width: 991px) {
+    section {
+        background-color: sienna;
     }
 }

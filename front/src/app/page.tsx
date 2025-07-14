@@ -2,11 +2,11 @@
 
 import "@/app/styles/main-candidato.css"
 import { ServicoSessao } from "@/resources/sessao/sessao";
-import { dadosConsultaVagaDTO, initConsultaVaga } from "@/resources/vaga_emprego/DadosConsultaVaga";
+import { dadosConsultaVagaDTO, initConsultaVaga } from "@/resources/vaga_emprego/DadosVaga";
 import { VagaService } from "@/resources/vaga_emprego/service";
 import { useFormik } from "formik";
 import { useEffect, useState } from "react";
-import { CardVaga, cardVagaProps } from "./components/cardvaga";
+import { CardVaga, cardVagaProps } from "../components/cardvaga";
 
 export default function Home() {
   return (
@@ -33,7 +33,7 @@ const MainCandidato = () => {
 
   //CRIANDO CARD DE VAGA
   function criarCardVaga(dados: cardVagaProps, key: number) {
-    return <CardVaga cidade={dados.cidade} nome_empresa={dados.nome_empresa}
+    return <CardVaga id={dados.id} cidade={dados.cidade} nome_empresa={dados.nome_empresa}
       estado={dados.estado} exclusivo_pcd={dados.exclusivo_pcd} modelo={dados.modelo}
       nivel={dados.nivel} salario={dados.salario} tipo_contrato={dados.tipo_contrato}
       titulo={dados.titulo} sexo_exclusivo={dados.sexo_exclusivo} periodo={dados.periodo} key={key} />
@@ -112,8 +112,8 @@ const MainCandidato = () => {
   }
 
   return (
-    <div className="h-[400vh]">
-      <header className="  shadow-lg shadow-gray-400  rounded-lg ">
+    <div className="h-[100vh]">
+      <header className="  shadow-lg shadow-gray-400  rounded-lg border">
 
         <div className="shadow-lg shadow-gray-700 py-8 h-24 ">
 
@@ -200,11 +200,9 @@ const MainCandidato = () => {
           </div>
         </div>
       </header>
-      <main>
-        <section className=" p-3 grid grid-cols-2 ">
-
+      <main className="h-[100vh]">
+        <section className=" p-3 flex items-start flex-wrap">
           {renderizarCards()}
-
         </section>
       </main>
     </div>
