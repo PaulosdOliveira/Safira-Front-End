@@ -102,7 +102,7 @@ class ServiceClass {
 
 
 
-export const candidatoService = () => new ServiceClass();
+export const CandidatoService = () => new ServiceClass();
 
 
 

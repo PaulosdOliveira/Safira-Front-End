@@ -3,7 +3,7 @@ import { useFormik } from "formik"
 import '@/app/styles/cadastro-candidato.css'
 import { dadosCadastroCandidato, dadosFormulario, formValidation, qualificacaoForm, qualificacaoFormInitial, qualificacaoFormValidation, valoresIniciais } from "./formSchema"
 import React, { useEffect, useState } from "react";
-import { candidatoService } from "@/resources/candidato/servico";
+import { CandidatoService } from "@/resources/candidato/servico";
 import { accessToken, dadosLogin, ServicoSessao } from "@/resources/sessao/sessao";
 import { QualificacaoService } from "@/resources/qualificacao/qualificacaoService";
 import { Qualificacao, qualificacaoUsuario } from "@/resources/qualificacao/qualificacaoResource";
@@ -17,7 +17,7 @@ export default function cadastroCandidato() {
     const [urlFoto, setUrlFoto] = useState<string>("");
     const [nomePdf, setNomePdf] = useState<string>("Selecionar");
     const [urlPdf, setUrlPdf] = useState<string | null>(null);
-    const service = candidatoService();
+    const service = CandidatoService();
     const sessaoService = ServicoSessao();
     const { errors, handleChange, handleSubmit, values } = useFormik<dadosFormulario>({
         initialValues: valoresIniciais,
@@ -308,7 +308,7 @@ const QualificacaoForm = () => {
         alert(token)
         const qualificacoesUsuario = qualificacoesSelecionadas.map(criarQualificacaoUsuario)
         if (token)
-            await candidatoService().salvarQualificacoes(qualificacoesUsuario, token);
+            await CandidatoService().salvarQualificacoes(qualificacoesUsuario, token);
     }
 
 

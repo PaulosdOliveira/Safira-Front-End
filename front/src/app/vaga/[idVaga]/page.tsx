@@ -24,9 +24,21 @@ export default function VagaPage() {
     }, [])
 
 
-    async function candidatar() {
-        await service.candidatar_a_vaga(ServicoSessao().getSessao()?.accessToken + '', idVaga + '');
 
+
+    async function candidatar() {
+        const token = ServicoSessao().getSessao()?.accessToken + '';
+        if (!vaga?.jaCandidatou) await service.candidatar_a_vaga(token, idVaga + '');
+        else {
+            await service.cancelar_candidatura(token, idVaga + '');
+        }
+
+        if (vaga) {
+            setVaga({
+                ...vaga,
+                jaCandidatou: !vaga.jaCandidatou
+            })
+        }
     }
 
     return (
@@ -91,7 +103,7 @@ export default function VagaPage() {
                 <div className=" flex flex-col items-center mt-10 ">
                     <button onClick={candidatar}
                         className="border border-gray-400 p-2 rounded-lg shadow shadow-black cursor-pointer">
-                        {!vaga?.jaCandidatou? "Candidatar-se" : "Cancelar candidatura"}
+                        {!vaga?.jaCandidatou ? "Candidatar-se" : "Cancelar candidatura"}
                     </button>
                 </div>
             </div>

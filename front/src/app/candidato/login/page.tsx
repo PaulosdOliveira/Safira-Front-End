@@ -1,6 +1,6 @@
 'use client'
 
-import { candidatoService } from "@/resources/candidato/servico"
+import { CandidatoService } from "@/resources/candidato/servico"
 import { accessToken, dadosLogin, formLoginValidator, ServicoSessao, valoresIniciais } from "@/resources/sessao/sessao";
 import { useFormik } from "formik";
 
@@ -8,7 +8,7 @@ import { useFormik } from "formik";
 export default function candidatoLoginPage() {
 
 
-    const service = candidatoService();
+    const service = CandidatoService();
     const sessao = ServicoSessao();
     const { handleChange, errors, handleSubmit, values } = useFormik<dadosLogin>({
         initialValues: valoresIniciais,
