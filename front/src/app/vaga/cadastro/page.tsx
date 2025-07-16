@@ -1,5 +1,5 @@
 'use client'
-
+import "@/app/styles/cadastro-vaga.css"
 import { useFormik } from "formik";
 import React from "react";
 import { dadosCadastroVaga, valoresIniciais } from "./formSchema";
@@ -38,54 +38,115 @@ export default function CadastroVaga() {
     }
 
     return (
-        <div>
-            <div className="border w-[60%] m-auto mt-12">
+        <div className="main">
+            <div className="form-container border border-gray-50 bg-white m-auto mt-12 rounded-lg shadow-lg">
                 <form onSubmit={handleSubmit}>
-                    <div id="primeiro" className="grid grid-cols-2">
+                    <div id="dados_simples" className="grid grid-cols-1">
 
-                        <input id="titulo" onChange={handleChange} type="text" placeholder="Titulo" />
-                        <input id="diasEmAberto" onChange={handleChange} onKeyDown={definirTeclasPermitidas} type="number" inputMode="numeric" pattern="[0-9]*" />
+                        <div className="component-form">
+                            <label>Adicione um titulo:</label>
+                            <input id="titulo" onChange={handleChange} type="text" placeholder="Titulo" />
+                        </div>
 
-                        <input id="salario" onChange={handleChange} type="text" placeholder="Salario" onKeyDown={definirTeclasPermitidas} />
-                        <input id="cep" onChange={handleChange} type="text" placeholder="Cep" />
-                        <select id="modelo" onChange={handleChange}>
-                            <option>PRESENCIAL</option>
-                            <option>HIBRIDO</option>
-                            <option>REMOTO</option>
-                        </select>
-                        <select id="nivel" onChange={handleChange}>
-                            <option >JUNIOR</option>
-                            <option >PLENO</option>
-                            <option >SENIOR</option>
-                            <option >INDEFINIDO</option>
-                        </select>
-                        <select id="tipoContrato" onChange={handleChange}>
-                            <option >CLT</option>
-                            <option >PJ</option>
-                            <option >ESTAGIO</option>
-                            <option >TEMPORARIO</option>
-                        </select>
+                        <div className="component-form">
+                            <label>Prazo em dias:</label>
+                            <input id="diasEmAberto" onChange={handleChange} onKeyDown={definirTeclasPermitidas} type="number" inputMode="numeric" pattern="[0-9]*" />
+                        </div>
 
-                        <select id="exclusivoParaSexo" onChange={handleChange}>
-                            <option >TODOS</option>
-                            <option >MASCULINO</option>
-                            <option >FEMININO</option>
-                        </select>
-                        <select id="exclusivoParaPcd" onChange={handleChange}>
-                            <option value={`${true}`}>SIM</option>
-                            <option value={`${false}`}>NÃO</option>
-                        </select>
+                        <div className="component-form">
+                            <label>Salario:</label>
+                            <input id="salario" onChange={handleChange} type="text" placeholder="Salario" onKeyDown={definirTeclasPermitidas} />
+                        </div>
+
+                        <div className="component-form">
+                            <label>Cep:</label>
+                            <input id="cep" onChange={handleChange} type="text" placeholder="Cep" />
+                        </div>
+
+                        <div className="component-form">
+                            <label>Modelo:</label>
+                            <select id="modelo" onChange={handleChange}>
+                                <option>PRESENCIAL</option>
+                                <option>HIBRIDO</option>
+                                <option>REMOTO</option>
+                            </select>
+                        </div>
+
+
+                        <div className="component-form">
+                            <label>Nível exigido:</label>
+                            <select id="nivel" onChange={handleChange}>
+                                <option >JUNIOR</option>
+                                <option >PLENO</option>
+                                <option >SENIOR</option>
+                                <option >INDEFINIDO</option>
+                            </select>
+                        </div>
+
+
+                        <div className="component-form">
+                            <label>Tipo de contrato:</label>
+                            <select id="tipoContrato" onChange={handleChange}>
+                                <option >CLT</option>
+                                <option >PJ</option>
+                                <option >ESTAGIO</option>
+                                <option >TEMPORARIO</option>
+                            </select>
+                        </div>
+
+
+                        <div className="component-form">
+                            <label>Exclusividade de sexo:</label>
+                            <select id="exclusivoParaSexo" onChange={handleChange}>
+                                <option >TODOS</option>
+                                <option >MASCULINO</option>
+                                <option >FEMININO</option>
+                            </select>
+                        </div>
+
+                        <div className="component-form">
+                            <label>Excluiva para PCD?:</label>
+                            <select id="exclusivoParaPcd" onChange={handleChange}>
+                                <option value={`${true}`}>SIM</option>
+                                <option value={`${false}`}>NÃO</option>
+                            </select>
+                        </div>
                     </div>
                     <div id="segundo" className="grid grid-cols-1">
 
-                        <textarea id="descricao_vaga" onChange={handleChange} placeholder="Introdução" />
-                        <textarea id="principais_atividades" onChange={handleChange} placeholder="Principais atividades" />
-                        <textarea id="requisitos" onChange={handleChange} placeholder="Reuisitos" />
-                        <textarea id="diferenciais" onChange={handleChange} placeholder="Diferenciais" />
-                        <textarea id="local_de_trabalho" onChange={handleChange} placeholder="Local de trabalho" />
-                        <textarea id="horario" onChange={handleChange} placeholder="Horário" />
-                        <input type="submit" value="Enviar" />
+                        <div className="component-form ">
+                            <label>Adicione uma introdução para a  descrição:</label>
+                            <textarea id="descricao_vaga" onChange={handleChange} placeholder="Introdução" />
+                        </div>
+
+
+                        <div className="component-form ">
+                            <label>Descreva as pricipais atividades:</label>
+                            <textarea id="principais_atividades" onChange={handleChange} placeholder="Principais atividades" />
+                        </div>
+
+                        <div className="component-form ">
+                            <label>Requisitos da vaga:</label>
+                            <textarea id="requisitos" onChange={handleChange} placeholder="Reuisitos" />
+                        </div>
+
+                        <div className="component-form ">
+                            <label>Diferenciais paa a vaga:</label>
+                            <textarea id="diferenciais" onChange={handleChange} placeholder="Diferenciais" />
+                        </div>
+
+                        <div className="component-form ">
+                            <label>Fale sobre o local de trabalho:</label>
+                            <textarea id="local_de_trabalho" onChange={handleChange} placeholder="Local de trabalho" />
+                        </div>
+
+
+                        <div className="component-form ">
+                            <label>Informações sobre horario e escala:</label>
+                            <textarea id="horario" onChange={handleChange} placeholder="Horário" />
+                        </div>
                     </div>
+                    <input type="submit" value="Enviar" />
                 </form>
             </div>
         </div>

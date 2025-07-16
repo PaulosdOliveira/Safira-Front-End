@@ -3,22 +3,9 @@
 input {
     height: 99%;
     padding-left: 5px;
-    border: 1px solid black;
-    margin: 5px;
-}
-
-textarea {
-    border: 1px solid black;
-    margin: 5px;
-    height: 25vh;
 }
 
 
-select {
-    border: 1px solid black;
-    margin: 9px;
-
-}
 
 .input-box {
     margin: 15px 0px;
