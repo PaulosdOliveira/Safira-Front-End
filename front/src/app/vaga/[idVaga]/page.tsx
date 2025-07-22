@@ -3,7 +3,6 @@
 import { ServicoSessao } from "@/resources/sessao/sessao";
 import { dadosVaga } from "@/resources/vaga_emprego/DadosVaga";
 import { VagaService } from "@/resources/vaga_emprego/service";
-import { assert } from "console";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -11,34 +10,56 @@ export default function VagaPage() {
 
     const idVaga = useParams().idVaga;
     const service = VagaService();
-    const [vaga, setVaga] = useState<dadosVaga>();
-    const urlFotoEmpresa = "http://localhost:8080/empresa/foto/" + vaga?.id_empresa;
+    const [vaga, setVaga] = useState<dadosVaga | null>(null);
+
 
     useEffect(() => {
         (async () => {
             const vaga: dadosVaga = await service
                 .carregarVaga(idVaga + '', ServicoSessao().getSessao()?.accessToken + '');
-            setVaga(vaga);
+            if (vaga.descricao) setVaga(vaga);
         })()
-
     }, [])
 
+    if (vaga == null) return <h1 className="text-black text-center">Vaga não encontrada</h1>;
+    return <Vaga vaga={vaga} />;
+}
 
 
+
+interface vagaProps {
+    vaga?: dadosVaga;
+}
+
+const Vaga: React.FC<vagaProps> = ({ vaga }) => {
+
+    const idVaga = useParams().idVaga;
+    const service = VagaService();
+    const urlFotoEmpresa = "http://localhost:8080/empresa/foto/" + vaga?.id_empresa;
+    const [candidatou, setCandidatou] = useState<boolean>();
+
+
+    useEffect(() => {
+        if (vaga) setCandidatou(vaga.jaCandidatou);
+    }, [])
+
+    const ifNotEmpt = (texto: any) => texto ? texto : "#";
 
     async function candidatar() {
         const token = ServicoSessao().getSessao()?.accessToken + '';
-        if (!vaga?.jaCandidatou) await service.candidatar_a_vaga(token, idVaga + '');
+        if (!candidatou) {
+            const status = await service.candidatar_a_vaga(token, idVaga + '');
+            if (status !== 201) alert("Erro ao se cadastrar");
+            else {
+                alert("Cadastro realizado com sucesso");
+                setCandidatou(!candidatou)
+            }
+        }
         else {
             await service.cancelar_candidatura(token, idVaga + '');
+            setCandidatou(!candidatou)
         }
 
-        if (vaga) {
-            setVaga({
-                ...vaga,
-                jaCandidatou: !vaga.jaCandidatou
-            })
-        }
     }
 
     return (
@@ -88,27 +109,25 @@ export default function VagaPage() {
                 </section>
                 <div>
                     <h1 className="text-2xl">Descrição</h1>
-                    <h2 className="text-black inline-block">{vaga?.descricao[0]}</h2>
+                    <h2 className="text-black inline-block">{ifNotEmpt(vaga?.descricao[0])}</h2>
                     <h1 className="text-2xl">Principais atividades</h1>
-                    <h2 className="text-black inline-block">{vaga?.descricao[1]}</h2>
+                    <h2 className="text-black inline-block">{ifNotEmpt(vaga?.descricao[1])}</h2>
                     <h1 className="text-2xl">Requisitos</h1>
-                    <h2 className="text-black inline-block">{vaga?.descricao[2]}</h2>
+                    <h2 className="text-black inline-block">{ifNotEmpt(vaga?.descricao[2])}</h2>
                     <h1 className="text-2xl">Diferenciais</h1>
-                    <h2 className="text-black inline-block">{vaga?.descricao[3]}</h2>
+                    <h2 className="text-black inline-block">{ifNotEmpt(vaga?.descricao[3])}</h2>
                     <h1 className="text-2xl">Local de trabalho</h1>
-                    <h2 className="text-black inline-block">{vaga?.descricao[4]}</h2>
+                    <h2 className="text-black inline-block">{ifNotEmpt(vaga?.descricao[4])}</h2>
                     <h1 className="text-2xl">Horario</h1>
-                    <h2 className="text-black inline-block">{vaga?.descricao[5]}</h2>
+                    <h2 className="text-black inline-block">{ifNotEmpt(vaga?.descricao[5])}</h2>
                 </div>
                 <div className=" flex flex-col items-center mt-10 ">
                     <button onClick={candidatar}
                         className="border border-gray-400 p-2 rounded-lg shadow shadow-black cursor-pointer">
-                        {!vaga?.jaCandidatou ? "Candidatar-se" : "Cancelar candidatura"}
+                        {!candidatou ? "Candidatar-se" : "Cancelar candidatura"}
                     </button>
                 </div>
             </div>
-
         </div>
-    );
-
+    )
 }

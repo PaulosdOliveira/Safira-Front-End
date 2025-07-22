@@ -1,31 +1,74 @@
 'use client'
 import "@/app/styles/cadastro-vaga.css"
 import { useFormik } from "formik";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { dadosCadastroVaga, valoresIniciais } from "./formSchema";
 import { VagaService } from "@/resources/vaga_emprego/service";
 import { ServicoSessao } from "@/resources/sessao/sessao";
+import { cidade, estado, UtilsService } from "@/resources/utils/utils";
+import { Option } from "@/app/page";
 
 
 export default function CadastroVaga() {
 
-
+    const [estados, setEstado] = useState<estado[]>([]);
+    const [cidades, setCidades] = useState<cidade[]>([]);
+    const utilsService = UtilsService();
     const { handleChange, handleSubmit, values } = useFormik<dadosCadastroVaga>({
         initialValues: valoresIniciais,
         onSubmit: submit
     })
 
     async function submit() {
+        alert(values.idCidade)
+        alert(values.idEstado)
         const dadosCadastrais: dadosCadastroVaga = {
-            cep: values.cep, descricao_vaga: values.descricao_vaga.replaceAll("###", ""),
+            descricao_vaga: values.descricao_vaga.replaceAll("###", ""),
             diasEmAberto: values.diasEmAberto, diferenciais: values.diferenciais.replaceAll("###", ""),
             exclusivoParaPcd: values.exclusivoParaPcd, horario: values.horario.replaceAll("###", ""),
             local_de_trabalho: values.local_de_trabalho.replaceAll("###", ""), modelo: values.modelo,
             nivel: values.nivel, principais_atividades: values.principais_atividades.replaceAll("###", ""),
             requisitos: values.requisitos.replaceAll("###", ""), salario: values.salario, exclusivoParaSexo: values.exclusivoParaSexo,
-            tipoContrato: values.tipoContrato, titulo: values.titulo
+            tipoContrato: values.tipoContrato, titulo: values.titulo, idCidade: values.idCidade, idEstado: values.idEstado
         }
         await VagaService().cadastrar_vaga(dadosCadastrais, ServicoSessao().getSessao()?.accessToken + '');
+    }
+
+
+    useEffect(() => {
+        (async () => {
+            const estadosEncontados: estado[] = await utilsService.buscarEstados();
+            setEstado(estadosEncontados);
+        })();
+
+    }, [])
+
+
+    async function selecionarEstado(estado: HTMLSelectElement) {
+        values.idEstado = estado.value;
+        values.idCidade = "";
+        const cidades = await utilsService.buscarCidadesdeEstado(parseInt(estado.value));
+        setCidades(cidades);
+    }
+
+
+    // Criando options 
+    function criaOption(texto: string, id: number) {
+        return (
+            <Option key={id} texto={texto} id={id} />
+        )
+    }
+
+    // Renderizando os options de estados
+    function renderizarOptionEstados() {
+        return estados.map((estado) => criaOption(estado.sigla, estado.id));
+    }
+
+    // Renderizando os options de cidades
+    function renderizarOptionsCidade() {
+        return (
+            cidades.map((cidade) => criaOption(cidade.nome, cidade.id))
+        );
     }
 
     function definirTeclasPermitidas(keyDown: React.KeyboardEvent<HTMLInputElement>) {
@@ -39,7 +82,7 @@ export default function CadastroVaga() {
 
     return (
         <div className="main">
-            <div className="form-container border border-gray-50 bg-white m-auto mt-12 rounded-lg shadow-lg">
+            <div className="form-container border border-gray-300 bg-white m-auto mt-12 rounded-lg shadow-2xl shadow-gray-600">
                 <form onSubmit={handleSubmit}>
                     <div id="dados_simples" className="grid grid-cols-1">
 
@@ -56,11 +99,6 @@ export default function CadastroVaga() {
                         <div className="component-form">
                             <label>Salario:</label>
                             <input id="salario" onChange={handleChange} type="text" placeholder="Salario" onKeyDown={definirTeclasPermitidas} />
-                        </div>
-
-                        <div className="component-form">
-                            <label>Cep:</label>
-                            <input id="cep" onChange={handleChange} type="text" placeholder="Cep" />
                         </div>
 
                         <div className="component-form">
@@ -94,6 +132,22 @@ export default function CadastroVaga() {
                             </select>
                         </div>
 
+
+                        <div className="component-form">
+                            <label>Estado:</label>
+                            <select id="idEstado" onChange={(event) => selecionarEstado(event.target)}>
+                                <option value={``}>Todos</option>
+                                {renderizarOptionEstados()}
+                            </select>
+                        </div>
+
+                        <div className="component-form">
+                            <label>Cidade:</label>
+                            <select id="idCidade" onChange={handleChange}>
+                                <option value={``}>Todos</option>
+                                {renderizarOptionsCidade()}
+                            </select>
+                        </div>
 
                         <div className="component-form">
                             <label>Exclusividade de sexo:</label>

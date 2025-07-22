@@ -2,15 +2,15 @@
 // Dados do formulário de busca por vagas
 export interface dadosConsultaVagaDTO {
     titulo: string;
-    estado: string;
-    cidade: string;
+    idEstado: string;
+    idCidade: string;
     senioridade: string;
     modelo: string;
     tipo_contrato: string;
 }
 
 // Valores inicias do formulário de busca por vagas
-export const initConsultaVaga: dadosConsultaVagaDTO = { cidade: '', estado: '', modelo: '', senioridade: '', titulo: '', tipo_contrato: '' };
+export const initConsultaVaga: dadosConsultaVagaDTO = { idCidade: '', idEstado: '', modelo: '', senioridade: '', titulo: '', tipo_contrato: '' };
 
 
 

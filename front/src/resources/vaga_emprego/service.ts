@@ -6,7 +6,7 @@ class Service {
 
 
     async cadastrar_vaga(dadosCadastrais: dadosCadastroVaga, token: string) {
-      const resultado =  await fetch(this.urlBase, {
+        const resultado = await fetch(this.urlBase, {
             method: 'POST',
             body: JSON.stringify(dadosCadastrais),
             headers: {
@@ -23,8 +23,8 @@ class Service {
 
         const params = new URLSearchParams({
             titulo: dadosForm.titulo,
-            estado: dadosForm.estado,
-            cidade: dadosForm.cidade,
+            idEstado: dadosForm.idEstado != null ? dadosForm.idEstado + "" : "",
+            idCidade: dadosForm.idCidade != null ? dadosForm.idCidade + "" : "",
             senioridade: dadosForm.senioridade,
             modelo: dadosForm.modelo,
             tipo_contrato: dadosForm.tipo_contrato
@@ -54,21 +54,6 @@ class Service {
     }
 
 
-    // Buscando os diferentes estados dos candidatos cadastrados
-    async buscarEstados() {
-        const resultado = await fetch(this.urlBase + "/estados", {
-            method: 'GET'
-        })
-        return resultado.json();
-    }
-
-    async buscaCidadesDoEstado(estado: string) {
-        const resultado = await fetch(`${this.urlBase}/cidades/${estado}`, {
-            method: 'GET'
-        })
-        return resultado.json();
-    }
-
     async carregarVaga(id: string, token: string) {
 
         const resultado = await fetch(`${this.urlBase}/buscar/${id}`, {
@@ -82,12 +67,14 @@ class Service {
     }
 
     async candidatar_a_vaga(token: string, idVaga: string) {
-        await fetch(`${this.urlBase}/candidatar/${idVaga}`, {
+        const resultado = await fetch(`${this.urlBase}/candidatar/${idVaga}`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         })
+
+        return resultado.status;
     }
 
     async cancelar_candidatura(token: string, idVaga: string) {

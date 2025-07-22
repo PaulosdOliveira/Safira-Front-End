@@ -16,11 +16,8 @@ export default function loginEmpresa() {
 
     async function submit() {
         const login: dadosLogin = { login: values.login, senha: values.senha };
-        await service.logar(login).then((resultado) => {
-            if (resultado.token) sessao.criarSessao(resultado.token);
-            else alert(resultado.erro);
-        });
-
+        const token: accessToken = await service.logar(login);
+        sessao.criarSessao(token);
     }
 
     return (

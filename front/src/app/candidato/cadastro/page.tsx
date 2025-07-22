@@ -7,6 +7,9 @@ import { CandidatoService } from "@/resources/candidato/servico";
 import { accessToken, dadosLogin, ServicoSessao } from "@/resources/sessao/sessao";
 import { QualificacaoService } from "@/resources/qualificacao/qualificacaoService";
 import { Qualificacao, qualificacaoUsuario } from "@/resources/qualificacao/qualificacaoResource";
+import { cidade, estado, UtilsService } from "@/resources/utils/utils";
+import { Option } from "../main";
+
 
 
 
@@ -18,13 +21,23 @@ export default function cadastroCandidato() {
     const [nomePdf, setNomePdf] = useState<string>("Selecionar");
     const [urlPdf, setUrlPdf] = useState<string | null>(null);
     const service = CandidatoService();
+    const utils = UtilsService();
     const sessaoService = ServicoSessao();
+    const [estados, setEstados] = useState<estado[]>([]);
+    const [cidades, setCidades] = useState<cidade[]>([]);
     const { errors, handleChange, handleSubmit, values } = useFormik<dadosFormulario>({
         initialValues: valoresIniciais,
         onSubmit: submit,
         validationSchema: formValidation
     })
 
+    //BUSCANDO ESTADOS NO BANCO DE DADOS
+    useEffect(() => {
+        (async () => {
+            const estados = await utils.buscarEstados();
+            setEstados(estados);
+        })()
+    }, [])
 
     //------->>> SUBMIT <<< ----------------------------
     async function submit() {
@@ -34,9 +47,10 @@ export default function cadastroCandidato() {
             cep: values.cep, cpf: values.cpf, email: values.email,
             nome: values.nome, pcd: values.pcd, senha: values.senha,
             sexo: values.sexo, trabalhando: values.trabalhando, descricao: values.descricao,
-            dataNascimento: values.dataNascimento, tel: values.tel
+            dataNascimento: values.dataNascimento, tel: values.tel, idCidade: values.idCidade,
+            idEstado: values.idEstado
         };
-        const resultado = await service.cadastrar(dadosCadastrais);
+        const resultado = await service.cadastrar(values);
 
 
         if (resultado.status === 201) {
@@ -79,6 +93,32 @@ export default function cadastroCandidato() {
             setNomePdf(curriculo.name);
             setUrlPdf(url);
         }
+    }
+
+    // Criando options 
+    function criaOption(texto: string, id: number) {
+        return (
+            <Option key={id} texto={texto} id={id} />
+        )
+    }
+
+    // Renderizando os options de cidades
+    function renderizarOptionsCidade() {
+        return (
+            cidades.map((cidade) => criaOption(cidade.nome, cidade.id))
+        );
+    }
+
+    // Renderizando os options de estados
+    function renderizarOptionEstados() {
+        return estados.map((estado) => criaOption(estado.sigla, estado.id));
+    }
+
+    async function selecionarEstado(estado: HTMLSelectElement) {
+        values.idEstado = estado.value;
+        values.idCidade = "";
+        const cidades = await utils.buscarCidadesdeEstado(parseInt(estado.value));
+        setCidades(cidades);
     }
 
 
@@ -147,6 +187,22 @@ export default function cadastroCandidato() {
                                 </div>
 
                                 <div className="input-container">
+                                    <label>Estado:</label>
+                                    <select name="idEstado" onChange={(event) => selecionarEstado(event.target)} className="" value={values.idEstado}>
+                                        <option value="">Todos</option>
+                                        {renderizarOptionEstados()}
+                                    </select>
+                                </div>
+
+                                <div className="input-container">
+                                    <label>Cidade:</label>
+                                    <select name="idCidade" onChange={handleChange} className="" value={values.idCidade}>
+                                        <option value="">Todos</option>
+                                        {renderizarOptionsCidade()}
+                                    </select>
+                                </div>
+
+                                <div className="input-container">
                                     <label>Você é PCD?:</label>
                                     <select name="pcd" onChange={() => values.pcd = !values.pcd}>
                                         <option>NÃO</option>
@@ -170,11 +226,7 @@ export default function cadastroCandidato() {
                                         type="tel" placeholder="(**) *****-****" value={values.tel} />
                                 </div>
 
-                                <div className="input-container">
-                                    <label>Qualquer cep de sua cidade:</label>
-                                    <input name="cep" onChange={handleChange} className="border  border-black m-auto"
-                                        type="text" placeholder="Cep" value={values.cep} />
-                                </div>
+
 
 
                                 <div className="input-container">
@@ -214,9 +266,6 @@ export default function cadastroCandidato() {
 
     )
 }
-
-
-
 
 
 
@@ -344,15 +393,12 @@ const QualificacaoForm = () => {
     )
 }
 
-interface qualificacaoSelecionadaProps {
+export interface qualificacaoSelecionadaProps {
     nomeQualificacao: string;
     idQualificacao: number;
     nivel: string;
     click: (event: any) => void;
 }
-
-
-
 
 
 const QualificacaoSelecionada: React.FC<qualificacaoSelecionadaProps> = ({ idQualificacao, nomeQualificacao, click, nivel }) => {
@@ -367,13 +413,13 @@ const QualificacaoSelecionada: React.FC<qualificacaoSelecionadaProps> = ({ idQua
     );
 }
 
-interface qualificacaoProps {
+export interface qualificacaoProps {
     id?: number;
     nome?: string;
     click: (event: any) => void;
 }
 
-const OptionQualificacao: React.FC<qualificacaoProps> = ({ id, nome, click }) => {
+export const OptionQualificacao: React.FC<qualificacaoProps> = ({ id, nome, click }) => {
     return (
         <option id={id + ''} onClick={() => click(id)}>{nome}</option>
     );

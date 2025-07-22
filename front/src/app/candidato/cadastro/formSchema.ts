@@ -12,6 +12,8 @@ export interface dadosCadastroCandidato {
     pcd: boolean;
     trabalhando: boolean;
     sexo: "MASCULINO" | "FEMININO";
+    idEstado: string;
+    idCidade: string;
 }
 
 
@@ -31,6 +33,8 @@ export interface dadosFormulario {
     sexo: "MASCULINO" | "FEMININO";
     foto: File | null;
     curriculo?: File | null;
+    idEstado: string;
+    idCidade: string;
 }
 
 
@@ -49,7 +53,7 @@ export const formValidation = yup.object().shape({
 
 })
 
-export const valoresIniciais: dadosFormulario = { foto: null, cpf: "88899", cep: "44094018", descricao: "hhhhhhhhhhh", email: "p@ww", nome: "ppp", senha: "123", sexo: 'FEMININO', tel: "75991995516", pcd: false, trabalhando: false, confirma_senha: "123" }
+export const valoresIniciais: dadosFormulario = { foto: null, cpf: "88899", cep: "44094018", descricao: "hhhhhhhhhhh", email: "p@ww", nome: "ppp", senha: "123", sexo: 'FEMININO', tel: "75991995516", pcd: false, trabalhando: false, confirma_senha: "123", idCidade: '', idEstado: '' }
 
 
 /***   FORMULÁRIO DE QUALIFICAÇÕES */

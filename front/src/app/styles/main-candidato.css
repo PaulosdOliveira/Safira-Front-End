@@ -12,20 +12,20 @@
     }
 
     select {
-        border: 1px solid rgba(51, 49, 49, 0.2);
+        border: 1px solid rgba(0,0,0,0.100);
         border-radius: 2px;
-        box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.300);
+        box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.200);
     }
 
     div#imagem {
         height: 230px;
         background-size: contain;
         background-attachment: fixed;
-        background-image: url(https://static.vecteezy.com/ti/vetor-gratis/p1/8953369-transparente-fundo-png-textura-fundo-transparente-grade-gratis-vetor.jpg);
+        background-image: linear-gradient(to left,white, lightgray);
     }
 
     div#search {
-        background-color: rgba(255, 255, 255, 0.900);
+        background-color: white;
         padding: 6px;
     }
 
@@ -37,7 +37,7 @@
 
 
 @media screen and (max-width: 575px) {
-    section {
+    section#vagas {
         background-color: blue;
     }
 
@@ -47,20 +47,20 @@
 }
 
 @media screen and (min-width: 575px) and (max-width: 767px) {
-    section {
+    section#vagas {
         background-color: pink;
     }
 }
 
 @media screen and (min-width: 767px) and (max-width: 991px) {
 
-    section {
+    section#vagas {
         background-color: darkcyan;
     }
 }
 
 @media screen and (min-width: 991px) {
-    section {
+    section#vagas {
         background-color: sienna;
     }
 }

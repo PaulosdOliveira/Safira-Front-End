@@ -42,6 +42,8 @@ class SessaoService {
             }
             alert(sessao.nome)
             this.setSessao(sessao);
+        }else{
+            alert("ERRO: " + token )
         }
     }
 
@@ -59,7 +61,7 @@ class SessaoService {
             const login: Sessao = JSON.parse(sessao ? sessao : '');
             return login;
         } catch (erro) {
-            alert(erro)
+           
         }
     }
 }

@@ -1,6 +1,7 @@
 import { dadosCadastroCandidato } from "@/app/candidato/cadastro/formSchema";
 import { dadosLogin } from "../sessao/sessao";
 import { qualificacaoUsuario } from "../qualificacao/qualificacaoResource";
+import { dadosConsultaCandidato } from "./candidatoResource";
 
 class ServiceClass {
 
@@ -96,7 +97,19 @@ class ServiceClass {
         })
     }
 
-    
+
+    async buscarCandidatosPorQualificacoes(dadosConsulta: dadosConsultaCandidato, token: string) {
+        const resultado = await fetch(`${this.urlBase}/qualificacao-candidato/consulta`, {
+            method: 'POST',
+            body: JSON.stringify(dadosConsulta),
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        return resultado.json();
+    }
+
 }
 
 

@@ -8,3 +8,11 @@ export interface qualificacaoUsuario {
     idQualificacao: number;
     nivel: string;
 }
+
+
+export interface qualificacaoSelecionada {
+    idQualificacao: number;
+    nome: string;
+    nivel: string;
+
+}
