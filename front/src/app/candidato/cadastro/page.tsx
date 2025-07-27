@@ -8,7 +8,7 @@ import { accessToken, dadosLogin, ServicoSessao } from "@/resources/sessao/sessa
 import { QualificacaoService } from "@/resources/qualificacao/qualificacaoService";
 import { Qualificacao, qualificacaoUsuario } from "@/resources/qualificacao/qualificacaoResource";
 import { cidade, estado, UtilsService } from "@/resources/utils/utils";
-import { Option } from "../main";
+import { Option } from "../page";
 
 
 
@@ -258,7 +258,7 @@ export default function cadastroCandidato() {
                         )}
                     </div >
                 </div>
-                {!cadastrou && (
+                {cadastrou && (
                     <QualificacaoForm />
                 )}
             </main>

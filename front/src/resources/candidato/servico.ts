@@ -1,7 +1,7 @@
 import { dadosCadastroCandidato } from "@/app/candidato/cadastro/formSchema";
 import { dadosLogin } from "../sessao/sessao";
 import { qualificacaoUsuario } from "../qualificacao/qualificacaoResource";
-import { dadosConsultaCandidato } from "./candidatoResource";
+import { dadosConsultaCandidato, PerfilCandidato } from "./candidatoResource";
 
 class ServiceClass {
 
@@ -107,6 +107,12 @@ class ServiceClass {
                 'Authorization': `Bearer ${token}`
             }
         })
+        return resultado.json();
+    }
+
+
+    async carregarPerfil(id: string) {
+        const resultado = await fetch(`${this.urlBase}/${id}`)
         return resultado.json();
     }
 

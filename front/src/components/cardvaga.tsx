@@ -13,63 +13,70 @@ export interface cardVagaProps {
     periodo: string;
 }
 
-export const CardVaga: React.FC<cardVagaProps> = ({id, cidade, nome_empresa, estado, modelo, nivel, salario, tipo_contrato, titulo, exclusivo_pcd, sexo_exclusivo, periodo }) => {
+export const CardVaga: React.FC<cardVagaProps> = ({ id, cidade, nome_empresa, estado, modelo, nivel, salario, tipo_contrato, titulo, exclusivo_pcd, sexo_exclusivo, periodo }) => {
+    let icone_modelo = "Domain";
+    if (modelo === "HIBRIDO") icone_modelo = "home_work";
+    else if (modelo === "REMOTO") icone_modelo = "home";
+
     return (
         <a href={`/vaga/${id}`} target="_blank"
-        className="border vaga border-gray-200 w-72  p-3  rounded-2xl bg-white shadow shadow-gray-300 cursor-pointer">
-            <div>
-                <i className="material-symbols">Domain</i>
-                <h2 className=" min-h-10 inline-block">{nome_empresa}</h2>
+            className="border vaga border-gray-200 w-64 p-3 rounded-2xl bg-white shadow shadow-gray-300 cursor-pointer m-5">
+            <h3 className="text-justify pb-2">{titulo}</h3>
+            <div className="flex">
+                <i className="material-symbols text-slate-600">Domain</i>
+                <p className="inline-block">{nome_empresa}</p>
             </div>
 
-            <div>
-                <i className="material-symbols">Enterprise</i>
-                <h2 className="inline-block">{titulo}</h2>
-            </div>
-
-            <div>
+            <hr className="text-gray-400 my-2" />
+            <div className="flex">
                 <i className="material-symbols">Distance</i>
-                <h2 className="inline-block">{`${cidade},${estado}`}</h2>
+                <p className="inline-block">{`${cidade},${estado}`}</p>
             </div>
-
-            <div>
-                <i className="material-symbols">home_work</i>
-                <h2 className="inline-block">{modelo}</h2>
+            <hr className="text-gray-400 my-2" />
+            <div className="flex">
+                <i className="material-symbols ">{icone_modelo}</i>
+                <p className="inline-block">{modelo}</p>
             </div>
-
-            <div>
-                <i className="material-symbols">contract</i>
-                <h2 className="inline-block ">{tipo_contrato}</h2>
+            <hr className="text-gray-400 my-2" />
+            <div className="flex">
+                <i className="material-symbols ">contract</i>
+                <p className="inline-block ">{tipo_contrato}</p>
             </div>
+            <hr className="text-gray-400 my-2" />
 
-
-            <div>
+            <div className="flex">
                 <i className="material-symbols">work_history</i>
-                <h2 className="inline-block ">{nivel}</h2>
+                <p className="inline-block ">{nivel}</p>
             </div>
-
-            <div>
+            <hr className="text-gray-400 my-2" />
+            <div className="flex">
                 <i className="material-symbols">attach_money</i>
-                <h2 className="inline-block font-serif">{salario}</h2>
+                <p className="inline-block font-serif">{salario}</p>
             </div>
-
-            <div>
-                <i className="material-symbols">acute</i>
-                <h2 className="inline-block">{periodo}</h2>
+            <hr className="text-gray-400 my-2" />
+            <div className="flex">
+                <i className="material-symbols text-gray-500">acute</i>
+                <p className="inline-block">{periodo}</p>
             </div>
 
             {sexo_exclusivo && (
                 <div>
-                    <i className="material-symbols">boy</i>
-                    <h2 className="inline-block ">{`Exclusiva para o sexo ${sexo_exclusivo}`}</h2>
+                    <hr className="text-gray-400 my-2" />
+                    <div className="flex">
+                        <i className="material-symbols">boy</i>
+                        <p className="inline-block ">{`Exclusiva para o sexo ${sexo_exclusivo}`}</p>
+                    </div>
                 </div>
             )}
 
 
             {exclusivo_pcd && (
                 <div>
-                    <i className="material-symbols">boy</i>
-                    <h2 className="inline-block">Exclusiva para PCD</h2>
+                    <hr className="text-gray-400 my-2" />
+                    <div className="flex">
+                        <i className="material-symbols">boy</i>
+                        <p className="inline-block">Exclusiva para PCD</p>
+                    </div>
                 </div>
             )}
 

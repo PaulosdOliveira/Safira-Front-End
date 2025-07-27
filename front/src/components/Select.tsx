@@ -1,6 +1,6 @@
 'use client'
 
-import { Option } from "@/app/candidato/main";
+import { Option } from "@/app/candidato/page";
 import { cidade, estado, UtilsService } from "@/resources/utils/utils";
 import React, { useEffect, useState } from "react";
 
@@ -13,7 +13,6 @@ interface localizacaoProps {
 }
 
 export const SelectEstadoCidade: React.FC<localizacaoProps> = ({ changeEstado, changeCidade, cidades }) => {
-
 
     const [estados, setEstado] = useState<estado[]>([]);
     const utils = UtilsService();
@@ -48,9 +47,9 @@ export const SelectEstadoCidade: React.FC<localizacaoProps> = ({ changeEstado, c
         return estados.map((estado) => criaOption(estado.sigla, estado.id));
     }
     return (
-        <div className="flex p-2 ">
+        <div className="flex p-2">
 
-            <div className="inline-block">
+            <div className="inline-block mx-3">
                 <label>Estado:</label>
                 <br />
                 <select className=""

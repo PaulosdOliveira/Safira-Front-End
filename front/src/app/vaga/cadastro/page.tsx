@@ -6,7 +6,8 @@ import { dadosCadastroVaga, valoresIniciais } from "./formSchema";
 import { VagaService } from "@/resources/vaga_emprego/service";
 import { ServicoSessao } from "@/resources/sessao/sessao";
 import { cidade, estado, UtilsService } from "@/resources/utils/utils";
-import { Option } from "@/app/page";
+import { Option } from "@/app/candidato/page";
+
 
 
 export default function CadastroVaga() {

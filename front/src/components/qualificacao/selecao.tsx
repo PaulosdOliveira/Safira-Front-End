@@ -14,10 +14,10 @@ export const QualificacaoSelecionada: React.FC<qualificacaoSelecionadaProps> = (
     else if (nivel == 'INTERMEDIARIO') cor = 'text-yellow-500';
 
     return (
-        <div className="flex items-center">
+        <div className="flex items-center" title={nivel}>
             <div className="border border-gray-200 flex bg-white  rounded-full  text-center mx-3 pl-2 min-w-10  text-nowrap" >
                 {nomeQualificacao}
-                <div onClick={() => click(idQualificacao + " " + nomeQualificacao)}
+                <div onClick={() => click(idQualificacao)}
                     className={`material-symbols cursor-pointer  border scale-50 ${cor}`}>close</div>
             </div>
 
