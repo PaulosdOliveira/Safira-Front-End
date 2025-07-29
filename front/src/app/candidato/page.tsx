@@ -6,11 +6,12 @@ import { cidade, estado, UtilsService } from "@/resources/utils/utils";
 import { dadosConsultaVagaDTO, initConsultaVaga } from "@/resources/vaga_emprego/DadosVaga";
 import { VagaService } from "@/resources/vaga_emprego/service";
 import { useFormik } from "formik";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 
 
-export default function MainCandidato (){
+export default function MainCandidato() {
 
   const { values, handleChange } = useFormik<dadosConsultaVagaDTO>({
     initialValues: initConsultaVaga,
@@ -22,8 +23,7 @@ export default function MainCandidato (){
   const [estados, setEstado] = useState<estado[]>([]);
   const [cidades, setCidades] = useState<cidade[]>([]);
   const [vagas, setVagas] = useState<cardVagaProps[]>([]);
-
-
+  const [menuVisivel, setMenuVisivel] = useState<boolean>(false);
 
   //CRIANDO CARD DE VAGA
   function criarCardVaga(dados: cardVagaProps, key: number) {
@@ -64,7 +64,7 @@ export default function MainCandidato (){
   }
 
 
-  
+
   async function selecionarEstado(estado: HTMLSelectElement) {
     values.idEstado = estado.value;
     values.idCidade = "";
@@ -122,8 +122,10 @@ export default function MainCandidato (){
           </div>
 
 
-          <div className=" inline-block text-right w-[100%]  pr-2">
-            <i className=" material-symbols cursor-pointer">Menu</i>
+          <div className="w-[100%] h-[22px] flex flex-col items-end  pr-2">
+            <i onClick={() => setMenuVisivel(!menuVisivel)}
+              className=" material-symbols cursor-pointer">Menu</i>
+            <Menu visivel={menuVisivel} id={sessao.getSessao()?.id} />
           </div>
         </div>
       </header>
@@ -196,9 +198,31 @@ interface optionProps {
   texto: string;
   id: number;
 }
-
+// Componente utilizado para tranformar lista[] em <option>
 export const Option: React.FC<optionProps> = ({ texto, id }) => {
   return (
     <option id={texto} value={id} >{texto}</option>
   )
 }
+
+
+interface menuProps {
+  visivel: boolean;
+  id?: string;
+}
+
+const Menu: React.FC<menuProps> = ({ visivel, id }) => {
+
+  const router = useRouter();
+
+  return (
+    <nav className={`bg-white z-10  border   ${visivel ? '' : 'hidden'}`}>
+      <ul >
+        <li onClick={() => router.push(`/candidato/${id}`)} className="border">Perfil</li>
+        <li className="border">Candidaturas</li>
+      </ul>
+    </nav>
+  )
+}
+
+

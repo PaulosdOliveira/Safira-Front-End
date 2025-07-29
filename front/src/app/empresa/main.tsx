@@ -1,7 +1,6 @@
 'use client'
 
 
-import "@/app/styles/main-empresa.css"
 import { SelectEstadoCidade } from "@/components/Select"
 import { ConsultaCandidatoDTO, dadosConsultaCandidato, initConsultaCandidato } from "@/resources/candidato/candidatoResource"
 import { CandidatoService } from "@/resources/candidato/servico"

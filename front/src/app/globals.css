@@ -59,18 +59,22 @@ h6 {
     letter-spacing: 0.05em;
 }
 
-i{
+i {
     margin-right: 3px;
 }
 
-input {
 
-    padding-left: 5px;
-}
 
 select,
 button {
-    height: 30px;
+    height: 40px;
+    border: 1px solid #9CA3AF;
+    border-radius: 2px;
+    
+}
+
+textarea {
+    border: 1px solid;
 
 }
 
@@ -81,4 +85,11 @@ button {
 #qualificacoes {
     direction: rtl;
     text-align: left;
+}
+
+
+input {
+    border: 1px solid #9CA3AF;
+    border-radius: 5px;
+    padding: 6px;
 }

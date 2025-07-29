@@ -27,14 +27,14 @@ export default function PagePerfilCandidato() {
             <main className="w-[100%] h-[100vh] bg-gray-020 p-5">
                 <div style={{ backgroundImage: `url(http://localhost:8080/candidato/foto/${id})` }}
                     className="w-20 h-20 rounded-full bg-cover bg-no-repeat"></div>
-                <h1>{perfil?.nome}</h1>
-                <h1>{perfil?.idade}</h1>
-                <h1>{perfil?.cidade}</h1>
-                <h1>{perfil?.estado}</h1>
-                <h1>{perfil?.email}</h1>
-                <h1>{perfil?.tel}</h1>
-                <h1>{perfil?.sexo}</h1>
-                <h1>{perfil?.descricao}</h1>
+                <p>{perfil?.nome}</p>
+                <p>{perfil?.idade}</p>
+                <p>{perfil?.cidade}</p>
+                <p>{perfil?.estado}</p>
+                <p>{perfil?.email}</p>
+                <p>{perfil?.tel}</p>
+                <p>{perfil?.sexo}</p>
+                <pre className="font-[arial]">{perfil?.descricao}</pre>
             </main>
         )
     }

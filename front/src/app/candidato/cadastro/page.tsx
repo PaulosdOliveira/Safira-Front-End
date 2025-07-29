@@ -1,6 +1,5 @@
 'use client'
 import { useFormik } from "formik"
-import '@/app/styles/cadastro-candidato.css'
 import { dadosCadastroCandidato, dadosFormulario, formValidation, qualificacaoForm, qualificacaoFormInitial, qualificacaoFormValidation, valoresIniciais } from "./formSchema"
 import React, { useEffect, useState } from "react";
 import { CandidatoService } from "@/resources/candidato/servico";
@@ -19,7 +18,6 @@ export default function cadastroCandidato() {
     const [cadastrou, setCadastrou] = useState<boolean>(false);
     const [urlFoto, setUrlFoto] = useState<string>("");
     const [nomePdf, setNomePdf] = useState<string>("Selecionar");
-    const [urlPdf, setUrlPdf] = useState<string | null>(null);
     const service = CandidatoService();
     const utils = UtilsService();
     const sessaoService = ServicoSessao();
@@ -87,11 +85,10 @@ export default function cadastroCandidato() {
     // SELECIONANDO CURRICULO
     function selecionarPdf(event: React.ChangeEvent<HTMLInputElement>) {
         if (event.target.files) {
-            const url = URL.createObjectURL(event.target.files[0]);
             const curriculo = event.target.files[0];
             values.curriculo = curriculo;
             setNomePdf(curriculo.name);
-            setUrlPdf(url);
+
         }
     }
 
@@ -126,142 +123,129 @@ export default function cadastroCandidato() {
         <>
             <main className="">
 
-                <div id="direita" className="h-[auto] pb-28 w-[100vw] ">
+                <form onSubmit={handleSubmit}
+                    className="border border-gray-200 shadow-lg shadow-gray-400  mt-3 p-5 rounded-lg bg-white sm:w-[600px] m-auto">
 
-                    <div id="form"
-                        className="border border-gray-200 shadow-lg shadow-gray-400 m-auto mt-3 p-5 rounded-lg bg-white">
-                        <form onSubmit={handleSubmit}
-                            className=" w-[auto]">
-
-                            <div id="Foto" className="flex my-4" >
-                                <label className=" foto rounded-full m-auto cursor-pointer border border-gray-300 bg-cover bg-no-repeat"
-                                    style={{ backgroundImage: `url(${urlFoto})` }}>
-                                    <input name="foto" onChange={capturarFoto} className="hidden" type="file" />
-                                </label>
-                            </div>
+                    <div id="Foto" className="flex my-6  w-[100%]" >
+                        <label className=" foto rounded-full m-auto cursor-pointer border border-gray-300 bg-cover bg-no-repeat w-36 h-36"
+                            style={{ backgroundImage: `url(${urlFoto})` }}>
+                            <input name="foto" onChange={capturarFoto} className="hidden" type="file" />
+                        </label>
+                    </div>
 
 
-                            <div id="Conteudo" className="grid grid-cols-1">
-                                <div className="input-container">
-                                    <label>CPF: </label>
-                                    <input name="cpf" onChange={handleChange} className="border  border-black m-auto"
-                                        type="text" placeholder="CPF" value={values.cpf} />
-                                </div>
+                    <div className=" grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit  m-auto">
 
-                                <div className="input-container">
-                                    <label>Nome:</label>
-                                    <input name="nome" onChange={handleChange} className="border  border-black m-auto"
-                                        type="text" placeholder="Nome completo" value={values.nome} />
-                                </div>
+                        <div className="grid">
+                            <label>CPF: </label>
+                            <input name="cpf" onChange={handleChange} className="border border-gray-400  h-10 rounded-lg sm:w-[260px] "
+                                type="text" placeholder="CPF" value={values.cpf} />
+                        </div>
 
-                                <div className="input-container">
-                                    <label>Email:</label>
-                                    <input name="email" onChange={handleChange} className="border  border-black m-auto"
-                                        type="email" placeholder="Email" value={values.email} />
-                                </div>
+                        <div className="grid">
+                            <label>Email:</label>
+                            <input name="email" onChange={handleChange} className="border  border-gray-400  h-10 rounded-lg w-[260px] "
+                                type="email" placeholder="Email" value={values.email} />
+                        </div>
 
-                                <div className="input-container">
-                                    <label>Senha:</label>
-                                    <input name="senha" onChange={handleChange} className="border  border-black m-auto"
-                                        type="password" placeholder="Senha" value={values.senha} />
-                                </div>
+                        <div className="grid">
+                            <label>Nome:</label>
+                            <input name="nome" onChange={handleChange} className="border  border-gray-400  h-10 rounded-lg w-[260px] "
+                                type="text" placeholder="Nome completo" value={values.nome} />
+                        </div>
 
-                                <div className="input-container">
-                                    <label>Senha:</label>
-                                    <input name="confirma_senha" onChange={handleChange} className="border  border-black m-auto"
-                                        type="password" placeholder="Confirme sua senha" value={values.confirma_senha} />
-                                </div>
-
-                                <div className="input-container">
-                                    <label>Data de nascimento:</label>
-                                    <input name="dataNascimento" onChange={handleChange} className="border  border-black m-auto"
-                                        type="date" placeholder="Senha" />
-                                </div>
-
-                                <div className="input-container">
-                                    <label>Sexo:</label>
-                                    <select name="sexo" onChange={handleChange} className="" value={values.sexo}>
-                                        <option>MASCULINO</option>
-                                        <option>FEMININO</option>
-                                    </select>
-                                </div>
-
-                                <div className="input-container">
-                                    <label>Estado:</label>
-                                    <select name="idEstado" onChange={(event) => selecionarEstado(event.target)} className="" value={values.idEstado}>
-                                        <option value="">Todos</option>
-                                        {renderizarOptionEstados()}
-                                    </select>
-                                </div>
-
-                                <div className="input-container">
-                                    <label>Cidade:</label>
-                                    <select name="idCidade" onChange={handleChange} className="" value={values.idCidade}>
-                                        <option value="">Todos</option>
-                                        {renderizarOptionsCidade()}
-                                    </select>
-                                </div>
-
-                                <div className="input-container">
-                                    <label>Você é PCD?:</label>
-                                    <select name="pcd" onChange={() => values.pcd = !values.pcd}>
-                                        <option>NÃO</option>
-                                        <option>SIM</option>
-                                    </select>
-                                </div>
-
-                                <div className="input-container">
-                                    <label>Trabalha atualmente?:</label>
-                                    <select name="trabalhando"
-                                        onChange={() => values.trabalhando = !values.trabalhando}>
-                                        <option>NÃO</option>
-                                        <option>SIM</option>
-                                    </select>
-
-                                </div>
-
-                                <div className="input-container">
-                                    <label>Telefone para contato:</label>
-                                    <input name="tel" onChange={handleChange} className="border  border-black m-auto"
-                                        type="tel" placeholder="(**) *****-****" value={values.tel} />
-                                </div>
+                        <div className="grid">
+                            <label>Telefone para contato:</label>
+                            <input name="tel" onChange={handleChange} className="border border-gray-400  h-10 rounded-lg w-[260px]"
+                                type="tel" placeholder="(**) *****-****" value={values.tel} />
+                        </div>
 
 
+                        <div className="grid">
+                            <label>Senha:</label>
+                            <input name="senha" onChange={handleChange} className="border  border-gray-400  h-10 rounded-lg w-[260px]"
+                                type="password" placeholder="Senha" value={values.senha} />
+                        </div>
+
+                        <div className="grid">
+                            <label>Senha:</label>
+                            <input id="confirma_senha" onChange={handleChange} className="border  border-gray-400  h-10 rounded-lg w-[260px] "
+                                type="password" placeholder="Confirme sua senha" value={values.confirma_senha} />
+                        </div>
+
+                        <div className="grid">
+                            <label>Estado:</label>
+                            <select name="idEstado" onChange={(event) => selecionarEstado(event.target)} className="border border-gray-400  h-10 rounded-sm" value={values.idEstado}>
+                                <option value="">Todos</option>
+                                {renderizarOptionEstados()}
+                            </select>
+                        </div>
+
+                        <div className="grid">
+                            <label>Cidade:</label>
+                            <select name="idCidade" onChange={handleChange} className="border border-gray-400  h-10 rounded-sm" value={values.idCidade}>
+                                <option value="">Todos</option>
+                                {renderizarOptionsCidade()}
+                            </select>
+                        </div>
+
+                        <div className="grid">
+                            <label>Você é PCD?:</label>
+                            <select name="pcd" className="border border-gray-400  h-10 rounded-sm"
+                                onChange={() => values.pcd = !values.pcd}>
+                                <option>NÃO</option>
+                                <option>SIM</option>
+                            </select>
+                        </div>
+
+                        <div className="grid">
+                            <label>Sexo:</label>
+                            <select name="sexo" onChange={handleChange} className="border border-gray-400  h-10 rounded-sm " value={values.sexo}>
+                                <option>MASCULINO</option>
+                                <option>FEMININO</option>
+                            </select>
+                        </div>
 
 
-                                <div className="input-container">
-                                    <label>Selecionar currículo:</label>
-                                    <label className="cursor-pointer text-center pt-3  h-13 w-40 rounded-sm mt-2 border">
-                                        {nomePdf}
-                                        <input name="curriculo" onChange={selecionarPdf} className="hidden" type="file" accept="application/pdf" />
-                                    </label>
+                        <div className="grid">
+                            <label>Está empregado?:</label>
+                            <select name="trabalhando" className="border border-gray-400  h-10 rounded-sm"
+                                onChange={() => values.trabalhando = !values.trabalhando}>
+                                <option>NÃO</option>
+                                <option>SIM</option>
+                            </select>
+                        </div>
 
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1">
-                                <textarea name="descricao" className="border border-gray-400 mt-3 h-32
-                        " value={values.descricao} onChange={handleChange} />
+                        <div className="grid">
+                            <label>Data de nascimento:</label>
+                            <input name="dataNascimento" onChange={handleChange} className="h-10 rounded-lg"
+                                type="date" placeholder="Senha" />
+                        </div>
+
+                    </div>
+                    <div className="grid pt-7 place-items-center">
+                        <label>Selecionar currículo:</label>
+                        <label className="cursor-pointer text-center pt-3  h-13 w-40 rounded-sm  border">
+                            {nomePdf}
+                            <input name="curriculo" onChange={selecionarPdf} className="hidden" type="file" accept="application/pdf" />
+                        </label>
+                    </div>
 
 
-                                <input type="submit" value="Enviar" className="cursor-pointer w-[50%] " />
-                            </div>
 
-                        </form>
-                        {urlPdf && (
-                            <embed
-                                src={urlPdf}
-                                width="100%"
-                                height="600px"
-                                title="Currículo"
-                            >
-                            </embed>
-                        )}
-                    </div >
-                </div>
-                {cadastrou && (
+                    <div className="grid grid-cols-1 pt-10">
+                        <label>Descrição:</label>
+                        <textarea name="descricao" placeholder="Fale sobre seu eu profissional" className="border border-gray-700 rounded-lg mt-3 h-32 pl-1 " value={values.descricao} onChange={handleChange} />
+                        <input type="submit" value="Enviar" className="cursor-pointer w-[230px] h-10  border rounded-lg text-white bg-gray-800 mt-16 m-auto" />
+                    </div>
+
+
+                </form>
+                {!cadastrou && (
                     <QualificacaoForm />
                 )}
             </main>
+            <footer className="border mt-20 h-40"></footer>
         </>
 
     )
@@ -363,23 +347,23 @@ const QualificacaoForm = () => {
 
     return (
 
-        <div className="border text-center border-gray-300  shadow-lg shadow-gray-600 bg-white m-auto mb-64 test rounded-lg  font-bold text-gray-800">
-            <h1>Selecione as suas qualificações</h1>
-            <div className="select-container border ">
+        <div className="w-96 border text-center border-gray-300  shadow-lg shadow-gray-600 bg-white m-auto mb-64 test rounded-lg  font-bold text-gray-800">
+            <h2>Selecione as suas qualificações</h2>
+            <div className="select-container ">
                 <form onSubmit={handleSubmit}>
 
-                    <select value={values.qualificacao} id="qualificacao" className="mx-9" onChange={handleChange}>
+                    <select value={values.qualificacao} id="qualificacao" className="mx-9 border border-gray-500" onChange={handleChange}>
                         <option></option>
                         {renderizargerarOptionQualificacao()}
                     </select>
 
-                    <select id="nivel" onChange={handleChange}>
+                    <select className="border border-gray-500" id="nivel" onChange={handleChange}>
                         <option >BASICO</option>
                         <option >INTERMEDIARIO</option>
                         <option >AVANCADO</option>
                     </select>
 
-                    <input className="cursor-pointer" type="submit" value="Selecionar" />
+                    <input className="cursor-pointer border p-1 mt-3" type="submit" value="Selecionar" />
                 </form>
             </div>
 

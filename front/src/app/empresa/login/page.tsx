@@ -1,8 +1,7 @@
 'use client'
-import "@/app/styles/login-empresa.css"
 import { ServicoEmpresa } from "@/resources/empresa/sevico"
 import { accessToken, dadosLogin, formLoginValidator, ServicoSessao, valoresIniciais } from "@/resources/sessao/sessao"
-import { Form, useFormik } from "formik"
+import { useFormik } from "formik"
 
 export default function loginEmpresa() {
 

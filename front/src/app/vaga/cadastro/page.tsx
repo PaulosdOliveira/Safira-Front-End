@@ -1,5 +1,4 @@
 'use client'
-import "@/app/styles/cadastro-vaga.css"
 import { useFormik } from "formik";
 import React, { useEffect, useState } from "react";
 import { dadosCadastroVaga, valoresIniciais } from "./formSchema";
@@ -75,7 +74,6 @@ export default function CadastroVaga() {
     function definirTeclasPermitidas(keyDown: React.KeyboardEvent<HTMLInputElement>) {
         if (keyDown.ctrlKey && keyDown.key.toLowerCase() == 'a') return;
         const permitidos = ['0', '9', '8', '7', '6', '5', '4', '3', '2', '1', '.', ',', 'Backspace', 'ArrowLeft', 'ArrowRight']
-
         if (!permitidos.includes(keyDown.key)) {
             keyDown.preventDefault();
         }
@@ -83,26 +81,26 @@ export default function CadastroVaga() {
 
     return (
         <div className="main">
-            <div className="form-container border border-gray-300 bg-white m-auto mt-12 rounded-lg shadow-2xl shadow-gray-600">
+            <div className=" w-[400px] sm:w-[600px] md:w-[680px] lg:w-[720px] border border-gray-300 bg-white m-auto mt-12 rounded-lg shadow-2xl shadow-gray-600  p-5">
                 <form onSubmit={handleSubmit}>
-                    <div id="dados_simples" className="grid grid-cols-1">
+                    <div className="grid gap-4 sm:grid-cols-2  ">
 
-                        <div className="component-form">
+                        <div className="grid">
                             <label>Adicione um titulo:</label>
                             <input id="titulo" onChange={handleChange} type="text" placeholder="Titulo" />
                         </div>
 
-                        <div className="component-form">
+                        <div className="grid">
                             <label>Prazo em dias:</label>
                             <input id="diasEmAberto" onChange={handleChange} onKeyDown={definirTeclasPermitidas} type="number" inputMode="numeric" pattern="[0-9]*" />
                         </div>
 
-                        <div className="component-form">
+                        <div className="grid">
                             <label>Salario:</label>
                             <input id="salario" onChange={handleChange} type="text" placeholder="Salario" onKeyDown={definirTeclasPermitidas} />
                         </div>
 
-                        <div className="component-form">
+                        <div className="grid">
                             <label>Modelo:</label>
                             <select id="modelo" onChange={handleChange}>
                                 <option>PRESENCIAL</option>
@@ -112,7 +110,7 @@ export default function CadastroVaga() {
                         </div>
 
 
-                        <div className="component-form">
+                        <div className="grid">
                             <label>Nível exigido:</label>
                             <select id="nivel" onChange={handleChange}>
                                 <option >JUNIOR</option>
@@ -123,7 +121,7 @@ export default function CadastroVaga() {
                         </div>
 
 
-                        <div className="component-form">
+                        <div className="grid">
                             <label>Tipo de contrato:</label>
                             <select id="tipoContrato" onChange={handleChange}>
                                 <option >CLT</option>
@@ -134,7 +132,7 @@ export default function CadastroVaga() {
                         </div>
 
 
-                        <div className="component-form">
+                        <div className="grid">
                             <label>Estado:</label>
                             <select id="idEstado" onChange={(event) => selecionarEstado(event.target)}>
                                 <option value={``}>Todos</option>
@@ -142,7 +140,7 @@ export default function CadastroVaga() {
                             </select>
                         </div>
 
-                        <div className="component-form">
+                        <div className="grid">
                             <label>Cidade:</label>
                             <select id="idCidade" onChange={handleChange}>
                                 <option value={``}>Todos</option>
@@ -150,7 +148,7 @@ export default function CadastroVaga() {
                             </select>
                         </div>
 
-                        <div className="component-form">
+                        <div className="grid">
                             <label>Exclusividade de sexo:</label>
                             <select id="exclusivoParaSexo" onChange={handleChange}>
                                 <option >TODOS</option>
@@ -159,7 +157,7 @@ export default function CadastroVaga() {
                             </select>
                         </div>
 
-                        <div className="component-form">
+                        <div className="grid">
                             <label>Excluiva para PCD?:</label>
                             <select id="exclusivoParaPcd" onChange={handleChange}>
                                 <option value={`${true}`}>SIM</option>
@@ -169,39 +167,41 @@ export default function CadastroVaga() {
                     </div>
                     <div id="segundo" className="grid grid-cols-1">
 
-                        <div className="component-form ">
+                        <div className="grid ">
                             <label>Adicione uma introdução para a  descrição:</label>
                             <textarea id="descricao_vaga" onChange={handleChange} placeholder="Introdução" />
                         </div>
 
 
-                        <div className="component-form ">
+                        <div className="grid ">
                             <label>Descreva as pricipais atividades:</label>
                             <textarea id="principais_atividades" onChange={handleChange} placeholder="Principais atividades" />
                         </div>
 
-                        <div className="component-form ">
+                        <div className="grid ">
                             <label>Requisitos da vaga:</label>
                             <textarea id="requisitos" onChange={handleChange} placeholder="Reuisitos" />
                         </div>
 
-                        <div className="component-form ">
+                        <div className="grid ">
                             <label>Diferenciais paa a vaga:</label>
                             <textarea id="diferenciais" onChange={handleChange} placeholder="Diferenciais" />
                         </div>
 
-                        <div className="component-form ">
+                        <div className="grid ">
                             <label>Fale sobre o local de trabalho:</label>
                             <textarea id="local_de_trabalho" onChange={handleChange} placeholder="Local de trabalho" />
                         </div>
 
 
-                        <div className="component-form ">
+                        <div className="grid ">
                             <label>Informações sobre horario e escala:</label>
                             <textarea id="horario" onChange={handleChange} placeholder="Horário" />
                         </div>
                     </div>
-                    <input type="submit" value="Enviar" />
+                    <div className="flex justify-center mt-8">
+                        <input type="submit" value="Enviar" className="bg-gray-800 text-white p-1 rounded-md cursor-pointer" />
+                    </div>
                 </form>
             </div>
         </div>
