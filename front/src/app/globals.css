@@ -15,8 +15,6 @@ h2 {
     font-weight: 600;
     line-height: 2.25rem;
     color: #374151;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
 }
 
 
@@ -64,13 +62,9 @@ i {
 }
 
 
-
 select,
 button {
-    height: 40px;
-    border: 1px solid #9CA3AF;
-    border-radius: 2px;
-    
+    cursor: pointer;
 }
 
 textarea {
@@ -90,6 +84,4 @@ textarea {
 
 input {
     border: 1px solid #9CA3AF;
-    border-radius: 5px;
-    padding: 6px;
 }

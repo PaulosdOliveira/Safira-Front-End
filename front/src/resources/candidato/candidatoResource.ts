@@ -1,4 +1,4 @@
-import { Qualificacao, qualificacaoUsuario } from "../qualificacao/qualificacaoResource";
+import { QualificacaoPerfil, qualificacaoUsuario } from "../qualificacao/qualificacaoResource";
 
 export interface dadosConsultaCandidato {
     idEstado?: string;
@@ -17,6 +17,15 @@ export class ConsultaCandidatoDTO {
     idade?: string;
 }
 
+export class CandidatoCadastrado {
+    id?: number;
+    nome?: string;
+    cidade?: string;
+    estado?: string;
+    idade?: string;
+    status?: string;
+}
+
 export class PerfilCandidato {
     id?: string;
     nome?: string;
@@ -24,11 +33,11 @@ export class PerfilCandidato {
     estado?: string;
     idade?: string;
     descricao?: string;
-    sexo?: string;
     pcd?: boolean;
     tel?: string;
     email?: string;
     trabalhando?: boolean;
+    qualificacoes?: QualificacaoPerfil[];
 }
 
 

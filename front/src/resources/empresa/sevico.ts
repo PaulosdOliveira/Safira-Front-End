@@ -29,7 +29,7 @@ class EmpresaService {
 
 
     async logar(dados: dadosLogin) {
-    
+
         const resultado = await fetch(this.urlBase + "/login", {
             method: 'POST',
             body: JSON.stringify(dados),
@@ -44,7 +44,7 @@ class EmpresaService {
     }
 
     async salvarFotoEmpresa(foto: File, token: string) {
-          alert(token + "-----------------------------")
+        alert(token + "-----------------------------")
         const dados = new FormData();
         dados.append("foto", foto);
 
@@ -55,6 +55,12 @@ class EmpresaService {
                 'Authorization': `Bearer ${token}`
             }
         })
+    }
+
+
+    async carregarPerfil(id: string) {
+        const resultado = await fetch(`${this.urlBase}/${id}`);
+        return resultado.json();
     }
 }
 

@@ -1,12 +1,12 @@
 'use client'
 
 import { CardVaga, cardVagaProps } from "@/components/cardvaga";
+import { Menu } from "@/components/menu";
 import { ServicoSessao } from "@/resources/sessao/sessao";
 import { cidade, estado, UtilsService } from "@/resources/utils/utils";
 import { dadosConsultaVagaDTO, initConsultaVaga } from "@/resources/vaga_emprego/DadosVaga";
 import { VagaService } from "@/resources/vaga_emprego/service";
 import { useFormik } from "formik";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 
@@ -23,7 +23,6 @@ export default function MainCandidato() {
   const [estados, setEstado] = useState<estado[]>([]);
   const [cidades, setCidades] = useState<cidade[]>([]);
   const [vagas, setVagas] = useState<cardVagaProps[]>([]);
-  const [menuVisivel, setMenuVisivel] = useState<boolean>(false);
 
   //CRIANDO CARD DE VAGA
   function criarCardVaga(dados: cardVagaProps, key: number) {
@@ -122,17 +121,13 @@ export default function MainCandidato() {
           </div>
 
 
-          <div className="w-[100%] h-[22px] flex flex-col items-end  pr-2">
-            <i onClick={() => setMenuVisivel(!menuVisivel)}
-              className=" material-symbols cursor-pointer">Menu</i>
-            <Menu visivel={menuVisivel} id={sessao.getSessao()?.id} />
-          </div>
+          <Menu />
         </div>
       </header>
       <section id="filtro" className="mt-2  font-semibold text-[.9em]">
         <div className="inline-block mx-[5px]">
           <p >Estado:</p>
-          <select id="idEstado" className="cursor-pointer border border-gray-200 bg-white rounded-sm"
+          <select id="idEstado" className="cursor-pointer border border-gray-200 bg-white rounded-sm h-7"
             onChange={(event) => selecionarEstado(event.target)} >
             <option value="">Todos</option>
             {renderizarOptionEstados()}
@@ -141,7 +136,7 @@ export default function MainCandidato() {
 
         <div className="inline-block mx-[5px]">
           <p>Cidade:</p>
-          <select className="cursor-pointer border  border-gray-300 bg-white rounded-sm"
+          <select className="cursor-pointer border  border-gray-300 bg-white rounded-sm h-7"
             onChange={handleChange} id="idCidade" value={values.idCidade}>
             <option value="">Todas</option>
             {renderizarOptionsCidade()}
@@ -151,7 +146,7 @@ export default function MainCandidato() {
 
         <div className="inline-block mx-[5px]">
           <p>Nivel:</p>
-          <select className="cursor-pointer border  border-gray-300 bg-white rounded-sm" onChange={handleChange} id="senioridade">
+          <select className="cursor-pointer border  border-gray-300 bg-white rounded-sm h-7" onChange={handleChange} id="senioridade">
             <option value="">Todos</option>
             <option value="ESTAGIARIO">Estagiario</option>
             <option value="JUNIOR">Junior</option>
@@ -162,7 +157,7 @@ export default function MainCandidato() {
 
         <div className="inline-block mx-[5px]">
           <p>Modelo:</p>
-          <select className="cursor-pointer border  border-gray-300 bg-white rounded-sm"
+          <select className="cursor-pointer border  border-gray-300 bg-white rounded-sm h-7"
             onChange={handleChange} id="modelo">
             <option value="">Todos</option>
             <option value="PRESENCIAL">Presencial</option>
@@ -173,7 +168,7 @@ export default function MainCandidato() {
 
         <div className="inline-block mx-[5px]">
           <p>Contrato:</p>
-          <select className="cursor-pointer border  border-gray-300 bg-white rounded-sm"
+          <select className="cursor-pointer border  border-gray-300 bg-white rounded-sm h-7"
             onChange={handleChange} id="tipo_contrato" value={values.tipo_contrato}>
             <option value="">Todos</option>
             <option>ESTAGIO</option>
@@ -206,23 +201,6 @@ export const Option: React.FC<optionProps> = ({ texto, id }) => {
 }
 
 
-interface menuProps {
-  visivel: boolean;
-  id?: string;
-}
 
-const Menu: React.FC<menuProps> = ({ visivel, id }) => {
-
-  const router = useRouter();
-
-  return (
-    <nav className={`bg-white z-10  border   ${visivel ? '' : 'hidden'}`}>
-      <ul >
-        <li onClick={() => router.push(`/candidato/${id}`)} className="border">Perfil</li>
-        <li className="border">Candidaturas</li>
-      </ul>
-    </nav>
-  )
-}
 
 

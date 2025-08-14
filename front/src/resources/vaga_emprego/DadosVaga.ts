@@ -1,4 +1,7 @@
 
+
+
+
 // Dados do formulário de busca por vagas
 export interface dadosConsultaVagaDTO {
     titulo: string;
@@ -19,18 +22,40 @@ export interface dadosVaga {
     id_empresa: string;
     nome_empresa: string;
     titulo: string;
-    descricao: string;
-    dataHoraPublicacao: Date;
-    dataHoraEncerramento: Date;
+    dataHoraPublicacao: string;
+    dataHoraEncerramento: string;
+    diasEmAberto: string;
     salario: number;
     nivel: string;
     estado: string;
     cidade: string;
     modelo: string;
-    ExclusivoParaSexo: string;
-    ExclusivoParaPcd: boolean;
+    exclusivoParaSexo: string;
+    exclusivoParaPcd: boolean;
     tipoContrato: string;
     jaCandidatou: boolean;
+    descricao: string;
+    principais_atividades: string;
+    requisitos: string;
+    diferenciais: string;
+    local_de_trabalho: string;
+    horario: string;
 }
 
 
+
+export class VagaEmpresaDTO {
+    id?: string;
+    titulo?: string;
+    tempo_decorrido?: string;
+    qtd_candidatos?: string;
+}
+
+
+// Vaga na qual candidato se cadastrou
+export class CandidaturaCandidato {
+    id?: string;
+    tituloVaga?: string;
+    nomeEmpresa?: string;
+    status?: string;
+}

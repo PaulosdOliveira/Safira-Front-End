@@ -7,7 +7,7 @@ export interface dadosCadastroVaga{
     tipoContrato: string;
     exclusivoParaSexo: string;
     exclusivoParaPcd: boolean;
-    descricao_vaga: string;
+    descricao: string;
     principais_atividades: string;
     requisitos: string;
     diferenciais: string;
@@ -17,4 +17,4 @@ export interface dadosCadastroVaga{
     idCidade: string;
 }
 
-export const valoresIniciais: dadosCadastroVaga = {diasEmAberto: '', diferenciais: '', exclusivoParaPcd: false, horario: '', descricao_vaga: '', local_de_trabalho: '', modelo: '', nivel: '', principais_atividades: '', requisitos: '', salario: '', exclusivoParaSexo: '', tipoContrato: '', titulo: '', idCidade: '', idEstado: ''}
+export const valoresIniciais: dadosCadastroVaga = {diasEmAberto: '', diferenciais: '', exclusivoParaPcd: false, horario: '', descricao: '', local_de_trabalho: '', modelo: '', nivel: '', principais_atividades: '', requisitos: '', salario: '', exclusivoParaSexo: '', tipoContrato: '', titulo: '', idCidade: '', idEstado: ''}

@@ -1,13 +1,15 @@
 'use client'
 import { useFormik } from "formik"
-import { dadosCadastroCandidato, dadosFormulario, formValidation, qualificacaoForm, qualificacaoFormInitial, qualificacaoFormValidation, valoresIniciais } from "./formSchema"
+import { dadosCadastroCandidato, dadosFormulario, formValidation, qualificacaoForm, qualificacaoFormValidation, valoresIniciais } from "./formSchema"
 import React, { useEffect, useState } from "react";
 import { CandidatoService } from "@/resources/candidato/servico";
 import { accessToken, dadosLogin, ServicoSessao } from "@/resources/sessao/sessao";
 import { QualificacaoService } from "@/resources/qualificacao/qualificacaoService";
-import { Qualificacao, qualificacaoUsuario } from "@/resources/qualificacao/qualificacaoResource";
+import { Qualificacao, qualificacaoFormInitial, qualificacaoSelecionada, qualificacaoUsuario } from "@/resources/qualificacao/qualificacaoResource";
 import { cidade, estado, UtilsService } from "@/resources/utils/utils";
 import { Option } from "../page";
+import { Instrucao, QualificacaoSelecionada } from "@/components/qualificacao/selecao";
+import { OptionQualificacao } from "@/components/qualificacao/optionQualificacao";
 
 
 
@@ -121,10 +123,9 @@ export default function cadastroCandidato() {
 
     return (
         <>
-            <main className="">
-
+            <main className={`${cadastrou ? 'hidden' : ''}`}>
                 <form onSubmit={handleSubmit}
-                    className="border border-gray-200 shadow-lg shadow-gray-400  mt-3 p-5 rounded-lg bg-white sm:w-[600px] m-auto">
+                    className=" w-[370px] sm:w-[600px] border border-gray-200 shadow-lg shadow-gray-400  mt-3 p-5 rounded-lg bg-white  m-auto">
 
                     <div id="Foto" className="flex my-6  w-[100%]" >
                         <label className=" foto rounded-full m-auto cursor-pointer border border-gray-300 bg-cover bg-no-repeat w-36 h-36"
@@ -175,7 +176,7 @@ export default function cadastroCandidato() {
 
                         <div className="grid">
                             <label>Estado:</label>
-                            <select name="idEstado" onChange={(event) => selecionarEstado(event.target)} className="border border-gray-400  h-10 rounded-sm" value={values.idEstado}>
+                            <select name="idEstado" onChange={(event) => selecionarEstado(event.target)} className="border border-gray-400  h-10 rounded-sm">
                                 <option value="">Todos</option>
                                 {renderizarOptionEstados()}
                             </select>
@@ -238,13 +239,17 @@ export default function cadastroCandidato() {
                         <textarea name="descricao" placeholder="Fale sobre seu eu profissional" className="border border-gray-700 rounded-lg mt-3 h-32 pl-1 " value={values.descricao} onChange={handleChange} />
                         <input type="submit" value="Enviar" className="cursor-pointer w-[230px] h-10  border rounded-lg text-white bg-gray-800 mt-16 m-auto" />
                     </div>
-
-
                 </form>
-                {!cadastrou && (
-                    <QualificacaoForm />
-                )}
             </main>
+            {cadastrou && (
+                <>
+                    <h1 className="text-center">Perfil criado!!</h1>
+                    <h2 className="text-center">Adicione suas habilidades para completa-lo</h2>
+                    <QualificacaoForm />
+
+                </>
+            )}
+
             <footer className="border mt-20 h-40"></footer>
         </>
 
@@ -253,13 +258,14 @@ export default function cadastroCandidato() {
 
 
 
+// 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+
 const QualificacaoForm = () => {
 
-    // Id da qualificação atual
-    const [id, setId] = useState<number>(0);
-    const [qualificacoesSelecionadas, setQualificacoesSelecionadas] = useState<qualificacaoSelecionadaProps[]>([]);
+
+    const [qualificacoesSelecionadas, setQualificacoesSelecionadas] = useState<qualificacaoSelecionada[]>([]);
     const service = QualificacaoService();
-    const { handleChange, handleSubmit, values } = useFormik<qualificacaoForm>({
+    const { handleChange, handleSubmit, values } = useFormik<qualificacaoSelecionada>({
         initialValues: qualificacaoFormInitial,
         onSubmit: selecionar,
         validationSchema: qualificacaoFormValidation
@@ -279,7 +285,7 @@ const QualificacaoForm = () => {
     function gerarOptionQualificacao(qualificacao: Qualificacao) {
         const id = qualificacao.id;
         return (
-            <OptionQualificacao key={id} id={id} nome={qualificacao.nome} click={setId} />
+            <OptionQualificacao key={id} id={id} nome={qualificacao.nome} />
         )
     }
 
@@ -290,36 +296,34 @@ const QualificacaoForm = () => {
         );
     }
 
+
+    function changeQualificacao(select: HTMLSelectElement) {
+        const option = select.item(select.selectedIndex);
+        values.idQualificacao = parseInt(option?.id + '')
+        values.nome = option?.text + ''
+    }
+
     // Selecionando qualificacao
     function selecionar() {
-        const selecionada: qualificacaoSelecionadaProps = { nivel: values.nivel, nomeQualificacao: values.qualificacao, idQualificacao: id, click: () => true }
-        setQualificacoesSelecionadas(pre => [...pre, selecionada]);
-        removerItem(selecionada.nomeQualificacao)
-        values.qualificacao = "";
-        alert(id)
+        if (!qualificacoesSelecionadas.some(
+            (item) => item.idQualificacao === values.idQualificacao
+        )) {
+            const selecionada: qualificacaoSelecionada = { idQualificacao: values.idQualificacao, nivel: values.nivel, nome: values.nome }
+            setQualificacoesSelecionadas(pre => [...pre, selecionada])
+        }
     }
 
-    // Removendo item selecionado do <select>
-    function removerItem(nome: string) {
-        setSelect((prev) => prev.filter(item => item.nome !== nome))
-    }
 
     // Removendo qualificação da lista de selecionadas e devolvendo ao select como ultimo item
-    function removarSelecao(nomeIdQualificacao: string) {
-        const textoDividido = nomeIdQualificacao.split(" ");
-        const qualificacaoRemovida: Qualificacao = {
-            id: parseInt(textoDividido[0]),
-            nome: textoDividido[1]
-        };
-        setQualificacoesSelecionadas((prev) => prev.filter(item => item.nomeQualificacao !== textoDividido[1]))
-        setSelect(pre => [...pre, qualificacaoRemovida])
+    function removarSelecao(id: number) {
+        setQualificacoesSelecionadas((prev) => prev.filter(item => item.idQualificacao !== id))
     }
 
     // Criando componente de qualificação selecionada
-    function criarQualificacaoSelecionada(dados: qualificacaoSelecionadaProps) {
+    function criarQualificacaoSelecionada(dados: qualificacaoSelecionada) {
         return (
             <QualificacaoSelecionada idQualificacao={dados.idQualificacao}
-                key={dados.idQualificacao} nivel={dados.nivel} nomeQualificacao={dados.nomeQualificacao} click={removarSelecao} />
+                key={dados.idQualificacao} nivel={dados.nivel} nomeQualificacao={dados.nome} click={removarSelecao} />
         )
     }
 
@@ -330,7 +334,7 @@ const QualificacaoForm = () => {
     }
 
     // Transformando as qualificações selecionadas em modelos para serem salvos no banco de dados
-    function criarQualificacaoUsuario(dados: qualificacaoSelecionadaProps) {
+    function criarQualificacaoUsuario(dados: qualificacaoSelecionada) {
         const qualificacao: qualificacaoUsuario = { idQualificacao: dados.idQualificacao, nivel: dados.nivel };
         return qualificacao;
     }
@@ -347,12 +351,12 @@ const QualificacaoForm = () => {
 
     return (
 
-        <div className="w-96 border text-center border-gray-300  shadow-lg shadow-gray-600 bg-white m-auto mb-64 test rounded-lg  font-bold text-gray-800">
+        <div className="w-96 border text-center border-gray-300  shadow-lg shadow-gray-600 bg-white m-auto mb-64 test rounded-lg  font-bold text-gray-800 mt-24 p-5">
             <h2>Selecione as suas qualificações</h2>
             <div className="select-container ">
                 <form onSubmit={handleSubmit}>
 
-                    <select value={values.qualificacao} id="qualificacao" className="mx-9 border border-gray-500" onChange={handleChange}>
+                    <select id="idQualificacao" className="mx-9 border border-gray-500" onChange={(event) => changeQualificacao(event.target)}>
                         <option></option>
                         {renderizargerarOptionQualificacao()}
                     </select>
@@ -366,45 +370,18 @@ const QualificacaoForm = () => {
                     <input className="cursor-pointer border p-1 mt-3" type="submit" value="Selecionar" />
                 </form>
             </div>
-
-            <div id="selecionados" className="border">
+            <div id="" className=" flex flex-wrap ">
                 {renderizar()}
             </div>
-            <input onClick={() => cadastrarQualificacoes()}
-                type="button" value="Enviar" className="cursor-pointer" />
+            <Instrucao />
+            <button onClick={() => cadastrarQualificacoes()}
+                type="button"  className="cursor-pointer bg-gray-800 text-white rounded-md p-2 mt-9 w-20">Salvar</button>
+
+            <hr className="my-7" />
+            <a  href="http://localhost:3000" target="_self"
+             className="cursor-pointer bg-blue-700 text-white rounded-md p-2 mt-9 w-20">Finalizar</a>
         </div>
 
     )
 }
 
-export interface qualificacaoSelecionadaProps {
-    nomeQualificacao: string;
-    idQualificacao: number;
-    nivel: string;
-    click: (event: any) => void;
-}
-
-
-const QualificacaoSelecionada: React.FC<qualificacaoSelecionadaProps> = ({ idQualificacao, nomeQualificacao, click, nivel }) => {
-
-    return (
-        <div className="border flex" >
-            {nomeQualificacao} | {nivel}
-            <div onClick={() => click(idQualificacao + " " + nomeQualificacao)}
-                className="ml-10 cursor-pointer">x</div>
-        </div>
-
-    );
-}
-
-export interface qualificacaoProps {
-    id?: number;
-    nome?: string;
-    click: (event: any) => void;
-}
-
-export const OptionQualificacao: React.FC<qualificacaoProps> = ({ id, nome, click }) => {
-    return (
-        <option id={id + ''} onClick={() => click(id)}>{nome}</option>
-    );
-}

@@ -22,16 +22,7 @@ export default function CadastroVaga() {
     async function submit() {
         alert(values.idCidade)
         alert(values.idEstado)
-        const dadosCadastrais: dadosCadastroVaga = {
-            descricao_vaga: values.descricao_vaga.replaceAll("###", ""),
-            diasEmAberto: values.diasEmAberto, diferenciais: values.diferenciais.replaceAll("###", ""),
-            exclusivoParaPcd: values.exclusivoParaPcd, horario: values.horario.replaceAll("###", ""),
-            local_de_trabalho: values.local_de_trabalho.replaceAll("###", ""), modelo: values.modelo,
-            nivel: values.nivel, principais_atividades: values.principais_atividades.replaceAll("###", ""),
-            requisitos: values.requisitos.replaceAll("###", ""), salario: values.salario, exclusivoParaSexo: values.exclusivoParaSexo,
-            tipoContrato: values.tipoContrato, titulo: values.titulo, idCidade: values.idCidade, idEstado: values.idEstado
-        }
-        await VagaService().cadastrar_vaga(dadosCadastrais, ServicoSessao().getSessao()?.accessToken + '');
+        await VagaService().cadastrar_vaga(values, ServicoSessao().getSessao()?.accessToken + '');
     }
 
 
@@ -169,7 +160,7 @@ export default function CadastroVaga() {
 
                         <div className="grid ">
                             <label>Adicione uma introdução para a  descrição:</label>
-                            <textarea id="descricao_vaga" onChange={handleChange} placeholder="Introdução" />
+                            <textarea id="descricao" onChange={handleChange} placeholder="Introdução" />
                         </div>
 
 

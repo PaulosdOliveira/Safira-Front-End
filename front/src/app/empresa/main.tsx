@@ -11,8 +11,10 @@ import { useEffect, useState } from "react"
 import { Qualificacao, qualificacaoSelecionada, qualificacaoUsuario } from "@/resources/qualificacao/qualificacaoResource"
 import { QualificacaoService } from "@/resources/qualificacao/qualificacaoService"
 import { OptionQualificacao } from "@/components/qualificacao/optionQualificacao"
-import { QualificacaoSelecionada } from "@/components/qualificacao/selecao"
+import { Instrucao, QualificacaoSelecionada } from "@/components/qualificacao/selecao"
 import { CardUsuario } from "@/components/cadUsuario"
+import { useRouter } from "next/navigation"
+import { Menu } from "@/components/menu"
 
 
 
@@ -23,6 +25,7 @@ export const MainEmpresa = () => {
     const [qualificacoesSelecionadas, setQualificacoesSelecionadas] = useState<qualificacaoSelecionada[]>([]);
     const [cidades, setCidades] = useState<cidade[]>([]);
     const sessao = ServicoSessao();
+    const router = useRouter();
     const [candidatos, setCandidatos] = useState<ConsultaCandidatoDTO[]>([]);
     const { values, handleSubmit, handleChange } = useFormik<dadosConsultaCandidato>({
         initialValues: initConsultaCandidato,
@@ -129,7 +132,7 @@ export const MainEmpresa = () => {
     return (
         <div className="w-[100vw] min-h-screen bg-white">
             <header className=" w-[100vw]  flex items-end pb-2 bg-white  border border-gray-100 shadow-2xl shadow-gray-200">
-                <div id="filtro" className=" flex items-end">
+                <div id="filtro" className=" flex items-end  w-[80%]">
                     <div className="">
                         <SelectEstadoCidade cidades={cidades} changeCidade={handleChange} changeEstado={(event) => selecionarEstado(event.target)} />
                     </div>
@@ -160,21 +163,14 @@ export const MainEmpresa = () => {
                         </div>
                     </div>
                 </div>
-
+                <div className="w-[20%]">
+                    <Menu />
+                </div>
 
             </header>
-            <div className="instrucao  flex items-center pl-3 pt-1 text-[.8em] font-semibold">
-                <div className=" h-2 w-2 rounded-full bg-green-400 mr-1" />
-                <span>Básico</span>
-                <div className=" h-2 w-2 rounded-full bg-yellow-400 mr-1 ml-4 " />
-                <span>Intermediario</span>
-                <div className=" h-2 w-2 rounded-full bg-red-500 mr-1 ml-4" />
-                <span>Avançado</span>
-
-            </div>
-            <section className="mt-1 flex overflow-auto px-3 pr-7  h-8 "
+            <Instrucao />
+            <section className="mt-1 flex items-center  p-1  h-14  w-[100vw] overflow-auto"
                 id="filtros-selecionados">
-
                 {renderizarQualificacoesSelecionadas()}
             </section>
             <main className="w-[100%] h-[79.2vh] bg-white flex mt-2">

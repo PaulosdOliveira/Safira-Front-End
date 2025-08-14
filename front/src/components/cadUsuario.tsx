@@ -14,13 +14,13 @@ export const CardUsuario: React.FC<ConsultaCandidatoDTO> = ({ nome, id, cidade, 
                 <div style={{ backgroundImage: `url(http://localhost:8080/candidato/foto/${id})` }}
                     className="border border-gray-100 w-20 h-20 rounded-full bg-cover bg-no-repeat" />
                 <div>
-                    <h2 className="font-bold">{nome}</h2>
-                    <h2 className=" pl-1">{idade} Anos</h2>
+                    <p className="font-bold">{nome}</p>
+                    <p className=" pl-1">{idade} Anos</p>
                 </div>
             </div>
             <div className="flex pt-1">
                 <div className="material-symbols scale-75 text-gray-700">location_on</div>
-                <h2 className="text-gray-700">{cidade}/{estado}</h2>
+                <p className="text-gray-700">{cidade}/{estado}</p>
             </div>
         </a>
     )

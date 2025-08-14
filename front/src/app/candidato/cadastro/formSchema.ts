@@ -57,9 +57,8 @@ export const valoresIniciais: dadosFormulario = { foto: null, cpf: "88899", cep:
 
 
 /***   FORMULÁRIO DE QUALIFICAÇÕES */
-
 export interface qualificacaoForm {
-    qualificacao: string;
+    idQualificacao: string;
     nivel: string;
 }
 
@@ -69,6 +68,6 @@ export const qualificacaoFormValidation = yup.object().shape({
     nivel: yup.string().trim("Campo obrigatório")
 })
 
-export const qualificacaoFormInitial: qualificacaoForm = { nivel: "BASICO", qualificacao: '' };
+export const qualificacaoFormInitial: qualificacaoForm = { nivel: "BASICO", idQualificacao: '' };
 
 /***   FORMULÁRIO DE QUALIFICAÇÕES */

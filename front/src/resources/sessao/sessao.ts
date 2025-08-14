@@ -23,7 +23,7 @@ export class Sessao {
     id?: string;
     nome?: string;
     accessToken?: string;
-    perfil?: 'CANDIDATO' | 'EMPRESA'
+    perfil?: 'candidato' | 'empresa'
     expiracao?: number;
 }
 
@@ -42,8 +42,8 @@ class SessaoService {
             }
             alert(sessao.nome)
             this.setSessao(sessao);
-        }else{
-            alert("ERRO: " + token )
+        } else {
+            alert("ERRO: " + token)
         }
     }
 
@@ -61,7 +61,15 @@ class SessaoService {
             const login: Sessao = JSON.parse(sessao ? sessao : '');
             return login;
         } catch (erro) {
-           
+
+        }
+    }
+
+    sair() {
+        try {
+            localStorage.removeItem("sessao");
+        } catch (error) {
+
         }
     }
 }

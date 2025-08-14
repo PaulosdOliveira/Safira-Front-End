@@ -1,5 +1,5 @@
 import { dadosCadastroVaga } from "@/app/vaga/cadastro/formSchema";
-import { dadosConsultaVagaDTO } from "./DadosVaga";
+import { CandidaturaCandidato, dadosConsultaVagaDTO } from "./DadosVaga";
 
 class Service {
     urlBase: string = "http://localhost:8080/vaga"
@@ -14,7 +14,6 @@ class Service {
                 'Authorization': `Bearer ${token}`
             }
         })
-
         alert(resultado.status)
     }
 
@@ -37,7 +36,6 @@ class Service {
                 'Authorization': `Bearer ${token}`
             }
         })
-
         return resultado.json();
     }
 
@@ -49,20 +47,18 @@ class Service {
                 'Authorization': `Bearer ${token}`
             }
         })
-
         return resultado.json();
     }
 
 
     async carregarVaga(id: string, token: string) {
 
-        const resultado = await fetch(`${this.urlBase}/buscar/${id}`, {
+        const resultado = await fetch(`${this.urlBase}/${id}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         })
-
         return resultado.json();
     }
 
@@ -73,14 +69,81 @@ class Service {
                 'Authorization': `Bearer ${token}`
             }
         })
-
         return resultado.status;
+    }
+
+    async buscar_candidaturas(token: string): Promise<CandidaturaCandidato[]>{
+        const resultado = await fetch(`${this.urlBase}/candidaturas`,{
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+
+        return resultado.json();
     }
 
     async cancelar_candidatura(token: string, idVaga: string) {
         await fetch(`${this.urlBase}/cancelar-candidatura/${idVaga}`, {
             method: "DELETE",
             headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+    }
+
+
+    async buscarVagasEmpresa(id_empresa: string) {
+        const resultado = await fetch(`${this.urlBase}?idEmpresa=${id_empresa}`);
+        return resultado.json();
+    }
+
+    // Buscando candidatos cadastrados em uma vaga
+    async buscarCandidatosVaga(idVaga: string, token: string) {
+        const resultado = await fetch(`${this.urlBase}/candidatos/${idVaga}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+
+        return resultado.json();
+    }
+
+    async selecionarCandidato(idCandidato: string, idVaga: string, token: string) {
+        await fetch(`${this.urlBase}/candidato/selecionar/${idCandidato}/${idVaga}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+    }
+
+    async dispesarCandidato(idCandidato: string, idVaga: string, token: string) {
+        await fetch(`${this.urlBase}/candidato/dispensar/${idCandidato}/${idVaga}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+    }
+
+    async buscarDadosCadastrais(idVaga: string, token: string) {
+        const resultado = await fetch(`${this.urlBase}/dados-cadastrais/${idVaga}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        return resultado.json();
+    }
+
+
+    async editarVaga(idVaga: string, dados: dadosCadastroVaga, token: string) {
+        await fetch(`${this.urlBase}/${idVaga}`, {
+            method: 'PUT',
+            body: JSON.stringify(dados),
+            headers: {
+                'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             }
         })
