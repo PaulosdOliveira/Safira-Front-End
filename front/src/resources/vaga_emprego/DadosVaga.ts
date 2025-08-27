@@ -40,6 +40,8 @@ export interface dadosVaga {
     diferenciais: string;
     local_de_trabalho: string;
     horario: string;
+    mensagemConvocacao: string;
+    mensagemDispensa: string;
 }
 
 

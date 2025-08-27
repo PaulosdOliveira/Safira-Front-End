@@ -189,6 +189,15 @@ export default function CadastroVaga() {
                             <label>Informações sobre horario e escala:</label>
                             <textarea id="horario" onChange={handleChange} placeholder="Horário" />
                         </div>
+
+                        <div className="grid ">
+                            <label>Texto selecionar candidato:</label>
+                            <textarea value={values.mensagemConvocacao} id="mensagemConvocacao" onChange={handleChange} placeholder="Mensagem padrão para candidato selecionado" />
+                        </div>
+                        <div className="grid ">
+                            <label>Texto dispensar candidato:</label>
+                            <textarea value={values.mensagemDispensa} id="mensagemDispensa" onChange={handleChange} placeholder="Mensagem padrão para candidato dispensado" />
+                        </div>
                     </div>
                     <div className="flex justify-center mt-8">
                         <input type="submit" value="Enviar" className="bg-gray-800 text-white p-1 rounded-md cursor-pointer" />

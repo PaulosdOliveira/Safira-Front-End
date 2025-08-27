@@ -99,7 +99,7 @@ class ServiceClass {
 
 
     async buscarCandidatosPorQualificacoes(dadosConsulta: dadosConsultaCandidato, token: string) {
-        const resultado = await fetch(`${this.urlBase}/qualificacao-candidato/consulta`, {
+        const resultado = await fetch(`${this.urlBase}/qualificacao-candidato/buscar-candidatos`, {
             method: 'POST',
             body: JSON.stringify(dadosConsulta),
             headers: {

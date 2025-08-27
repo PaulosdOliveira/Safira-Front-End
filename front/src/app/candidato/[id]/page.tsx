@@ -16,6 +16,7 @@ export default function PagePerfilCandidato() {
     const [perfil, setPerfil] = useState<PerfilCandidato | null>(null);
     const [aba, setAba] = useState<string>("informacoes");
     const [candidaturas, setCandidaturas] = useState<CandidaturaCandidato[]>([]);
+    const sessao = ServicoSessao();
 
     useEffect(() => {
         (async () => {
@@ -45,7 +46,7 @@ export default function PagePerfilCandidato() {
     }
 
     const candidaturaToJSX = (candidatura: CandidaturaCandidato, key: number) => {
-    
+
         return (
             <Candidaturas key={key} candidatura={candidatura} />
         )
@@ -68,8 +69,8 @@ export default function PagePerfilCandidato() {
                 </div>
                 <hr />
 
-                <span onClick={() => setAba("informacoes")} className={`mx-3 cursor-pointer ${aba === "informacoes" ? 'underline' : ''}`}>Informações</span>
-                <span onClick={buscarCandidaturas} className={`mx-3 cursor-pointer ${aba === "candidaturas" ? 'underline' : ''}`}>Minhas candidaturas</span>
+                <span onClick={() => setAba("informacoes")} className={` ${id === sessao.getSessao()?.id? '' : 'hidden'} mx-3 cursor-pointer ${aba === "informacoes" ? 'underline' : ''}`}>Informações</span>
+                <span onClick={buscarCandidaturas} className={`${id === sessao.getSessao()?.id? '' : 'hidden'} mx-3 cursor-pointer ${aba === "candidaturas" ? 'underline' : ''}`}>Minhas candidaturas</span>
                 {aba === "informacoes" && (
                     <>
                         <h3>Sobre mim</h3>

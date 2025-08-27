@@ -10,14 +10,16 @@ import { CandidatoCadastrado, PerfilCandidato } from "@/resources/candidato/cand
 import { CandidatoService } from "@/resources/candidato/servico";
 import { perfilEmpresa } from "@/resources/empresa/model";
 import { ServicoEmpresa } from "@/resources/empresa/sevico"
+import { CadastroMensagemDTO, MensagemDTO } from "@/resources/mensagem/mensagemResource";
 import { QualificacaoPerfil } from "@/resources/qualificacao/qualificacaoResource";
 import { ServicoSessao } from "@/resources/sessao/sessao";
 import { cidade, estado, UtilsService } from "@/resources/utils/utils";
 import { dadosVaga, VagaEmpresaDTO } from "@/resources/vaga_emprego/DadosVaga";
 import { VagaService } from "@/resources/vaga_emprego/service";
+import { Client } from "@stomp/stompjs";
 import { useFormik } from "formik";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 
 export default function PerfilEmpresa() {
@@ -37,18 +39,48 @@ export default function PerfilEmpresa() {
     const [dadosCadastraisVaga, setDadosCadastraisVaga] = useState<dadosCadastroVaga | null>(null);
     const [nav, setNav] = useState<string>("dados");
     const [modalIsOpen, setmodalOpen] = useState<boolean>(false);
+    const clientRef = useRef<Client | null>(null);
+    const [popUpPropostaIsOpen, setPopUpPropostaIsOpen] = useState<boolean>(false);
+    /* USADO PARA INDICAR SE O USUÁRIO DESEJA SELECIONAR UM CANDIDATO
+    * CONSIDERA-SE QUE DESEJA DISPENSAR O MESMO ↓   */
+    const [selecionar, setSelecionar] = useState<boolean>(true);
 
 
 
     // Execuutando efeitos ao carregar a página
     useEffect(() => {
+        // Carregando perfil da empresa e suas vagas publicadas
         (async () => {
             const perfilEncontrado = await service.carregarPerfil(`${id}`);
             setPerfil(perfilEncontrado)
             const vagas = await vagaService.buscarVagasEmpresa(`${id}`);
             setVagas(vagas);
         })()
+
+        // OBJETO DE CONEXÃO COM WS
+        const client = new Client({
+            brokerURL: 'ws:localhost:8080/conect',
+            reconnectDelay: 15000,
+            heartbeatIncoming: 10000,
+            heartbeatOutgoing: 10000,
+            connectHeaders: {
+                'Authorization': `Bearer ${sessao.getSessao()?.accessToken}`
+            }
+        })
+
+        client.onStompError = (erro) => { alert("Erro de WS: " + erro) }
+        if (!clientRef.current?.connected) {
+            client.onConnect = () => {
+                console.log("CONECTOU!!!!!!!!!!")
+            }
+            client.activate();
+            clientRef.current = client;
+        }
     }, [])
+
+
+
+
 
 
     useEffect(() => {
@@ -61,7 +93,35 @@ export default function PerfilEmpresa() {
     }, [idVagaSelecionada])
 
 
+    // Enviado mensagem para candidato
+    function enviarMensagem(mensagem: string) {
+        const mensagemDTO: CadastroMensagemDTO = { idCandidato: parseInt(`${dadosModalCandidato?.id}`), idEmpresa: `${sessao.getSessao()?.id}`, texto: mensagem, perfilRemetente: `${sessao.getSessao()?.perfil}` }
+        clientRef.current?.publish({
+            destination: `/app/receber-mensagem/${id}${dadosModalCandidato?.id}`,
+            body: JSON.stringify(mensagemDTO)
+        })
 
+        if (selecionar) selecionarCandidato();
+        else dispensarCandidato();
+    }
+
+    /// Selecionando candidato
+    async function selecionarCandidato() {
+        const token = sessao.getSessao()?.accessToken + "";
+        await VagaService().selecionarCandidato(`${dadosModalCandidato?.id}`, `${idVagaSelecionada}`, token);
+        if (indexListaCandidato != null) candidatosVaga[indexListaCandidato].status = 'SELECIONADO'
+        fecharModal();
+        setPopUpPropostaIsOpen(false);
+    }
+
+    // Dispensando candidato
+    async function dispensarCandidato() {
+        const token = sessao.getSessao()?.accessToken + "";
+        await VagaService().dispesarCandidato(`${dadosModalCandidato?.id}`, `${idVagaSelecionada}`, token);
+        if (indexListaCandidato != null) candidatosVaga[indexListaCandidato].status = 'DISPENSADO'
+        fecharModal();
+        setPopUpPropostaIsOpen(false);
+    }
 
     // Transformando dados da vaga em componente JSX
     function vagaObjectToComponent(dados: VagaEmpresaDTO) {
@@ -94,28 +154,6 @@ export default function PerfilEmpresa() {
         return <Qualificao key={key} nivel={qualificacao.nivel} nome={qualificacao.nome} />
     }
     const renderizarQualificacoes = () => { return dadosModalCandidato?.qualificacoes?.map(toQualificacao) }
-
-    /// Selecionando candidato
-    async function selecionarCandidato() {
-        const confirma = confirm("Deseja selecionar esse candidato ?")
-        if (confirma) {
-            const token = sessao.getSessao()?.accessToken + "";
-            await VagaService().selecionarCandidato(`${dadosModalCandidato?.id}`, `${idVagaSelecionada}`, token);
-
-            if (indexListaCandidato != null) candidatosVaga[indexListaCandidato].status = 'SELECIONADO'
-            setmodalOpen(false)
-
-        }
-    }
-
-    // Dispensando candidato
-    async function dispensarCandidato() {
-        const confirma = confirm("Deseja dispensar esse candidato ?")
-        if (confirma) {
-            const token = sessao.getSessao()?.accessToken + "";
-            await VagaService().dispesarCandidato(`${dadosModalCandidato?.id}`, `${idVagaSelecionada}`, token)
-        }
-    }
 
     const fecharModal = () => { setmodalOpen(false), document.body.classList.remove("overflow-hidden"), setDadosModalCandidato(null) }
 
@@ -208,13 +246,13 @@ export default function PerfilEmpresa() {
                                                             <div style={{ transform: 'translate(-50%, -50%)' }} className="absolute bg-white top-[50%] left-[50%] w-[78%] p-6 rounded-lg">
                                                                 <div className=" text-right">
                                                                     <button onClick={fecharModal}
-                                                                        className="h-8 w-8 text-2xl  text-black cursor-pointer absolute font-extrabold -top-2" >
+                                                                        className="h-8 w-8 text-2xl  text-black cursor-pointer absolute font-extrabold -top-2 left-[95%]" >
                                                                         x
                                                                     </button>
                                                                 </div>
                                                                 <br />
                                                                 <div className="flex items-center">
-                                                                    <div style={{ backgroundImage: `url(http://localhost:8080/candidato/foto/${dadosModalCandidato?.id})` }}
+                                                                    <div style={{ backgroundImage: `url(http://localhost:8080/candidato/foto/${dadosModalCandidato?.id}` }}
                                                                         className="h-20 w-20 rounded-full bg-cover bg-no-repeat mr-3" />
                                                                     <span className="text-[1.3em] font-semibold">{dadosModalCandidato?.nome}</span><br />
 
@@ -231,8 +269,10 @@ export default function PerfilEmpresa() {
                                                                 <p>{dadosModalCandidato?.tel}</p>
                                                                 <h3>Qualificações</h3>
                                                                 {renderizarQualificacoes()}<br />
-                                                                <button onClick={selecionarCandidato} className="bg-gray-950 text-white p-2 rounded-lg">Selecionar</button>
-                                                                <button onClick={dispensarCandidato} className="p-2 rounded-lg ml-5 border">Dispensar</button>
+                                                                <button onClick={() => { setPopUpPropostaIsOpen(true), setSelecionar(true) }} className="bg-gray-950 text-white p-2 rounded-lg">Selecionar</button>
+                                                                <button onClick={() => { setPopUpPropostaIsOpen(true), setSelecionar(false) }} className="p-2 rounded-lg ml-5 border">Dispensar</button>
+                                                                <PopUp selecionar={selecionar} isOpen={popUpPropostaIsOpen} click={enviarMensagem} mensagemPadrao={selecionar ? cardVaga.mensagemConvocacao : cardVaga.mensagemDispensa} close={() => setPopUpPropostaIsOpen(false)} />
+
                                                             </div>
                                                         </div>
                                                     )}
@@ -252,6 +292,44 @@ export default function PerfilEmpresa() {
 
             </div>
         </>
+    )
+}
+
+// POP-UP DE SELEÇÃO DE CANDIDATO       <--------------------------------------------------------------------------------------------------
+
+interface popUpProps {
+    isOpen: boolean;
+    close: (event: any) => void;
+    mensagemPadrao: string;
+    selecionar: boolean;
+    click: (event: any) => void
+}
+
+
+
+const PopUp: React.FC<popUpProps> = ({ click, isOpen, mensagemPadrao, selecionar, close }) => {
+
+    interface mensagemForm {
+        mensagem: string;
+    }
+    const { handleChange, values } = useFormik<mensagemForm>({
+        initialValues: { mensagem: `${mensagemPadrao}` },
+        enableReinitialize: true,
+        onSubmit: () => console.log("Enviando mensagem")
+    })
+
+
+    return (
+        <div style={{ transform: 'translate(-50%,-50%)' }}
+            className={`border border-gray-400 p-5 absolute top-[50%] left-[50%] bg-white rounded-lg ${isOpen ? '' : 'hidden'}`}>
+            <span className="absolute text-2xl -top-[3%] left-[94%] z-30 cursor-pointer font-extrabold" onClick={close}>x</span>
+            <h3>{selecionar ? 'Selecionar candidato' : 'Dispensar candidato'}</h3>
+            <label className="block mb-2" htmlFor="mensagem"><strong>Mensagem:</strong></label>
+            <textarea id="mensagem" onChange={handleChange} value={values.mensagem} className="h-20 w-72 rounded-md" /><br />
+            <div className="flex justify-center pt-6">
+                <button onClick={() => click(values.mensagem)} className="bg-gray-700 text-white p-1 rounded-md">Enviar</button>
+            </div>
+        </div>
     )
 }
 
@@ -334,9 +412,6 @@ const FormEditarVaga: React.FC<formEditProps> = ({ vaga, idVaga }) => {
                 cidades.map((cidade) => criaOption(cidade.nome, cidade.id))
             );
         }
-
-
-
 
 
         function definirTeclasPermitidas(keyDown: React.KeyboardEvent<HTMLInputElement>) {
@@ -448,7 +523,7 @@ const FormEditarVaga: React.FC<formEditProps> = ({ vaga, idVaga }) => {
                     </div>
 
                     <div className="grid ">
-                        <label>Diferenciais paa a vaga:</label>
+                        <label>Diferenciais para a vaga:</label>
                         <textarea id="diferenciais" placeholder="Diferenciais" onChange={handleChange} value={values.diferenciais} />
                     </div>
 
@@ -461,6 +536,16 @@ const FormEditarVaga: React.FC<formEditProps> = ({ vaga, idVaga }) => {
                     <div className="grid ">
                         <label>Informações sobre horario e escala:</label>
                         <textarea id="horario" placeholder="Horário" onChange={handleChange} value={values.horario} />
+                    </div>
+
+                    <div className="grid ">
+                        <label>Mensagem padrão:</label>
+                        <textarea id="mensagemConvocacao" placeholder="Mensagem recebida pelo usuário ao ser avaliado" onChange={handleChange} value={values.mensagemConvocacao} />
+                    </div>
+
+                    <div className="grid ">
+                        <label>Mensagem padrão:</label>
+                        <textarea id="mensagemDispensa" placeholder="Mensagem recebida pelo usuário ao ser avaliado" onChange={handleChange} value={values.mensagemDispensa} />
                     </div>
                 </div>
                 <div className="flex justify-center mt-8">
