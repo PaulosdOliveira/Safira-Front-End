@@ -22,17 +22,17 @@ export const Instrucao = () => {
 }
 
 export const QualificacaoSelecionada: React.FC<qualificacaoSelecionadaProps> = ({ click, idQualificacao, nivel, nomeQualificacao }) => {
-    let cor = 'bg-green-300';
-    if (nivel == 'AVANCADO') cor = 'bg-red-600';
-    else if (nivel == 'INTERMEDIARIO') cor = 'bg-yellow-300';
+    let cor = 'border-green-700';
+    if (nivel == 'AVANCADO') cor = 'border-red-700';
+    else if (nivel == 'INTERMEDIARIO') cor = 'border-yellow-400';
 
     return (
 
-        <div className={` h-8   border border-gray-200 flex items-center gap-1  rounded-full mx-3 pl-2 min-w-10 bg-white`} >
-           <span >{nomeQualificacao}</span> 
-           <div className={`h-[100%] w-1 ${cor}`}></div>
+        <div className={` h-8   border ${cor} flex items-center gap-1  rounded-full mx-3 pl-2 min-w-10 bg-white`} >
+           <span>{nomeQualificacao}</span> 
+        
             <i onClick={() => click(idQualificacao)}
-                className={`material-symbols cursor-pointer  scale-90 `}>close</i>
+                className={`material-symbols cursor-pointer  scale-90 ${cor}`}>close</i>
         </div>
 
 

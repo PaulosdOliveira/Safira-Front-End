@@ -10,6 +10,7 @@ import { cidade, estado, UtilsService } from "@/resources/utils/utils";
 import { Option } from "../page";
 import { Instrucao, QualificacaoSelecionada } from "@/components/qualificacao/selecao";
 import { OptionQualificacao } from "@/components/qualificacao/optionQualificacao";
+import { useRouter } from "next/navigation";
 
 
 
@@ -123,132 +124,149 @@ export default function cadastroCandidato() {
 
     return (
         <>
-            <main className={`${cadastrou ? 'hidden' : ''}`}>
-                <form onSubmit={handleSubmit}
-                    className=" w-[370px] sm:w-[600px] border border-gray-200 shadow-lg shadow-gray-400  mt-3 p-5 rounded-lg bg-white  m-auto">
-
-                    <div id="Foto" className="flex my-6  w-[100%]" >
-                        <label className=" foto rounded-full m-auto cursor-pointer border border-gray-300 bg-cover bg-no-repeat w-36 h-36"
-                            style={{ backgroundImage: `url(${urlFoto})` }}>
-                            <input name="foto" onChange={capturarFoto} className="hidden" type="file" />
-                        </label>
-                    </div>
-
-
-                    <div className=" grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit  m-auto">
-
-                        <div className="grid">
-                            <label>CPF: </label>
-                            <input name="cpf" onChange={handleChange} className="border border-gray-400  h-10 rounded-lg sm:w-[260px] "
-                                type="text" placeholder="CPF" value={values.cpf} />
+            <header className=" h-[120px] shadow-sm shadow-gray-200 flex flex-col justify-end items-center py-2 z-10">
+                <div className="w-80 h-20  bg-cover"
+                    style={{
+                        backgroundPosition: "center center",
+                        backgroundImage: `url(${"https://sdmntprnorthcentralus.oaiusercontent.com/files/00000000-ab98-622f-8ea1-1a044a1eed60/raw?se=2025-08-31T07%3A05%3A54Z&sp=r&sv=2024-08-04&sr=b&scid=4b3e33c9-b272-5a86-be4d-694409c802f2&skoid=c953efd6-2ae8-41b4-a6d6-34b1475ac07c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-08-31T00%3A48%3A05Z&ske=2025-09-01T00%3A48%3A05Z&sks=b&skv=2024-08-04&sig=GTnYTKvKp65xR6pok4gX2vzXaWr%2Bzi0N70zb8gXkMss%3D"})`
+                    }} />
+                <nav className="w-[100%]">
+                    <ul className="text-gray-950 text-right">
+                        <li className="inline-block hover:underline pr-4 pb-1"><a target="_self" href="/empresa/login">Login para empresas</a></li>
+                    </ul>
+                </nav>
+            </header>
+            {!cadastrou ? (
+                <main className={`${cadastrou ? 'hidden' : ''}`}>
+                    <form onSubmit={handleSubmit}
+                        className=" w-[370px] sm:w-[600px] border border-gray-200 shadow-lg shadow-gray-400  mt-3 p-5 rounded-lg bg-white  m-auto">
+                        <div id="Foto" className="flex my-6  w-[100%]" >
+                            <label className=" foto rounded-full m-auto cursor-pointer border border-gray-300 bg-cover bg-no-repeat w-36 h-36"
+                                style={{ backgroundImage: `url(${urlFoto})` }}>
+                                <input id="foto" onChange={capturarFoto} className="hidden" type="file" />
+                            </label>
+                        </div>
+                        <div className="my-10 text-center">
+                            <label className="bg-gray-900 p-2 rounded-md text-white cursor-pointer" htmlFor="foto">Seleione uma foto</label>
                         </div>
 
-                        <div className="grid">
-                            <label>Email:</label>
-                            <input name="email" onChange={handleChange} className="border  border-gray-400  h-10 rounded-lg w-[260px] "
-                                type="email" placeholder="Email" value={values.email} />
+                        <div className=" grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit  m-auto">
+
+                            <div className="grid">
+                                <label>CPF: </label>
+                                <input name="cpf" onChange={handleChange} className="border border-gray-400  h-10 rounded-lg sm:w-[260px] "
+                                    type="text" placeholder="CPF" value={values.cpf} />
+                            </div>
+
+                            <div className="grid">
+                                <label>Email:</label>
+                                <input name="email" onChange={handleChange} className="border  border-gray-400  h-10 rounded-lg w-[260px] "
+                                    type="email" placeholder="Email" value={values.email} />
+                            </div>
+
+                            <div className="grid">
+                                <label>Nome:</label>
+                                <input name="nome" onChange={handleChange} className="border  border-gray-400  h-10 rounded-lg w-[260px] "
+                                    type="text" placeholder="Nome completo" value={values.nome} />
+                            </div>
+
+                            <div className="grid">
+                                <label>Telefone para contato:</label>
+                                <input name="tel" onChange={handleChange} className="border border-gray-400  h-10 rounded-lg w-[260px]"
+                                    type="tel" placeholder="(**) *****-****" value={values.tel} />
+                            </div>
+
+
+                            <div className="grid">
+                                <label>Senha:</label>
+                                <input name="senha" onChange={handleChange} className="border  border-gray-400  h-10 rounded-lg w-[260px]"
+                                    type="password" placeholder="Senha" value={values.senha} />
+                            </div>
+
+                            <div className="grid">
+                                <label>Senha:</label>
+                                <input id="confirma_senha" onChange={handleChange} className="border  border-gray-400  h-10 rounded-lg w-[260px] "
+                                    type="password" placeholder="Confirme sua senha" value={values.confirma_senha} />
+                            </div>
+
+                            <div className="grid">
+                                <label>Estado:</label>
+                                <select name="idEstado" onChange={(event) => selecionarEstado(event.target)} className="border border-gray-400  h-10 rounded-sm">
+                                    <option value="">Todos</option>
+                                    {renderizarOptionEstados()}
+                                </select>
+                            </div>
+
+                            <div className="grid">
+                                <label>Cidade:</label>
+                                <select name="idCidade" onChange={handleChange} className="border border-gray-400  h-10 rounded-sm" value={values.idCidade}>
+                                    <option value="">Todos</option>
+                                    {renderizarOptionsCidade()}
+                                </select>
+                            </div>
+
+                            <div className="grid">
+                                <label>Você é PCD?:</label>
+                                <select name="pcd" className="border border-gray-400  h-10 rounded-sm"
+                                    onChange={() => values.pcd = !values.pcd}>
+                                    <option>NÃO</option>
+                                    <option>SIM</option>
+                                </select>
+                            </div>
+
+                            <div className="grid">
+                                <label>Sexo:</label>
+                                <select name="sexo" onChange={handleChange} className="border border-gray-400  h-10 rounded-sm " value={values.sexo}>
+                                    <option>MASCULINO</option>
+                                    <option>FEMININO</option>
+                                </select>
+                            </div>
+
+
+                            <div className="grid">
+                                <label>Está empregado?:</label>
+                                <select name="trabalhando" className="border border-gray-400  h-10 rounded-sm"
+                                    onChange={() => values.trabalhando = !values.trabalhando}>
+                                    <option>NÃO</option>
+                                    <option>SIM</option>
+                                </select>
+                            </div>
+
+                            <div className="grid">
+                                <label>Data de nascimento:</label>
+                                <input name="dataNascimento" onChange={handleChange} className="h-10 rounded-lg"
+                                    type="date" placeholder="Senha" />
+                            </div>
+
+                        </div>
+                        <div className="grid pt-7 place-items-center">
+                            <label>Selecionar currículo:</label>
+                            <label className="cursor-pointer text-center pt-3  h-13 w-40 rounded-sm  border">
+                                {nomePdf}
+                                <input name="curriculo" onChange={selecionarPdf} className="hidden" type="file" accept="application/pdf" />
+                            </label>
                         </div>
 
-                        <div className="grid">
-                            <label>Nome:</label>
-                            <input name="nome" onChange={handleChange} className="border  border-gray-400  h-10 rounded-lg w-[260px] "
-                                type="text" placeholder="Nome completo" value={values.nome} />
+
+
+                        <div className="grid grid-cols-1 pt-10">
+                            <label>Descrição:</label>
+                            <textarea name="descricao" placeholder="Fale sobre seu eu profissional" className="border border-gray-700 rounded-lg mt-3 h-32 pl-1 " value={values.descricao} onChange={handleChange} />
+                            <input type="submit" value="Enviar" className="cursor-pointer w-[230px] h-10  border rounded-lg text-white bg-gray-800 mt-16 m-auto" />
                         </div>
-
-                        <div className="grid">
-                            <label>Telefone para contato:</label>
-                            <input name="tel" onChange={handleChange} className="border border-gray-400  h-10 rounded-lg w-[260px]"
-                                type="tel" placeholder="(**) *****-****" value={values.tel} />
-                        </div>
-
-
-                        <div className="grid">
-                            <label>Senha:</label>
-                            <input name="senha" onChange={handleChange} className="border  border-gray-400  h-10 rounded-lg w-[260px]"
-                                type="password" placeholder="Senha" value={values.senha} />
-                        </div>
-
-                        <div className="grid">
-                            <label>Senha:</label>
-                            <input id="confirma_senha" onChange={handleChange} className="border  border-gray-400  h-10 rounded-lg w-[260px] "
-                                type="password" placeholder="Confirme sua senha" value={values.confirma_senha} />
-                        </div>
-
-                        <div className="grid">
-                            <label>Estado:</label>
-                            <select name="idEstado" onChange={(event) => selecionarEstado(event.target)} className="border border-gray-400  h-10 rounded-sm">
-                                <option value="">Todos</option>
-                                {renderizarOptionEstados()}
-                            </select>
-                        </div>
-
-                        <div className="grid">
-                            <label>Cidade:</label>
-                            <select name="idCidade" onChange={handleChange} className="border border-gray-400  h-10 rounded-sm" value={values.idCidade}>
-                                <option value="">Todos</option>
-                                {renderizarOptionsCidade()}
-                            </select>
-                        </div>
-
-                        <div className="grid">
-                            <label>Você é PCD?:</label>
-                            <select name="pcd" className="border border-gray-400  h-10 rounded-sm"
-                                onChange={() => values.pcd = !values.pcd}>
-                                <option>NÃO</option>
-                                <option>SIM</option>
-                            </select>
-                        </div>
-
-                        <div className="grid">
-                            <label>Sexo:</label>
-                            <select name="sexo" onChange={handleChange} className="border border-gray-400  h-10 rounded-sm " value={values.sexo}>
-                                <option>MASCULINO</option>
-                                <option>FEMININO</option>
-                            </select>
-                        </div>
-
-
-                        <div className="grid">
-                            <label>Está empregado?:</label>
-                            <select name="trabalhando" className="border border-gray-400  h-10 rounded-sm"
-                                onChange={() => values.trabalhando = !values.trabalhando}>
-                                <option>NÃO</option>
-                                <option>SIM</option>
-                            </select>
-                        </div>
-
-                        <div className="grid">
-                            <label>Data de nascimento:</label>
-                            <input name="dataNascimento" onChange={handleChange} className="h-10 rounded-lg"
-                                type="date" placeholder="Senha" />
-                        </div>
-
-                    </div>
-                    <div className="grid pt-7 place-items-center">
-                        <label>Selecionar currículo:</label>
-                        <label className="cursor-pointer text-center pt-3  h-13 w-40 rounded-sm  border">
-                            {nomePdf}
-                            <input name="curriculo" onChange={selecionarPdf} className="hidden" type="file" accept="application/pdf" />
-                        </label>
-                    </div>
-
-
-
-                    <div className="grid grid-cols-1 pt-10">
-                        <label>Descrição:</label>
-                        <textarea name="descricao" placeholder="Fale sobre seu eu profissional" className="border border-gray-700 rounded-lg mt-3 h-32 pl-1 " value={values.descricao} onChange={handleChange} />
-                        <input type="submit" value="Enviar" className="cursor-pointer w-[230px] h-10  border rounded-lg text-white bg-gray-800 mt-16 m-auto" />
-                    </div>
-                </form>
-            </main>
-            {cadastrou && (
+                    </form>
+                </main>
+            ) : (
                 <>
-                    <h1 className="text-center">Perfil criado!!</h1>
+                    <h1 className="text-center">Perfil criado!!</h1 >
                     <h2 className="text-center">Adicione suas habilidades para completa-lo</h2>
                     <QualificacaoForm />
 
                 </>
-            )}
+            )
+            }
+
+
 
             <footer className="border mt-20 h-40"></footer>
         </>
@@ -258,7 +276,7 @@ export default function cadastroCandidato() {
 
 
 
-// 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+// ------------------------------> FORM QUALIFICAÇÕES <------------------------------------------------------
 
 const QualificacaoForm = () => {
 
@@ -271,6 +289,7 @@ const QualificacaoForm = () => {
         validationSchema: qualificacaoFormValidation
     })
     const [select, setSelect] = useState<Qualificacao[]>([]);
+    const router = useRouter();
 
     // Buscando qualificações no banco de dados
     useEffect(() => {
@@ -327,7 +346,7 @@ const QualificacaoForm = () => {
         )
     }
 
-    function renderizar() {
+    function renderizarQualificacoesSelecionadas() {
         return (
             qualificacoesSelecionadas.map(criarQualificacaoSelecionada)
         );
@@ -344,42 +363,46 @@ const QualificacaoForm = () => {
         const token = ServicoSessao().getSessao()?.accessToken?.toString();
         alert(token)
         const qualificacoesUsuario = qualificacoesSelecionadas.map(criarQualificacaoUsuario)
-        if (token)
+        if (token) {
             await CandidatoService().salvarQualificacoes(qualificacoesUsuario, token);
+            router.push("/")
+        }
     }
 
 
     return (
 
-        <div className="w-96 border text-center border-gray-300  shadow-lg shadow-gray-600 bg-white m-auto mb-64 test rounded-lg  font-bold text-gray-800 mt-24 p-5">
+        <div className="w-[500px] border text-center border-gray-300  shadow-lg shadow-gray-600 bg-white m-auto mb-64 test rounded-lg  font-bold text-gray-800 mt-24 p-5">
             <h2>Selecione as suas qualificações</h2>
-            <div className="select-container ">
+            <div className="">
                 <form onSubmit={handleSubmit}>
 
-                    <select id="idQualificacao" className="mx-9 border border-gray-500" onChange={(event) => changeQualificacao(event.target)}>
-                        <option></option>
-                        {renderizargerarOptionQualificacao()}
-                    </select>
+                    <div className="grid grid-cols-2 gap-x-5 mt-16">
+                        <label className="text-left pl-1">Qualificação:</label>
+                        <label className="text-left pl-1">Nível:</label>
+                        <select id="idQualificacao" className=" border border-gray-500 h-8 rounded-lg pl-2" onChange={(event) => changeQualificacao(event.target)}>
+                            <option></option>
+                            {renderizargerarOptionQualificacao()}
+                        </select>
 
-                    <select className="border border-gray-500" id="nivel" onChange={handleChange}>
-                        <option >BASICO</option>
-                        <option >INTERMEDIARIO</option>
-                        <option >AVANCADO</option>
-                    </select>
+                        <select className="border border-gray-500 rounded-lg pl-2" id="nivel" onChange={handleChange}>
+                            <option >BASICO</option>
+                            <option >INTERMEDIARIO</option>
+                            <option >AVANCADO</option>
+                        </select>
+                    </div>
 
-                    <input className="cursor-pointer border p-1 mt-3" type="submit" value="Selecionar" />
+                    <input className="cursor-pointer border p-1 my-6 rounded-lg bg-gray-800 text-white" type="submit" value="Selecionar" />
                 </form>
             </div>
-            <div id="" className=" flex flex-wrap ">
-                {renderizar()}
+            <div id="" className=" flex flex-wrap gap-2 ">
+                {renderizarQualificacoesSelecionadas()}
             </div>
             <Instrucao />
-            <button onClick={() => cadastrarQualificacoes()}
-                type="button"  className="cursor-pointer bg-gray-800 text-white rounded-md p-2 mt-9 w-20">Salvar</button>
-
             <hr className="my-7" />
-            <a  href="http://localhost:3000" target="_self"
-             className="cursor-pointer bg-blue-700 text-white rounded-md p-2 mt-9 w-20">Finalizar</a>
+            <button onClick={() => cadastrarQualificacoes()}
+                type="button" className="cursor-pointer bg-blue-800 text-white rounded-md p-2 mt-9 w-20">Salvar</button>
+
         </div>
 
     )

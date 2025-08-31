@@ -18,6 +18,8 @@ export default function Chat() {
     const [mensagens, setMensagens] = useState<MensagemDTO[]>([]);
     const divRef = useRef<HTMLDivElement | null>(null);
     const clientRef = useRef<Client | null>(null);
+    // CAMPO DE TEXTO DE MENSAGEM
+
 
     // Rolando para a ultima menagem sempre que necessário
     useEffect(() => {
@@ -43,7 +45,7 @@ export default function Chat() {
             }
         })
 
-        client.onStompError = (erro) => alert(erro);
+        client.onStompError = (erro) => console.log(erro);
         if (!clientRef.current?.connected) {
             client.onConnect = () => {
                 console.log("Conectardo")
@@ -52,7 +54,10 @@ export default function Chat() {
                     setMensagens(pre => [...pre, mensagemRecebida])
                 })
 
-
+                clientRef.current?.subscribe(`/mensagem/receber-mensagem/${sessao.getSessao()?.id}${idDestino}`, (mensagem) => {
+                    const mensagemRecebida: MensagemDTO = JSON.parse(mensagem.body);
+                    setMensagens(pre => [...pre, mensagemRecebida])
+                })
             }
             client.activate();
             clientRef.current = client;
@@ -84,8 +89,9 @@ export default function Chat() {
                 destination: `/app/receber-mensagem/${sessao.getSessao()?.id}${idDestino}`,
                 body: JSON.stringify(mensagem)
             })
-           
         }
+
+        input.value = "";
     }
 
     const renderizarMensagens = () => { return mensagens.map(mensagemToComponent) };
@@ -97,7 +103,7 @@ export default function Chat() {
                     className="border border-gray-200 w-14 h-14 rounded-full ml-1 bg-cover" />
                 <span className="text-[1.2em]" >{contato?.nome}</span>
             </div>
-            <section className="border h-[71%] overflow-auto"
+            <section className="border h-[71%] overflow-auto "
                 id="mensagens">
                 {renderizarMensagens()}
                 <div ref={divRef} />

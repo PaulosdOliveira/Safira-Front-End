@@ -60,4 +60,5 @@ export class CandidaturaCandidato {
     tituloVaga?: string;
     nomeEmpresa?: string;
     status?: string;
+    finalizada?: boolean;
 }

@@ -1,6 +1,7 @@
 import { dadosCadastroEmpresa } from "@/app/empresa/cadastro/formSchema";
 import { erroResposta } from "../candidato/servico";
 import { dadosLogin } from "../sessao/sessao";
+import { CadastroModeloDeProposta, ModeloDeProposta } from "./rascunho/rascunhoResource";
 
 class EmpresaService {
     urlBase: string = "http://localhost:8080/empresa"
@@ -61,6 +62,42 @@ class EmpresaService {
     async carregarPerfil(id: string) {
         const resultado = await fetch(`${this.urlBase}/${id}`);
         return resultado.json();
+    }
+
+    // CADASTRAR RASCUNHO
+    async cadastrarRascunho(dadosCadastrais: CadastroModeloDeProposta, token: string): Promise<ModeloDeProposta> {
+        const resultado = await fetch(`${this.urlBase}/rascunho`, {
+            method: 'POST',
+            body: JSON.stringify(dadosCadastrais),
+            headers: {
+                'Content-Type': 'application/json',
+                'AUthorization': `Bearer ${token}`
+            }
+        })
+        if (resultado.status === 201) alert("Criado com sucesso");
+        return resultado.json();
+    }
+
+
+    // BUSCAR RASCUNHOS SALVOS
+    async buscarRascunhos(token: string): Promise<ModeloDeProposta[]> {
+        const resultado = await fetch(`${this.urlBase}/rascunho`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        return resultado.json();
+    }
+
+
+    async excluir_rascunho(token: string, idRascunho: string) {
+        await fetch(`${this.urlBase}/rascunho/${idRascunho}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
     }
 }
 

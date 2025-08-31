@@ -6,9 +6,11 @@ import { Vaga } from "@/app/vaga/[idVaga]/page";
 import { dadosCadastroVaga } from "@/app/vaga/cadastro/formSchema";
 import { CardUsuario } from "@/components/cadUsuario";
 import { Menu } from "@/components/menu";
+import { CardRascunho, GerenciadorDeRascunhos } from "@/components/rascunho";
 import { CandidatoCadastrado, PerfilCandidato } from "@/resources/candidato/candidatoResource";
 import { CandidatoService } from "@/resources/candidato/servico";
 import { perfilEmpresa } from "@/resources/empresa/model";
+import { CadastroModeloDeProposta, ModeloDeProposta } from "@/resources/empresa/rascunho/rascunhoResource";
 import { ServicoEmpresa } from "@/resources/empresa/sevico"
 import { CadastroMensagemDTO, MensagemDTO } from "@/resources/mensagem/mensagemResource";
 import { QualificacaoPerfil } from "@/resources/qualificacao/qualificacaoResource";
@@ -30,6 +32,7 @@ export default function PerfilEmpresa() {
     const sessao = ServicoSessao();
     const [perfil, setPerfil] = useState<perfilEmpresa>();
     const [vagas, setVagas] = useState<VagaEmpresaDTO[]>([]);
+    const [rascunhos, setRascunhos] = useState<ModeloDeProposta[]>([]);
     const [candidatosVaga, setCandidatosVaga] = useState<CandidatoCadastrado[]>([]);
     const [indexListaCandidato, setIndexListaCandidato] = useState<number>();
     const [statusCandidato, setStatusCandidato] = useState<string>("EM_ANALISE");
@@ -37,6 +40,7 @@ export default function PerfilEmpresa() {
     const [idVagaSelecionada, setIdVagaSelecionada] = useState<string | null>(null);
     const [cardVaga, setCardVaga] = useState<dadosVaga | null>(null);
     const [dadosCadastraisVaga, setDadosCadastraisVaga] = useState<dadosCadastroVaga | null>(null);
+    const [aba, setAba] = useState<"vagas" | "rascunhos">("vagas");
     const [nav, setNav] = useState<string>("dados");
     const [modalIsOpen, setmodalOpen] = useState<boolean>(false);
     const clientRef = useRef<Client | null>(null);
@@ -55,6 +59,8 @@ export default function PerfilEmpresa() {
             setPerfil(perfilEncontrado)
             const vagas = await vagaService.buscarVagasEmpresa(`${id}`);
             setVagas(vagas);
+            const rascunhos = await service.buscarRascunhos(`${sessao.getSessao()?.accessToken}`);
+            setRascunhos(rascunhos);
         })()
 
         // OBJETO DE CONEXÃO COM WS
@@ -77,10 +83,6 @@ export default function PerfilEmpresa() {
             clientRef.current = client;
         }
     }, [])
-
-
-
-
 
 
     useEffect(() => {
@@ -132,6 +134,29 @@ export default function PerfilEmpresa() {
 
     const renderizarVagas = () => { return vagas.map(vagaObjectToComponent) };
 
+
+    async function excluirRascunho(idRascunho?: string) {
+        if (idRascunho) {
+            const confirma = confirm("Confirma a exclusão desse rascunho??")
+            if (confirma) {
+                await service.excluir_rascunho(`${sessao.getSessao()?.accessToken}`, idRascunho);
+                setRascunhos(prev => prev.filter(item => item.id !== idRascunho));
+            }
+        }
+    }
+
+    function rascunhoToJSX(rascunho: ModeloDeProposta) {
+        return (
+            <CardRascunho apagarRascunho={() => excluirRascunho(rascunho.id)} key={rascunho.id} descricao={rascunho.descricao} id={rascunho.id} titulo={rascunho.titulo} />
+        )
+    }
+
+    const renderizarRascunhos = () => { return rascunhos.map(rascunhoToJSX) }
+
+    async function CadastrarRascunho(dados: CadastroModeloDeProposta) {
+        const modeloSalvo: ModeloDeProposta = await ServicoEmpresa().cadastrarRascunho(dados, `${ServicoSessao().getSessao()?.accessToken}`)
+        setRascunhos(pre => [...pre, modeloSalvo]);
+    }
 
     async function buscarCandidatos() {
         if (idVagaSelecionada && !candidatosVaga.length) {
@@ -211,78 +236,88 @@ export default function PerfilEmpresa() {
                     </section>
                     <hr className="my-9 w-[97%] m-auto" />
                     <section id="sei_la">
-                        <h2>Vagas</h2>
-
+                        <div className="flex gap-7">
+                            <h2 onClick={() => setAba("vagas")} className={`${aba === "vagas" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`}>Vagas</h2>
+                            <h2 onClick={() => setAba("rascunhos")} className={`${perfil?.id == id ? '' : 'hidden'} cursor-pointer ${aba === "rascunhos" ? 'bg-gray-200' : ''} p-1 rounded-lg transition duration-700`}>Rascunhos</h2>
+                        </div>
                         <div className="flex flex-wrap items-start gap-1 mt-16  px-4  rounded-md m-auto">
 
-                            {!idVagaSelecionada ? (
-                                renderizarVagas()
-                            ) : (
-                                <div className="flex flex-col">
-                                    <nav className="mb-10">
-                                        <ul className="flex gap-4">
-                                            <li className={`cursor-pointer`} onClick={voltar}>Voltar</li>
-                                            <li className={`cursor-pointer ${nav === "dados" ? 'underline' : ''}`} onClick={() => setNav("dados")}>Dados</li>
-                                            <li className={`cursor-pointer ${nav === "candidatos" ? 'underline' : ''}`} onClick={buscarCandidatos}>Candidatos</li>
-                                            <li className={`cursor-pointer ${nav === "editar" ? 'underline' : ''}`} onClick={buscarDadosCadastrais}>Editar</li>
-                                        </ul>
-                                    </nav>
 
-                                    <br />
-                                    {cardVaga?.id && (
-                                        <div className="flex">
-                                            {nav === "dados" && (
-                                                <Vaga vaga={cardVaga} />
-                                            )}
-                                            {nav === "candidatos" && (
-                                                <div>
-                                                    <span className={`cursor-pointer mx-3 ${statusCandidato === 'EM_ANALISE' ? 'underline' : ''}`} onClick={() => setStatusCandidato("EM_ANALISE")}>Em análise</span>
-                                                    <span className={`cursor-pointer mx-3 ${statusCandidato === 'SELECIONADO' ? 'underline' : ''}`} onClick={() => setStatusCandidato("SELECIONADO")}>Selecionados</span>
-                                                    <span className={`cursor-pointer mx-3 ${statusCandidato === 'DISPENSADO' ? 'underline' : ''}`} onClick={() => setStatusCandidato("DISPENSADO")}>Dispensados</span>
-                                                    {renderizarCardCandidato()}
-                                                    {modalIsOpen && (
-                                                        <div className="fixed inset-0  z-50 overflow-hidden">
-                                                            <div className="inset-0 bg-black  absolute overflow-hidden opacity-50" />
-                                                            <div style={{ transform: 'translate(-50%, -50%)' }} className="absolute bg-white top-[50%] left-[50%] w-[78%] p-6 rounded-lg">
-                                                                <div className=" text-right">
-                                                                    <button onClick={fecharModal}
-                                                                        className="h-8 w-8 text-2xl  text-black cursor-pointer absolute font-extrabold -top-2 left-[95%]" >
-                                                                        x
-                                                                    </button>
+                            {aba === "vagas" ? (
+                                !idVagaSelecionada ? (
+                                    renderizarVagas()
+                                ) : (
+                                    <div className="flex flex-col">
+                                        <nav className="mb-10">
+                                            <ul className="flex gap-4">
+                                                <li className={`cursor-pointer`} onClick={voltar}>Voltar</li>
+                                                <li className={`cursor-pointer ${nav === "dados" ? 'underline' : ''}`} onClick={() => setNav("dados")}>Dados</li>
+                                                <li className={`cursor-pointer ${nav === "candidatos" ? 'underline' : ''}`} onClick={buscarCandidatos}>Candidatos</li>
+                                                <li className={`cursor-pointer ${nav === "editar" ? 'underline' : ''}`} onClick={buscarDadosCadastrais}>Editar</li>
+                                            </ul>
+                                        </nav>
+
+                                        <br />
+                                        {cardVaga?.id && (
+                                            <div className="flex">
+                                                {nav === "dados" && (
+                                                    <Vaga vaga={cardVaga} />
+                                                )}
+                                                {nav === "candidatos" && (
+                                                    <div>
+                                                        <span className={`cursor-pointer mx-3 ${statusCandidato === 'EM_ANALISE' ? 'underline' : ''}`} onClick={() => setStatusCandidato("EM_ANALISE")}>Em análise</span>
+                                                        <span className={`cursor-pointer mx-3 ${statusCandidato === 'SELECIONADO' ? 'underline' : ''}`} onClick={() => setStatusCandidato("SELECIONADO")}>Selecionados</span>
+                                                        <span className={`cursor-pointer mx-3 ${statusCandidato === 'DISPENSADO' ? 'underline' : ''}`} onClick={() => setStatusCandidato("DISPENSADO")}>Dispensados</span>
+                                                        {renderizarCardCandidato()}
+                                                        {modalIsOpen && (
+                                                            <div className="fixed inset-0  z-50 overflow-hidden">
+                                                                <div className="inset-0 bg-black  absolute overflow-hidden opacity-50" />
+                                                                <div style={{ transform: 'translate(-50%, -50%)' }} className="absolute bg-white top-[50%] left-[50%] w-[78%] p-6 rounded-lg">
+                                                                    <div className=" text-right">
+                                                                        <button onClick={fecharModal}
+                                                                            className="h-8 w-8 text-2xl  text-black cursor-pointer absolute font-extrabold -top-2 left-[95%]" >
+                                                                            x
+                                                                        </button>
+                                                                    </div>
+                                                                    <br />
+                                                                    <div className="flex items-center">
+                                                                        <div style={{ backgroundImage: `url(http://localhost:8080/candidato/foto/${dadosModalCandidato?.id}` }}
+                                                                            className="h-20 w-20 rounded-full bg-cover bg-no-repeat mr-3" />
+                                                                        <span className="text-[1.3em] font-semibold">{dadosModalCandidato?.nome}</span><br />
+
+                                                                    </div>
+                                                                    <p>{`${dadosModalCandidato?.idade} anos`}</p>
+                                                                    <span>{`${dadosModalCandidato?.cidade}, ${dadosModalCandidato?.estado}`}</span>
+                                                                    <span>{ }</span>
+                                                                    <hr className="my-4 w-[95%] m-auto text-gray-300" />
+                                                                    <h3>Descrição</h3>
+                                                                    <p className="mx-2 text-justify">{dadosModalCandidato?.descricao}</p>
+                                                                    <hr className="my-4 w-[95%] m-auto text-gray-300" />
+                                                                    <h3>Contato</h3>
+                                                                    <p>{dadosModalCandidato?.email}</p>
+                                                                    <p>{dadosModalCandidato?.tel}</p>
+                                                                    <h3>Qualificações</h3>
+                                                                    {renderizarQualificacoes()}<br />
+                                                                    <button onClick={() => { setPopUpPropostaIsOpen(true), setSelecionar(true) }} className="bg-gray-950 text-white p-2 rounded-lg">Selecionar</button>
+                                                                    <button onClick={() => { setPopUpPropostaIsOpen(true), setSelecionar(false) }} className="p-2 rounded-lg ml-5 border">Dispensar</button>
+                                                                    <PopUp selecionar={selecionar} isOpen={popUpPropostaIsOpen} click={enviarMensagem} mensagemPadrao={selecionar ? cardVaga.mensagemConvocacao : cardVaga.mensagemDispensa} close={() => setPopUpPropostaIsOpen(false)} />
+
                                                                 </div>
-                                                                <br />
-                                                                <div className="flex items-center">
-                                                                    <div style={{ backgroundImage: `url(http://localhost:8080/candidato/foto/${dadosModalCandidato?.id}` }}
-                                                                        className="h-20 w-20 rounded-full bg-cover bg-no-repeat mr-3" />
-                                                                    <span className="text-[1.3em] font-semibold">{dadosModalCandidato?.nome}</span><br />
-
-                                                                </div>
-                                                                <p>{`${dadosModalCandidato?.idade} anos`}</p>
-                                                                <span>{`${dadosModalCandidato?.cidade}, ${dadosModalCandidato?.estado}`}</span>
-                                                                <span>{ }</span>
-                                                                <hr className="my-4 w-[95%] m-auto text-gray-300" />
-                                                                <h3>Descrição</h3>
-                                                                <p className="mx-2 text-justify">{dadosModalCandidato?.descricao}</p>
-                                                                <hr className="my-4 w-[95%] m-auto text-gray-300" />
-                                                                <h3>Contato</h3>
-                                                                <p>{dadosModalCandidato?.email}</p>
-                                                                <p>{dadosModalCandidato?.tel}</p>
-                                                                <h3>Qualificações</h3>
-                                                                {renderizarQualificacoes()}<br />
-                                                                <button onClick={() => { setPopUpPropostaIsOpen(true), setSelecionar(true) }} className="bg-gray-950 text-white p-2 rounded-lg">Selecionar</button>
-                                                                <button onClick={() => { setPopUpPropostaIsOpen(true), setSelecionar(false) }} className="p-2 rounded-lg ml-5 border">Dispensar</button>
-                                                                <PopUp selecionar={selecionar} isOpen={popUpPropostaIsOpen} click={enviarMensagem} mensagemPadrao={selecionar ? cardVaga.mensagemConvocacao : cardVaga.mensagemDispensa} close={() => setPopUpPropostaIsOpen(false)} />
-
                                                             </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-                                            {nav === "editar" && (<FormEditarVaga idVaga={idVagaSelecionada} vaga={dadosCadastraisVaga} />)}
-                                        </div>
-                                    )}
-
-                                </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                                {nav === "editar" && (<FormEditarVaga idVaga={idVagaSelecionada} vaga={dadosCadastraisVaga} />)}
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            ) : (
+                                <>
+                                    <GerenciadorDeRascunhos condition={true} enviarForm={CadastrarRascunho}>
+                                        {renderizarRascunhos()}
+                                    </GerenciadorDeRascunhos>
+                                </>
                             )
 
                             }
@@ -290,7 +325,7 @@ export default function PerfilEmpresa() {
                     </section>
                 </main>
 
-            </div>
+            </div >
         </>
     )
 }

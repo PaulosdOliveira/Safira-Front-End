@@ -57,9 +57,7 @@ h6 {
     letter-spacing: 0.05em;
 }
 
-i {
-    margin-right: 3px;
-}
+
 
 
 select,
@@ -72,9 +70,6 @@ textarea {
 
 }
 
-.input-box {
-    margin: 15px 0px;
-}
 
 #qualificacoes {
     direction: rtl;
@@ -83,5 +78,5 @@ textarea {
 
 
 input {
-    border: 1px solid #9CA3AF;
+    border: 1px solid #414449;
 }
