@@ -56,9 +56,10 @@ export class VagaEmpresaDTO {
 
 // Vaga na qual candidato se cadastrou
 export class CandidaturaCandidato {
-    id?: string;
+    idVaga?: string;
     tituloVaga?: string;
     nomeEmpresa?: string;
+    idEmpresa?: string;
     status?: string;
     finalizada?: boolean;
 }

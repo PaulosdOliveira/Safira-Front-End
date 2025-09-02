@@ -68,69 +68,98 @@ export default function PagePerfilCandidato() {
 
     if (perfil) {
         return (
-            <main className="w-[100%] h-[100vh] bg-gray-020 p-5">
-                <div className="flex items-center py-3">
-                    <div style={{ backgroundImage: `url(http://localhost:8080/candidato/foto/${id})` }}
-                        className="w-20 h-20 rounded-full bg-cover bg-no-repeat mr-4"></div>
-                    <div className="">
-                        <p className="text-[1.7em] font-semibold">{perfil?.nome}</p>
-                        <span className="text-gray-700">{`${perfil?.idade} Anos / ${perfil.cidade} - ${perfil.estado}`}</span>
+            <div className="w-[100%] min-h-[100vh] max-h-fit bg-gray-200">
+                <header className=" h-[120px] bg-white shadow-sm shadow-gray-200 flex flex-col justify-end items-center py-2 z-10">
+                    <div className="w-80 h-20  bg-contain"
+                        style={{
+                            backgroundPosition: "center center",
+                            backgroundImage: `url(${"https://i.pinimg.com/736x/0d/cf/b5/0dcfb548989afdf22afff75e2a46a508.jpg"})`
+                        }} />
+                    <nav className="w-[100%]">
+                        <ul className="text-gray-950 text-right">
+                            <li className="inline-block hover:underline pr-4 pb-1"><a target="_self" href="/candidato/login">Login para candidatos</a></li>
+                        </ul>
+                    </nav>
+                </header>
+                <main className=" bg-gray-020 p-5">
+                    <div className=" w-[500px] bg-white  flex items-center  px-5 pb-2 m-auto border border-gray-200  rounded-sm">
+
+                        <div style={{ backgroundImage: `url(http://localhost:8080/candidato/foto/${id})` }}
+                            className="w-24 h-24  rounded-full bg-cover bg-no-repeat mr-4" />
+
+
+                        <div className="mt-7 ">
+                            <p className="text-[1.7em] font-semibold">{perfil?.nome}</p>
+                            <p className="font-bold">PROFISSÃO</p>
+                            <span className="text-gray-700">{`${perfil?.idade} Anos / ${perfil.cidade} - ${perfil.estado}`}</span>
+                            {sessao.getSessao()?.perfil === "empresa" && (
+                                <button onClick={() => setModalIsOpen(true)} className="bg-gray-700 text-white p-2 text-[.9em] rounded-lg block mt-5">Enviar proposta</button>
+                            )}
+                        </div>
                     </div>
-                </div>
-                <hr />
+                    <span onClick={() => setAba("informacoes")} className={` ${id === sessao.getSessao()?.id ? '' : 'hidden'} mx-3 cursor-pointer ${aba === "informacoes" ? 'underline' : ''}`}>Informações</span>
+                    <span onClick={buscarCandidaturas} className={`${id === sessao.getSessao()?.id ? '' : 'hidden'} mx-3 cursor-pointer ${aba === "candidaturas" ? 'underline' : ''}`}>Minhas candidaturas</span>
+                    {aba === "informacoes" && (
+                        <div className="bg-white border border-gray-300 shadow shadow-gray-300 lg:w-[800px] md:w-[700px]  sm:w-[625px] w-[500px] rounded-sm px-5 pb-10 m-auto mt-5">
+                            <h3>Sobre</h3>
+                            <pre className="font-[arial] text-wrap w-[400px]  text-justify ">{perfil?.descricao}</pre>
+                            <hr className="my-2 text-gray-300" />
+                            <h3>Contado</h3>
+                            <div className="flex items-center ">
+                                <i className="material-symbols scale-95">email</i>
+                                <span className="font-semibold pl-1 mb-1">{`${perfil?.email}`}</span>
+                            </div>
 
-                <span onClick={() => setAba("informacoes")} className={` ${id === sessao.getSessao()?.id ? '' : 'hidden'} mx-3 cursor-pointer ${aba === "informacoes" ? 'underline' : ''}`}>Informações</span>
-                <span onClick={buscarCandidaturas} className={`${id === sessao.getSessao()?.id ? '' : 'hidden'} mx-3 cursor-pointer ${aba === "candidaturas" ? 'underline' : ''}`}>Minhas candidaturas</span>
-                {aba === "informacoes" && (
-                    <>
-                        <h3>Sobre mim</h3>
-                        <pre className="font-[arial] text-wrap text-left w-80 ">{perfil?.descricao}</pre>
-                        <h3>Contado</h3>
-                        <div className="flex items-center ">
-                            <i className="material-symbols scale-95">email</i>
-                            <span className="font-semibold pl-1 mb-1">{`${perfil?.email}`}</span>
+                            <div className="flex items-center">
+                                <i className="material-symbols scale-95">call</i>
+                                <span className="font-semibold pl-1 ">{`${perfil?.tel}`}</span>
+                            </div>
+                            <hr className="my-6 text-gray-300" />
+                            {
+                                perfil.qualificacoes?.length ? (
+                                    <div className="">
+                                        <h4>Qualificações</h4>
+                                        {renderizarQualificacoes()}
+                                        {renderizarQualificacoes()}
+                                        {renderizarQualificacoes()}
+                                        {renderizarQualificacoes()}
+                                        {renderizarQualificacoes()}
+                                        {renderizarQualificacoes()}
+                                        {renderizarQualificacoes()}
+                                        {renderizarQualificacoes()}
+                                        {renderizarQualificacoes()}
+                                        {renderizarQualificacoes()}
+                                        {renderizarQualificacoes()}
+                                        {renderizarQualificacoes()}
+                                    </div>
+                                ) : (<h3>Usuário não possui qualificações cadastradas</h3>)}
+
                         </div>
+                    )}
+                    {aba === "candidaturas" && (
+                        <>
+                            <div className="my-7" />
+                            <span onClick={() => setCandidaturasFinalizadas(false)} className={`mx-5 cursor-pointer transition duration-700  p-1 rounded-md  ${candidaturasFinalizadas ? '' : 'bg-white'}`}>Em análise</span>
+                            <span onClick={() => setCandidaturasFinalizadas(true)} className={`cursor-pointer transition duration-700  p-1 rounded-md ${candidaturasFinalizadas ? 'bg-white' : ''}`}>Finalizadas</span>
+                            {renderizarCandidaturas()}
+                        </>
 
-                        <div className="flex items-center">
-                            <i className="material-symbols scale-95">call</i>
-                            <span className="font-semibold pl-1 ">{`${perfil?.tel}`}</span>
-                        </div>
+                    )
+                    }
 
-                        {
-                            perfil.qualificacoes?.length ? (
-                                <div className=" items-center">
-                                    <h4>Qualificações</h4>
-                                    {renderizarQualificacoes()}
-                                </div>
-                            ) : (<h3>Usuário não possui qualificações cadastradas</h3>)}
 
-                    </>
-                )}
-                {aba === "candidaturas" && (
-                    <>
-                        <div className="my-7" />
-                        <span onClick={() => setCandidaturasFinalizadas(false)} className={`mx-5 cursor-pointer transition duration-700  p-1 rounded-md  ${candidaturasFinalizadas ? '' : 'bg-gray-200'}`}>Em análise</span>
-                        <span onClick={() => setCandidaturasFinalizadas(true)} className={`cursor-pointer transition duration-700  p-1 rounded-md ${candidaturasFinalizadas ? 'bg-gray-200' : ''}`}>Finalizadas</span>
-                        {renderizarCandidaturas()}
-                    </>
-
-                )
-                }
-
-                {sessao.getSessao()?.perfil === "empresa" && (
-                    <button onClick={() => setModalIsOpen(true)} className="bg-gray-700 text-white p-2 rounded-lg mt-20">Enviar proposta</button>
-                )}
-                {modalIsOpen && (
-                    <ModalProposta close={() => setModalIsOpen(false)} idCandidato={`${id}`} />
-                )}
-                <ToastContainer position="top-center"
-                    closeOnClick={true}
-                    autoClose={6000}
-                    pauseOnHover={true}
-                    hideProgressBar={false}
-                    draggable={false}
-                />
-            </main>
+                    {modalIsOpen && (
+                        <ModalProposta close={() => setModalIsOpen(false)} idCandidato={`${id}`} />
+                    )}
+                    <ToastContainer position="top-center"
+                        closeOnClick={true}
+                        autoClose={6000}
+                        pauseOnHover={true}
+                        hideProgressBar={false}
+                        draggable={false}
+                    />
+                </main>
+            </div>
         )
     }
     return <h1 className="text-black text-center">Nenhum perfil encontrado</h1>
@@ -140,7 +169,7 @@ export default function PagePerfilCandidato() {
 
 export const Qualificao: React.FC<QualificacaoPerfil> = ({ nome, nivel }) => {
     return (
-        <div className="">
+        <div className="text-[.9em] inline-block border-2 border-gray-700 w-fit px-2 py-1 rounded-full m-2">
             <span>{`${nome} - `}</span>
             <span>{nivel}</span>
         </div>
@@ -154,11 +183,14 @@ interface candidaturaProps {
 }
 // Component para renderização de candidaturas
 const Candidaturas: React.FC<candidaturaProps> = ({ candidatura }) => {
+    let cor = candidatura.status !== "Em análise" ? (candidatura.status === "Selecionado" ? "text-green-900" : "text-red-600") : "text-black";
+
     return (
-        <div className="border border-gray-300 shadow-md w-52 rounded-lg p-1 mt-4">
-            <p>{candidatura.tituloVaga}</p>
-            <p>{candidatura.nomeEmpresa}</p>
-            <p>{candidatura.status}</p>
+        <div className="bg-white border border-gray-300 shadow-md w-52 rounded-lg p-1 mt-4 font-[arial] cursor-pointer">
+            <p className="font-bold font-[arial]">{candidatura.tituloVaga}</p>
+            <p className="hover:underline"><a href={`/empresa/${candidatura.idEmpresa}`} target="_blank">{candidatura.nomeEmpresa}</a></p>
+            <p className={`${cor}`}>{candidatura.status}</p>
+            <a href={`/vaga/${candidatura.idVaga}`} target="_blank" className="text-blue-700 hover:underline">ver vaga</a>
         </div>
     )
 }
@@ -246,7 +278,7 @@ const ModalProposta: React.FC<modalPorps> = ({ close, idCandidato }) => {
                 <div id="Rascunhos">
                     <h3 className="text-center">Selecione um racunho</h3>
                     <div className="h-36 grid justify-center  gap-3 overflow-auto py-4">
-                        {rascunhos.length? (
+                        {rascunhos.length ? (
                             renderizarRascunhos()
                         ) : <h2>Sem rascunhos</h2>}
 

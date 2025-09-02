@@ -238,7 +238,9 @@ export default function PerfilEmpresa() {
                     <section id="sei_la">
                         <div className="flex gap-7">
                             <h2 onClick={() => setAba("vagas")} className={`${aba === "vagas" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`}>Vagas</h2>
-                            <h2 onClick={() => setAba("rascunhos")} className={`${perfil?.id == id ? '' : 'hidden'} cursor-pointer ${aba === "rascunhos" ? 'bg-gray-200' : ''} p-1 rounded-lg transition duration-700`}>Rascunhos</h2>
+                            {sessao.getSessao()?.perfil === "empresa" && (
+                                <h2 onClick={() => setAba("rascunhos")} className={`${perfil?.id == id ? '' : 'hidden'} cursor-pointer ${aba === "rascunhos" ? 'bg-gray-200' : ''} p-1 rounded-lg transition duration-700`}>Rascunhos</h2>
+                            )}
                         </div>
                         <div className="flex flex-wrap items-start gap-1 mt-16  px-4  rounded-md m-auto">
 
@@ -313,6 +315,7 @@ export default function PerfilEmpresa() {
                                     </div>
                                 )
                             ) : (
+
                                 <>
                                     <GerenciadorDeRascunhos condition={true} enviarForm={CadastrarRascunho}>
                                         {renderizarRascunhos()}
