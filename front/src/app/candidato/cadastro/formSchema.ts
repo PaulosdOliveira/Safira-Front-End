@@ -1,3 +1,6 @@
+import { CadastroCurso } from "@/resources/curso/cursoResource";
+import { CadastroExperiencia } from "@/resources/experiencia/experineciaResource";
+import { CadastroFormacao } from "@/resources/formacao/formacaoResource";
 import * as yup from "yup";
 
 export interface dadosCadastroCandidato {
@@ -14,6 +17,10 @@ export interface dadosCadastroCandidato {
     sexo: "MASCULINO" | "FEMININO";
     idEstado: string;
     idCidade: string;
+    formacoes: CadastroFormacao[];
+    experiencias: CadastroExperiencia[];
+    cursos: CadastroCurso[];
+
 }
 
 
@@ -35,6 +42,9 @@ export interface dadosFormulario {
     curriculo?: File | null;
     idEstado: string;
     idCidade: string;
+    formacoes: CadastroFormacao[];
+    experiencias: CadastroExperiencia[];
+    cursos: CadastroCurso[];
 }
 
 
@@ -53,7 +63,10 @@ export const formValidation = yup.object().shape({
 
 })
 
-export const valoresIniciais: dadosFormulario = { foto: null, cpf: "88899", cep: "44094018", descricao: "hhhhhhhhhhh", email: "p@ww", nome: "ppp", senha: "123", sexo: 'FEMININO', tel: "75991995516", pcd: false, trabalhando: false, confirma_senha: "123", idCidade: '', idEstado: '' }
+export const valoresIniciais: dadosFormulario = { foto: null, cpf: "88899", cep: "44094018",
+     descricao: "hhhhhhhhhhh", email: "p@ww", nome: "ppp", senha: "123", sexo: 'FEMININO', 
+     tel: "75991995516", pcd: false, trabalhando: false, confirma_senha: "123", idCidade: '',
+      idEstado: '',cursos: [], experiencias: [], formacoes: [],  }
 
 
 /***   FORMULÁRIO DE QUALIFICAÇÕES */

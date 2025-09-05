@@ -49,7 +49,8 @@ export default function cadastroCandidato() {
             nome: values.nome, pcd: values.pcd, senha: values.senha,
             sexo: values.sexo, trabalhando: values.trabalhando, descricao: values.descricao,
             dataNascimento: values.dataNascimento, tel: values.tel, idCidade: values.idCidade,
-            idEstado: values.idEstado
+            idEstado: values.idEstado, cursos: values.cursos, experiencias: values.experiencias,
+            formacoes: values.formacoes
         };
         const resultado = await service.cadastrar(values);
 
@@ -247,6 +248,44 @@ export default function cadastroCandidato() {
                             </label>
                         </div>
 
+                        <div className="grid grid-cols-1 my-5 pt-10 border">
+                            <input id="fInstituicao" type="text" placeholder="Instituição" />
+                            <input id="fCurso" type="text" placeholder="Curso" />
+                            <label>Nivel: </label>
+                            <select id="fNivel">
+                                <option>TECNICO </option>
+                                <option>TECNOLOGO </option>
+                                <option>GRADUACAO </option>
+                                <option>POS_GRADUACAO </option>
+                                <option>MESTRADO </option>
+                                <option>DOUTORADO </option>
+                            </select>
+                            <label>Inicio:</label>
+                            <input id="fIncio" type="date" />
+
+                            <label>Final:</label>
+                            <input id="fFim" type="date" />
+                        </div>
+
+
+                        <div className="grid grid-cols-1 my-5 pt-10 border">
+                            <input id="eEmpresa" type="text" placeholder="Empresa" />
+                            <input id="eCargo" type="text" placeholder="Cargo" />
+                            <textarea id="eDescricao" placeholder="Descrição" />
+                            <label>Inicio:</label>
+                            <input id="eInicio" type="date" />
+
+                            <label>Final:</label>
+                            <input id="eFim" type="date" />
+                        </div>
+
+
+                        <div className="grid grid-cols-1 my-5 pt-10 border">
+                            <input id="cInstituicao" type="text" placeholder="Instituição" />
+                            <input id="cCurso" type="text" placeholder="Curso" />
+                            <input id="cCargaHoraria" type="number" placeholder="Carga horária" />
+                        </div>
+
 
 
                         <div className="grid grid-cols-1 pt-10">
@@ -254,6 +293,8 @@ export default function cadastroCandidato() {
                             <textarea name="descricao" placeholder="Fale sobre seu eu profissional" className="border border-gray-700 rounded-lg mt-3 h-32 pl-1 " value={values.descricao} onChange={handleChange} />
                             <input type="submit" value="Enviar" className="cursor-pointer w-[230px] h-10  border rounded-lg text-white bg-gray-800 mt-16 m-auto" />
                         </div>
+
+
                     </form>
                 </main>
             ) : (
