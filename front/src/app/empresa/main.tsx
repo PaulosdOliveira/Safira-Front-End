@@ -10,17 +10,15 @@ import { useFormik } from "formik"
 import { useEffect, useState } from "react"
 import { Qualificacao, qualificacaoSelecionada, qualificacaoUsuario } from "@/resources/qualificacao/qualificacaoResource"
 import { QualificacaoService } from "@/resources/qualificacao/qualificacaoService"
-import { OptionQualificacao } from "@/components/qualificacao/optionQualificacao"
-import { Instrucao, QualificacaoSelecionada } from "@/components/qualificacao/selecao"
 import { CardUsuario } from "@/components/cadUsuario"
 import { useRouter } from "next/navigation"
 import { Menu } from "@/components/menu"
+import { QualificacaoSelecionada } from "@/components/perfilCandidato/selecao"
+import AsyncSelect from "react-select/async"
 
 
 
 export const MainEmpresa = () => {
-
-    const [qualificacoes, setQualificacoes] = useState<Qualificacao[]>([]);
     const [nivel, setNivel] = useState<string>("INTERMEDIARIO");
     const [qualificacoesSelecionadas, setQualificacoesSelecionadas] = useState<qualificacaoSelecionada[]>([]);
     const [cidades, setCidades] = useState<cidade[]>([]);
@@ -33,49 +31,32 @@ export const MainEmpresa = () => {
     })
 
 
-
-
-    // Buscando qualificações no banco de dados
-    useEffect(() => {
-        (async () => {
-            const qualificacoes: Qualificacao[] = await QualificacaoService().buscarQualificacoes();
-            setQualificacoes(qualificacoes);
-        })();
-    }, [])
-
-
-    // Criando <option>'s de qualificação 
-    function gerarOptionQualificacao(qualificacao: Qualificacao) {
-        const id = qualificacao.id;
-        return (
-            <OptionQualificacao key={id} id={id} nome={qualificacao.nome} />
-        )
+    const loadOptions = async (inputValue: string) => {
+        if (!inputValue.trim().length) return [];
+        const result: Qualificacao[] = await QualificacaoService().buscarQualificacoes(inputValue);
+        return result.map((q) => ({
+            value: q.id,
+            label: q.nome
+        }))
     }
 
-    // Renderizando <option>'s de qualificação 
-    function renderizarOptionQualificacao() {
-        return (
-            qualificacoes.map(gerarOptionQualificacao)
-        );
-    }
 
     // Ativada ao mudar o valor do select de  qualificações
-    function changeQualificacao(select: HTMLSelectElement) {
-        const option = select.item(select.selectedIndex);
-        if (option?.text) {
-            const selecionada: qualificacaoSelecionada = {
-                idQualificacao: parseInt(`${option.value}`),
-                nivel: `${nivel}`,
-                nome: `${option.text}`
-            }
-            if (!qualificacoesSelecionadas.some(
-                (item) => item.idQualificacao === selecionada.idQualificacao
-            )) {
-                setQualificacoesSelecionadas(pre => [...pre, selecionada]);
-            }
+    function changeQualificacao(nome: string, id: number) {
+        const selecionada: qualificacaoSelecionada = {
+            idQualificacao: id,
+            nivel: nivel,
+            nome: nome
         }
-
+        if (!qualificacoesSelecionadas.some(
+            (item) => item.idQualificacao === selecionada.idQualificacao
+        )) {
+            setQualificacoesSelecionadas(pre => [...pre, selecionada]);
+        }
     }
+
+
+
 
 
     async function selecionarEstado(estado: HTMLSelectElement) {
@@ -88,7 +69,7 @@ export const MainEmpresa = () => {
     function mapearQualificacoesSelecionadas(qualificacao: qualificacaoSelecionada) {
         const qualificacaoUsuario: qualificacaoUsuario = {
             idQualificacao: parseInt(qualificacao.idQualificacao + ''),
-            nivel: qualificacao.nivel
+            nivel: qualificacao.nivel, nome: qualificacao.nome
         }
         return qualificacaoUsuario;
     }
@@ -142,12 +123,16 @@ export const MainEmpresa = () => {
 
                             <div className="inline-block">
                                 <label className="mr-2">Qualificação:</label>
-                                <br />
-                                <select onChange={(event) => changeQualificacao(event.target)}
-                                    id="qualificacao">
-                                    <option value={""}></option>
-                                    {renderizarOptionQualificacao()}
-                                </select>
+                                <AsyncSelect
+                                    cacheOptions
+                                    loadOptions={loadOptions}
+                                    defaultOptions={[]}
+                                    placeholder="Busque aqui"
+                                    onChange={(item) => {
+                                        changeQualificacao(item?.label!, item?.value!)
+                                    }}
+                                />
+
                             </div>
 
                             <div className="inline-block  mx-2">
@@ -168,49 +153,58 @@ export const MainEmpresa = () => {
                 </div>
 
             </header>
-            <Instrucao />
-            <section className="mt-1 flex items-center  p-1  h-14  w-[100vw] overflow-auto"
+            <section className="mt-1 flex  items-center  p-1  h-14  w-[100vw] overflow-auto"
                 id="filtros-selecionados">
                 {renderizarQualificacoesSelecionadas()}
             </section>
             <main className="w-[100%] h-[79.2vh] bg-white flex mt-2">
-                <div id="mais-filtros" className=" w-[20%]  pl-2 flex flex-col items-center">
-                    <div id="filtros" className="border border-gray-300  rounded-lg flex flex-col p-3 mt-3">
+                <div id="mais-filtros" className="hidden  lg:flex flex-col items-center">
+                    <div id="filtros" className="rounded-lg flex flex-col p-3 mt-3">
                         <h2 className="text-black text-2xl font-thin">Mais filtros</h2>
                         <div className="inline-block">
-                            <label>Sexo:</label>
+                            <label className="font-bold">Sexo:</label>
                             <br />
-                            <select id="sexo" className="w-40" onChange={handleChange}>
-                                <option value="">Todos</option>
-                                <option value="MASCULINO">Masculino</option>
-                                <option value="FEMININO">Feminino</option>
-                            </select>
+                            <div className="text-[.8em] flex  items-center gap-x-1">
+                                <label>Mas:</label>
+                                <input value="MASCULINO" onChange={handleChange} className="scale-75 mt-0.5" id="sexo" name="sexo" type="radio" />
+                                <label>Fem:</label>
+                                <input value="FEMININO" onChange={handleChange} className="scale-75 mt-0.5" id="sexo" name="sexo" type="radio" />
+                                <label>Todos:</label>
+                                <input value="" onChange={handleChange} className="scale-75 mt-0.5" id="sexo" name="sexo" type="radio" />
+                            </div>
                         </div>
 
                         <div className="inline-block ">
-                            <label>Status?:</label>
+                            <label className="font-bold">Empregado:</label>
                             <br />
-                            <select id="trabalhando" className="w-40" onChange={handleChange}>
-                                <option value={`${null}`}>Ambos</option>
-                                <option value="true">Trabalhando</option>
-                                <option value="false">Desempregado</option>
-                            </select>
+                            <div className="text-[.8em] flex items-center gap-x-1">
+                                <label>Sim:</label>
+                                <input onChange={handleChange} value="true" className="scale-75 mt-0.5" id="trabalhando" name="trabalhando" type="radio" />
+                                <label>Não:</label>
+                                <input onChange={handleChange} value="false" className="scale-75 mt-0.5" id="trabalhando" name="trabalhando" type="radio" />
+                                <label>Todos:</label>
+                                <input onChange={handleChange} value="" className="scale-75 mt-0.5" id="trabalhando" name="trabalhando" type="radio" />
+                            </div>
                         </div>
 
                         <div className="inline-block ">
-                            <label>PCD?:</label>
+                            <label className="font-bold">PCD?:</label>
                             <br />
-                            <select id="pcd" className="w-40" onChange={handleChange}>
-                                <option value="true">Sim</option>
-                                <option value="false">Não</option>
-                            </select>
+                            <div className="text-[.8em] flex items-center gap-x-1">
+                                <label>Sim:</label>
+                                <input onChange={handleChange} value={"true"} className="scale-75 mt-0.5" id="pcd" name="pcd" type="radio" />
+                                <label>Não:</label>
+                                <input onChange={handleChange} value={"false"} className="scale-75 mt-0.5" id="pcd" name="pcd" type="radio" />
+                                <label>Todos:</label>
+                                <input onChange={handleChange} value="" className="scale-75 mt-0.5" id="pcd" name="pcd" type="radio" />
+                            </div>
                         </div>
                     </div>
                 </div>
-                <section className=" border w-[60%] h-[100%] m-auto grid grid-cols-2  justify-center overflow-auto">
+                <section className="pt-2 w-[500px] lg:w-[80vw] h-[100%] m-auto md:w-[700px] md:grid-cols-2 grid gap-x-5 lg:flex flex-wrap  justify-center overflow-auto">
                     {renderizarCardsUsuario()}
                 </section>
-                <span className="border w-[20%]">Direita</span>
+
 
             </main>
 

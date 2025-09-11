@@ -1,16 +1,19 @@
 'use client'
 import { useFormik } from "formik"
-import { dadosCadastroCandidato, dadosFormulario, formValidation, qualificacaoForm, qualificacaoFormValidation, valoresIniciais } from "./formSchema"
+import { dadosCadastroCandidato, dadosFormularioCadastroCandidato, formValidation, valoresIniciais } from "./formSchema"
 import React, { useEffect, useState } from "react";
 import { CandidatoService } from "@/resources/candidato/servico";
 import { accessToken, dadosLogin, ServicoSessao } from "@/resources/sessao/sessao";
 import { QualificacaoService } from "@/resources/qualificacao/qualificacaoService";
-import { Qualificacao, qualificacaoFormInitial, qualificacaoSelecionada, qualificacaoUsuario } from "@/resources/qualificacao/qualificacaoResource";
+import { Qualificacao, qualificacaoUsuario } from "@/resources/qualificacao/qualificacaoResource";
 import { cidade, estado, UtilsService } from "@/resources/utils/utils";
 import { Option } from "../page";
-import { Instrucao, QualificacaoSelecionada } from "@/components/qualificacao/selecao";
-import { OptionQualificacao } from "@/components/qualificacao/optionQualificacao";
 import { useRouter } from "next/navigation";
+import { CadastroFormacao } from "@/resources/formacao/formacaoResource";
+import { CadastroExperiencia } from "@/resources/experiencia/experineciaResource";
+import { CadastroCurso } from "@/resources/curso/cursoResource";
+import { Curso, Experiencia, Formacao, QualificacaoComponent } from "@/components/perfilCandidato/CompoentsCadastroCandidato";
+import { dadosFormCadastroEmpresa } from "@/app/empresa/cadastro/formSchema";
 
 
 
@@ -18,15 +21,31 @@ import { useRouter } from "next/navigation";
 
 export default function cadastroCandidato() {
 
-    const [cadastrou, setCadastrou] = useState<boolean>(false);
     const [urlFoto, setUrlFoto] = useState<string>("");
     const [nomePdf, setNomePdf] = useState<string>("Selecionar");
     const service = CandidatoService();
     const utils = UtilsService();
     const sessaoService = ServicoSessao();
+    const router = useRouter();
     const [estados, setEstados] = useState<estado[]>([]);
     const [cidades, setCidades] = useState<cidade[]>([]);
-    const { errors, handleChange, handleSubmit, values } = useFormik<dadosFormulario>({
+    const [addFormacao, setAddFormacao] = useState<boolean>(false);
+    const [addExperiencia, setAddExperiencia] = useState<boolean>(false);
+    const [addCurso, setAddCurso] = useState<boolean>(false);
+    const [addQualificacoes, setAddQualificacoes] = useState<boolean>(false);
+    const [formacoes, setFornacoes] = useState<CadastroFormacao[]>([]);
+    const [experiencias, setExperiencias] = useState<CadastroExperiencia[]>([]);
+    const [cursos, setCursos] = useState<CadastroCurso[]>([]);
+
+    /// SELEÇÃO QUALIFICAÇÃO
+    const qualificacaoService = QualificacaoService();
+    const [resultQualificacoes, setResultQualificacoes] = useState<Qualificacao[]>([]);
+    const [qualificacoes, setQualificacoes] = useState<qualificacaoUsuario[]>([]);
+    const [idQualificacaoSelecionada, setIdQualificacaoSelecionada] = useState<number | undefined>(undefined);
+
+
+
+    const { errors, handleChange, handleSubmit, values } = useFormik<dadosFormularioCadastroCandidato>({
         initialValues: valoresIniciais,
         onSubmit: submit,
         validationSchema: formValidation
@@ -42,18 +61,16 @@ export default function cadastroCandidato() {
 
     //------->>> SUBMIT <<< ----------------------------
     async function submit() {
-
         const dadosCadastrais: dadosCadastroCandidato =
         {
-            cep: values.cep, cpf: values.cpf, email: values.email,
+            cpf: values.cpf, email: values.email,
             nome: values.nome, pcd: values.pcd, senha: values.senha,
             sexo: values.sexo, trabalhando: values.trabalhando, descricao: values.descricao,
             dataNascimento: values.dataNascimento, tel: values.tel, idCidade: values.idCidade,
-            idEstado: values.idEstado, cursos: values.cursos, experiencias: values.experiencias,
-            formacoes: values.formacoes
+            idEstado: values.idEstado, cursos: cursos, experiencias: experiencias, formacoes: formacoes,
+            qualificacoes: qualificacoes
         };
-        const resultado = await service.cadastrar(values);
-
+        const resultado = await service.cadastrar(dadosCadastrais);
 
         if (resultado.status === 201) {
             alert("Cadastro realizado com sucesso")
@@ -64,11 +81,10 @@ export default function cadastroCandidato() {
             const token: accessToken = await service.logar(login);
             await service.salvarFoto(values.foto, token.token + '');
             sessaoService.criarSessao(token);
-            setCadastrou(true);
+
             if (values.curriculo)
                 await service.salvarCurriculo(values.curriculo, token.token + "");
-
-
+            router.push("/");
         } else {
             alert(resultado.erro);
         }
@@ -92,8 +108,139 @@ export default function cadastroCandidato() {
             const curriculo = event.target.files[0];
             values.curriculo = curriculo;
             setNomePdf(curriculo.name);
-
         }
+    }
+
+    // ADICIONAR FORMAÇÃO
+    function adicionarFormacao() {
+        const instituicao = document.getElementById("fInstituicao") as HTMLInputElement
+        const curso = document.getElementById("fCurso") as HTMLInputElement
+        const nivel = document.getElementById("fNivel") as HTMLSelectElement
+        const situacao = document.getElementById("fSituacao") as HTMLSelectElement
+    
+        if (instituicao.value.length && curso.value.length) {
+            const formacao: CadastroFormacao = { curso: curso.value,instituicao: instituicao.value, nivel: nivel.value, situacao: situacao.value }
+            setFornacoes(pre => [...pre, formacao]);
+            instituicao.value = "";
+            curso.value = "";
+        }
+    }
+
+    // ADICIONAR EXPERIENCIA
+    function adicionarExperiencia() {
+        const empresa = document.getElementById("eEmpresa") as HTMLInputElement
+        const cargo = document.getElementById("eCargo") as HTMLInputElement
+        const descricao = document.getElementById("eDescricao") as HTMLTextAreaElement
+        const duracao = document.getElementById("eDuracao") as HTMLInputElement
+
+        if (empresa.value.length && cargo.value.length && descricao.value.length && duracao.value.length) {
+            const experiencia: CadastroExperiencia = { cargo: cargo.value, descricao: descricao.value, empresa: empresa.value, duracao: duracao.value };
+            setExperiencias(pre => [...pre, experiencia]);
+            empresa.value = "";
+            cargo.value = "";
+            descricao.value = "";
+            duracao.value = "";
+        }
+    }
+
+    // ADICIONAR CURSO
+    function adicionarCurso() {
+        const instituicao = document.getElementById("cInstituicao") as HTMLInputElement
+        const curso = document.getElementById("cCurso") as HTMLInputElement
+        const carga = document.getElementById("cCargaHoraria") as HTMLTextAreaElement
+        if (instituicao.value.length && curso.value.length && carga.value.length) {
+            const cursoComplementar: CadastroCurso = { cargaHoraria: parseInt(carga.value), curso: curso.value, instituicao: instituicao.value };
+            setCursos(pre => [...pre, cursoComplementar]);
+            instituicao.value = "";
+            curso.value = "";
+            carga.value = "";
+        }
+    }
+
+
+    // BUSCANDO QUALIFICAÇÕES NO BANCO DE DADOS
+    async function buscarQualificacoes(nome: string) {
+        if (!nome || nome.trim().length === 0) {
+            setResultQualificacoes([]);
+        } else {
+            const qualificacoesEncontradas: Qualificacao[] = await qualificacaoService.buscarQualificacoes(nome);
+            setResultQualificacoes(qualificacoesEncontradas);
+        }
+    }
+    // RENDERIZAR RESULTADO DA BUSCA PRO QUALIFICAÇÕES
+    const renderizarQUalificacoesEncontradas = () => {
+        return resultQualificacoes.map(q => {
+
+            function mudarTexto() {
+                const inputNomeQualificacao = document.getElementById("nome_qualificacao") as HTMLInputElement;
+                inputNomeQualificacao.value = `${q.nome}`;
+                setIdQualificacaoSelecionada(q.id);
+                setResultQualificacoes([]);
+            }
+            return (
+                <p className="cursor-pointer hover:bg-gray-100"
+                    key={q.id} onClick={mudarTexto}>
+                    {q.nome}
+                </p>
+            )
+        })
+    }
+    // SELECIONAR QUALIFICAÇÃO
+
+    function selecionarQualificacao() {
+        if (idQualificacaoSelecionada) {
+            const inputNomeQualificacao = document.getElementById("nome_qualificacao") as HTMLInputElement;
+            const nivel = document.getElementById("nivel") as HTMLSelectElement;
+            if (idQualificacaoSelecionada && nivel.length && inputNomeQualificacao.value.length) {
+
+                if (!qualificacoes.some((item) => item.idQualificacao === idQualificacaoSelecionada
+                )) {
+                    //PARA ENVIAR AO BACK END
+                    const qualificacao: qualificacaoUsuario = {
+                        idQualificacao: idQualificacaoSelecionada,
+                        nivel: nivel.value, nome: inputNomeQualificacao.value
+                    };
+                    setQualificacoes(pre => [...pre, qualificacao]);
+                }
+                inputNomeQualificacao.value = "";
+            }
+        }
+    }
+
+    const renderizarQualificacoes = () => {
+        return qualificacoes.map(q => {
+            return (
+                <QualificacaoComponent click={() => setQualificacoes(pre => pre.filter(item => item.idQualificacao !== q.idQualificacao))}
+                    idQualificacao={q.idQualificacao} nivel={`` + q.nivel} nome={`${q.nome}`} key={q.idQualificacao}
+                />
+            )
+        })
+    }
+
+
+    const renderizarFormacoes = () => {
+        return formacoes.map((f, index) => {
+            return (
+                <Formacao key={index} click={() => setFornacoes(pre => pre.filter(item => item.curso !== f.curso && item.instituicao !== f.instituicao))}
+                    instituicao={f.instituicao} nivel={f.nivel} curso={f.curso} situacao={f.situacao} />
+            )
+        })
+    }
+
+    const renderizarExperiencias = () => {
+        return experiencias.map(e => {
+            return (<Experiencia click={() => setExperiencias(prev => prev.filter(item => item.empresa !== e.cargo && item.cargo !== e.cargo))}
+                key={crypto.randomUUID()} empresa={`${e.empresa}`} cargo={e.cargo + ""} descricao={`${e.descricao}`} duracao={`${e.duracao}`} />)
+        }
+        )
+    }
+
+    const renderizarCurso = () => {
+        return cursos.map(e => {
+            return (<Curso click={() => setCursos(pre => pre.filter(item => item.curso !== e.curso && item.instituicao !== e.instituicao))}
+                key={crypto.randomUUID()} carga={e.cargaHoraria ? e.cargaHoraria : 0} curso={`${e.curso}`} instituicao={`${e.instituicao}`} />)
+        }
+        )
     }
 
     // Criando options 
@@ -115,17 +262,17 @@ export default function cadastroCandidato() {
         return estados.map((estado) => criaOption(estado.sigla, estado.id));
     }
 
-    async function selecionarEstado(estado: HTMLSelectElement) {
-        values.idEstado = estado.value;
+    async function selecionarEstado(idEstado: string) {
+        values.idEstado = idEstado;
         values.idCidade = "";
-        const cidades = await utils.buscarCidadesdeEstado(parseInt(estado.value));
+        const cidades = await utils.buscarCidadesdeEstado(parseInt(idEstado));
         setCidades(cidades);
     }
 
 
     return (
-        <>
-            <header className=" h-[120px] shadow-sm shadow-gray-200 flex flex-col justify-end items-center py-2 z-10">
+        <div className="bg-gray-100">
+            <header className="h-[120px] shadow-sm shadow-gray-200 flex flex-col justify-end items-center py-2 z-10 bg-white">
                 <div className="w-80 h-20  bg-cover"
                     style={{
                         backgroundPosition: "center center",
@@ -137,315 +284,240 @@ export default function cadastroCandidato() {
                     </ul>
                 </nav>
             </header>
-            {!cadastrou ? (
-                <main className={`${cadastrou ? 'hidden' : ''}`}>
-                    <form onSubmit={handleSubmit}
-                        className=" w-[370px] sm:w-[600px] border border-gray-200 shadow-lg shadow-gray-400  mt-3 p-5 rounded-lg bg-white  m-auto">
-                        <div id="Foto" className="flex my-6  w-[100%]" >
-                            <label className=" foto rounded-full m-auto cursor-pointer border border-gray-300 bg-cover bg-no-repeat w-36 h-36"
-                                style={{ backgroundImage: `url(${urlFoto})` }}>
-                                <input id="foto" onChange={capturarFoto} className="hidden" type="file" />
-                            </label>
+            <main className="font-[arial] pt-10">
+                <h2 className="text-center">Construa o seu perfil profissional</h2>
+                <form onSubmit={handleSubmit}
+                    className=" w-[370px] sm:w-[600px] md:w-[700px] border-[.7px] border-gray-500 shadow-lg shadow-gray-400  mt-3 p-5 rounded-lg bg-white  m-auto">
+                    <div id="Foto" className="flex mt-6 mb-2   w-[100%]" >
+                        <label className=" foto rounded-full m-auto cursor-pointer border border-gray-500 bg-cover bg-no-repeat w-36 h-36"
+                            style={{ backgroundImage: `url(${urlFoto})` }}>
+                            <input id="foto" onChange={capturarFoto} className="hidden" type="file" />
+                        </label>
+                    </div>
+                    <div className="text-center min-h-[5px]">
+                        <span className="text-[.6em]  text-red-700 m-auto ">{errors.foto}</span>
+                    </div>
+                    <div className="mb-10 mt-3 text-center">
+                        <label className="bg-gray-900 p-2 rounded-md text-white cursor-pointer" htmlFor="foto">Seleione uma foto</label>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit  m-auto">
+                        <div className="grid ">
+                            <label htmlFor="cpf">CPF: </label>
+                            <input id="cpf" name="cpf" onChange={handleChange} maxLength={14} className="border border-gray-400  h-10 rounded-sm sm:w-[260px] "
+                                type="text" placeholder="000.000.000-00" value={values.cpf} />
+                            <span className="text-[.6em] min-h-[16px]  text-red-700 ">{errors.cpf}</span>
                         </div>
-                        <div className="my-10 text-center">
-                            <label className="bg-gray-900 p-2 rounded-md text-white cursor-pointer" htmlFor="foto">Seleione uma foto</label>
+                        <div className="grid">
+                            <label htmlFor="email">Email:</label>
+                            <input id="email" name="email" onChange={handleChange} className="border  border-gray-400  h-10 rounded-sm w-[260px] "
+                                type="email" placeholder="usuario@exemplo.com" value={values.email} />
+                            <span className="text-[.6em] min-h-[16px]  text-red-700 ">{errors.email}</span>
                         </div>
-
-                        <div className=" grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit  m-auto">
-
-                            <div className="grid">
-                                <label>CPF: </label>
-                                <input name="cpf" onChange={handleChange} className="border border-gray-400  h-10 rounded-lg sm:w-[260px] "
-                                    type="text" placeholder="CPF" value={values.cpf} />
-                            </div>
-
-                            <div className="grid">
-                                <label>Email:</label>
-                                <input name="email" onChange={handleChange} className="border  border-gray-400  h-10 rounded-lg w-[260px] "
-                                    type="email" placeholder="Email" value={values.email} />
-                            </div>
-
-                            <div className="grid">
-                                <label>Nome:</label>
-                                <input name="nome" onChange={handleChange} className="border  border-gray-400  h-10 rounded-lg w-[260px] "
-                                    type="text" placeholder="Nome completo" value={values.nome} />
-                            </div>
-
-                            <div className="grid">
-                                <label>Telefone para contato:</label>
-                                <input name="tel" onChange={handleChange} className="border border-gray-400  h-10 rounded-lg w-[260px]"
-                                    type="tel" placeholder="(**) *****-****" value={values.tel} />
-                            </div>
-
-
-                            <div className="grid">
-                                <label>Senha:</label>
-                                <input name="senha" onChange={handleChange} className="border  border-gray-400  h-10 rounded-lg w-[260px]"
-                                    type="password" placeholder="Senha" value={values.senha} />
-                            </div>
-
-                            <div className="grid">
-                                <label>Senha:</label>
-                                <input id="confirma_senha" onChange={handleChange} className="border  border-gray-400  h-10 rounded-lg w-[260px] "
-                                    type="password" placeholder="Confirme sua senha" value={values.confirma_senha} />
-                            </div>
-
-                            <div className="grid">
-                                <label>Estado:</label>
-                                <select name="idEstado" onChange={(event) => selecionarEstado(event.target)} className="border border-gray-400  h-10 rounded-sm">
-                                    <option value="">Todos</option>
-                                    {renderizarOptionEstados()}
-                                </select>
-                            </div>
-
-                            <div className="grid">
-                                <label>Cidade:</label>
-                                <select name="idCidade" onChange={handleChange} className="border border-gray-400  h-10 rounded-sm" value={values.idCidade}>
-                                    <option value="">Todos</option>
-                                    {renderizarOptionsCidade()}
-                                </select>
-                            </div>
-
-                            <div className="grid">
-                                <label>Você é PCD?:</label>
-                                <select name="pcd" className="border border-gray-400  h-10 rounded-sm"
-                                    onChange={() => values.pcd = !values.pcd}>
-                                    <option>NÃO</option>
-                                    <option>SIM</option>
-                                </select>
-                            </div>
-
-                            <div className="grid">
-                                <label>Sexo:</label>
-                                <select name="sexo" onChange={handleChange} className="border border-gray-400  h-10 rounded-sm " value={values.sexo}>
-                                    <option>MASCULINO</option>
-                                    <option>FEMININO</option>
-                                </select>
-                            </div>
-
-
-                            <div className="grid">
-                                <label>Está empregado?:</label>
-                                <select name="trabalhando" className="border border-gray-400  h-10 rounded-sm"
-                                    onChange={() => values.trabalhando = !values.trabalhando}>
-                                    <option>NÃO</option>
-                                    <option>SIM</option>
-                                </select>
-                            </div>
-
-                            <div className="grid">
-                                <label>Data de nascimento:</label>
-                                <input name="dataNascimento" onChange={handleChange} className="h-10 rounded-lg"
-                                    type="date" placeholder="Senha" />
-                            </div>
-
+                        <div className="grid">
+                            <label htmlFor="nome">Nome:</label>
+                            <input id="nome" name="nome" onChange={handleChange} className="border  border-gray-400  h-10 rounded-sm w-[260px] "
+                                type="text" placeholder="Nome completo" value={values.nome} />
+                            <span className="text-[.6em] min-h-[16px]  text-red-700 ">{errors.nome}</span>
                         </div>
-                        <div className="grid pt-7 place-items-center">
-                            <label>Selecionar currículo:</label>
-                            <label className="cursor-pointer text-center pt-3  h-13 w-40 rounded-sm  border">
-                                {nomePdf}
-                                <input name="curriculo" onChange={selecionarPdf} className="hidden" type="file" accept="application/pdf" />
-                            </label>
+                        <div className="grid">
+                            <label htmlFor="tel">Telefone para contato:</label>
+                            <input id="tel" name="tel" onChange={handleChange} className="border border-gray-400  h-10 rounded-sm w-[260px]"
+                                type="tel" placeholder="(**) *****-****" value={values.tel} />
+                            <span className="min-h-[16px]" />
                         </div>
-
-                        <div className="grid grid-cols-1 my-5 pt-10 border">
-                            <input id="fInstituicao" type="text" placeholder="Instituição" />
-                            <input id="fCurso" type="text" placeholder="Curso" />
-                            <label>Nivel: </label>
-                            <select id="fNivel">
-                                <option>TECNICO </option>
-                                <option>TECNOLOGO </option>
-                                <option>GRADUACAO </option>
-                                <option>POS_GRADUACAO </option>
-                                <option>MESTRADO </option>
-                                <option>DOUTORADO </option>
+                        <div className="grid">
+                            <label htmlFor="senha">Senha:</label>
+                            <input id="senha" name="senha" onChange={handleChange} className="border  border-gray-400  h-10 rounded-sm w-[260px]"
+                                type="password" placeholder="Senha" value={values.senha} />
+                            <span className="text-[.6em] min-h-[16px]  text-red-700 ">{errors.senha}</span>
+                        </div>
+                        <div className="grid">
+                            <label htmlFor="confirma_senha">Senha:</label>
+                            <input id="confirma_senha" name="confirma_senha" onChange={handleChange} className="border  border-gray-400  h-10 rounded-sm w-[260px] "
+                                type="password" placeholder="Confirme sua senha" value={values.confirma_senha} />
+                            <span className="text-[.6em] min-h-[16px]  text-red-700 ">{errors.confirma_senha}</span>
+                        </div>
+                        <div className="grid">
+                            <label htmlFor="estado">Estado:</label>
+                            <select id="estado" name="idEstado" onChange={(event) => selecionarEstado(event.target.value)} className="border border-gray-400  h-10 rounded-sm">
+                                <option value="">Todos</option>
+                                {renderizarOptionEstados()}
                             </select>
-                            <label>Inicio:</label>
-                            <input id="fIncio" type="date" />
-
-                            <label>Final:</label>
-                            <input id="fFim" type="date" />
+                            <span className="text-[.6em] min-h-[16px]  text-red-700 ">{errors.idEstado}</span>
                         </div>
-
-
-                        <div className="grid grid-cols-1 my-5 pt-10 border">
-                            <input id="eEmpresa" type="text" placeholder="Empresa" />
-                            <input id="eCargo" type="text" placeholder="Cargo" />
-                            <textarea id="eDescricao" placeholder="Descrição" />
-                            <label>Inicio:</label>
-                            <input id="eInicio" type="date" />
-
-                            <label>Final:</label>
-                            <input id="eFim" type="date" />
+                        <div className="grid">
+                            <label htmlFor="cidade">Cidade:</label>
+                            <select id="cidade" name="idCidade" onChange={handleChange} className="border border-gray-400  h-10 rounded-sm" value={values.idCidade}>
+                                <option value="">Todos</option>
+                                {renderizarOptionsCidade()}
+                            </select>
+                            <span className="text-[.6em] min-h-[16px]  text-red-700 ">{errors.idCidade}</span>
                         </div>
-
-
-                        <div className="grid grid-cols-1 my-5 pt-10 border">
-                            <input id="cInstituicao" type="text" placeholder="Instituição" />
-                            <input id="cCurso" type="text" placeholder="Curso" />
-                            <input id="cCargaHoraria" type="number" placeholder="Carga horária" />
+                        <div className="grid">
+                            <label htmlFor="pcd">Você é PCD?:</label>
+                            <select id="pcd" name="pcd" className="border border-gray-400  h-10 rounded-sm"
+                                onChange={() => values.pcd = !values.pcd}>
+                                <option>NÃO</option>
+                                <option>SIM</option>
+                            </select>
                         </div>
-
-
-
-                        <div className="grid grid-cols-1 pt-10">
-                            <label>Descrição:</label>
-                            <textarea name="descricao" placeholder="Fale sobre seu eu profissional" className="border border-gray-700 rounded-lg mt-3 h-32 pl-1 " value={values.descricao} onChange={handleChange} />
-                            <input type="submit" value="Enviar" className="cursor-pointer w-[230px] h-10  border rounded-lg text-white bg-gray-800 mt-16 m-auto" />
+                        <div className="grid">
+                            <label htmlFor="sexo">Sexo:</label>
+                            <select id="sexo" name="sexo" onChange={handleChange} className="border border-gray-400  h-10 rounded-sm " value={values.sexo}>
+                                <option>MASCULINO</option>
+                                <option>FEMININO</option>
+                            </select>
                         </div>
+                        <div className="grid">
+                            <label htmlFor="trabalhando">Está empregado?:</label>
+                            <select id="trabalhando" name="trabalhando" className="border border-gray-400  h-10 rounded-sm"
+                                onChange={() => values.trabalhando = !values.trabalhando}>
+                                <option>NÃO</option>
+                                <option>SIM</option>
+                            </select>
+                        </div>
+                        <div className="grid">
+                            <label htmlFor="dataNascimento">Data de nascimento:</label>
+                            <input id="dataNascimento" name="dataNascimento" onChange={handleChange} className="h-10 rounded-sm"
+                                type="date" placeholder="Senha" />
+                            <span className="text-[.6em] min-h-[16px]  text-red-700 ">{errors.dataNascimento}</span>
+                        </div>
+                    </div>
+                    <h3>Adicione suas formações <span className="text-[.6em]">(Opcional/Importante)</span></h3>
+                    <i onClick={() => setAddFormacao(!addFormacao)} className="material-symbols cursor-pointer">{addFormacao ? "done" : "add"}</i>
+                    {addFormacao && (
+                        <>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit">
+                                <div className="grid">
+                                    <input id="fInstituicao" type="text" placeholder="Instituição"
+                                        className=" h-8 rounded-md " />
+                                </div>
+                                <div className="grid">
+                                    <input id="fCurso" type="text" placeholder="Curso"
+                                        className=" h-8 rounded-sm" />
+                                </div>
+                                <div className="grid">
+                                    <label htmlFor="fNivel" className="">Nivel: </label>
+                                    <select className="border  h-9 rounded-sm" id="fNivel">
+                                        <option>TECNICO </option>
+                                        <option>TECNOLOGO </option>
+                                        <option>GRADUACAO </option>
+                                        <option>POS_GRADUACAO </option>
+                                        <option>MESTRADO </option>
+                                        <option>DOUTORADO </option>
+                                    </select>
+                                </div>
+                                <div className="grid">
+                                    <label htmlFor="fSituacao" className="">Situação: </label><div />
+                                    <select className="border  h-9 rounded-sm" id="fSituacao">
+                                        <option value="CONCLUIDO">Concluido</option>
+                                        <option value="EM_ANDAMENTO">Em andamento</option>
+                                    </select>
+                                </div>
+                                <div className="" >
+                                    <div className="w-36 h-9 flex flex-col justify-center border text-center  rounded-md cursor-pointer" onClick={adicionarFormacao}>Adicionar</div>
+                                </div>
+                            </div>
+                            {renderizarFormacoes()}
+                        </>
+                    )}
 
+                    <h3>Suas experiencia <span className="text-[.6em]">(Opcional/Importante)</span></h3>
+                    <i onClick={() => setAddExperiencia(!addExperiencia)} className="material-symbols cursor-pointer">{addExperiencia ? "done" : "add"}</i>
+                    {addExperiencia && (
+                        <>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit">
+                                <div>
+                                    <input id="eEmpresa" type="text" placeholder="Empresa" className="w-[210px] h-8 rounded-sm" />
+                                </div>
+                                <div>
+                                    <input id="eCargo" type="text" placeholder="Cargo" className="w-[210px] h-8 rounded-sm" />
 
-                    </form>
-                </main>
-            ) : (
-                <>
-                    <h1 className="text-center">Perfil criado!!</h1 >
-                    <h2 className="text-center">Adicione suas habilidades para completa-lo</h2>
-                    <QualificacaoForm />
+                                </div>
+                                <div className="grid">
+                                    <label htmlFor="eDuracao">Duração:</label>
+                                    <input id="eDuracao" type="text" placeholder="Ex: 1 ano e 7 meses"
+                                        className=" h-8 rounded-sm" />
+                                </div>
+                            </div>
 
-                </>
-            )
-            }
+                            <div className="grid grid-cols-1 pt-10">
+                                <label htmlFor="eDescricao">Descrição:</label>
+                                <textarea id="eDescricao" placeholder="Descrição" className="rounded-lg mt-3 h-32 pl-1 mb-5" />
+                            </div>
 
+                            <div className="">
+                                <div className="m-auto w-36 h-9 flex flex-col justify-center border text-center  rounded-md cursor-pointer" onClick={adicionarExperiencia}>Adicionar</div>
+                            </div>
+                            {renderizarExperiencias()}
+                        </>
+
+                    )}
+                    <h3>Cursos complementares <span className="text-[.6em]">(Opcional)</span></h3>
+                    <i onClick={() => setAddCurso(!addCurso)} className="material-symbols cursor-pointer">{addCurso ? "done" : "add"}</i>
+                    {addCurso && (
+                        <>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit">
+                                <div className="grid">
+                                    <label htmlFor="cInstituicao">Instituição:</label>
+                                    <input id="cInstituicao" type="text" placeholder="Instituição" className="h-8 w-[220px]" />
+                                </div>
+                                <div className="grid">
+                                    <label htmlFor="cCurso">Curso:</label>
+                                    <input id="cCurso" type="text" placeholder="Nome do curso" className="h-8 w-[220px]" />
+                                </div>
+                                <input id="cCargaHoraria" type="number" placeholder="Carga horária" className="h-8 w-[220px]" />
+                                <div className="w-36 h-8  flex flex-col justify-center border text-center rounded-sm cursor-pointer" onClick={adicionarCurso}>Adicionar</div>
+                            </div>
+                            {renderizarCurso()}
+                        </>
+                    )
+                    }
+                    <h3>Qualificações <span className="text-[.6em]">(Opcional/Importante)</span></h3>
+                    <i onClick={() => setAddQualificacoes(!addQualificacoes)} className="material-symbols cursor-pointer">{addQualificacoes ? "done" : "add"}</i>
+                    {addQualificacoes && (
+                        <>
+                            <div className="grid  gap-2 w-fit">
+                                <div className="grid ">
+                                    <label htmlFor="nivel">Nivel:</label>
+                                    <select className="border border-gray-500 pl-2 w-fit h-8" id="nivel" onChange={handleChange}>
+                                        <option value="BASICO">Básico</option>
+                                        <option value="INTERMEDIARIO">Intermediario</option>
+                                        <option value="INTERMEDIARIO">Avançado</option>
+                                    </select>
+                                </div>
+                                <div className=" relative">
+                                    <div className="grid relative">
+
+                                        <label htmlFor="nome_qualificacao">Qualificação:</label>
+                                        <input onChange={(event) => buscarQualificacoes(event.target.value)} id="nome_qualificacao" type="text" placeholder="Busque aqui" className="w-[210px] rounded-md h-8" />
+                                    </div>
+                                    <div className={`border border-gray-200 w-[210px] absolute top-[100%] z-10  bg-white `}>
+                                        {renderizarQUalificacoesEncontradas()}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="w-36 h-9 flex flex-col justify-center border text-center my-5 rounded-md cursor-pointer" onClick={selecionarQualificacao}>Adicionar</div>
+
+                            <div className=" text-nowrap flex gap-x-3 px-4 overflow-x-auto ">
+                                {renderizarQualificacoes()}
+                            </div>
+                        </>
+                    )
+                    }
+
+                    <div className="grid grid-cols-1 pt-10">
+                        <label htmlFor="descricao">Descrição:</label>
+                        <textarea id="descricao" name="descricao" placeholder="Fale sobre seu eu profissional" className="rounded-lg mt-3 h-32 sm:h-56 pl-1 " value={values.descricao} onChange={handleChange} />
+                        <span className="text-[.6em] min-h-[16px]  text-red-700 ">{errors.descricao}</span>
+                        <input type="submit" value="Enviar" className="cursor-pointer w-[230px] h-10  border rounded-lg text-white bg-gray-800 mt-16 m-auto" />
+                    </div>
+                </form>
+            </main>
 
 
             <footer className="border mt-20 h-40"></footer>
-        </>
-
-    )
-}
-
-
-
-// ------------------------------> FORM QUALIFICAÇÕES <------------------------------------------------------
-
-const QualificacaoForm = () => {
-
-
-    const [qualificacoesSelecionadas, setQualificacoesSelecionadas] = useState<qualificacaoSelecionada[]>([]);
-    const service = QualificacaoService();
-    const { handleChange, handleSubmit, values } = useFormik<qualificacaoSelecionada>({
-        initialValues: qualificacaoFormInitial,
-        onSubmit: selecionar,
-        validationSchema: qualificacaoFormValidation
-    })
-    const [select, setSelect] = useState<Qualificacao[]>([]);
-    const router = useRouter();
-
-    // Buscando qualificações no banco de dados
-    useEffect(() => {
-        (async () => {
-            const qualificacoes: Qualificacao[] = await service.buscarQualificacoes();
-            setSelect(qualificacoes);
-        })();
-    }, [])
-
-
-    // Criando <option>'s de qualificação 
-    function gerarOptionQualificacao(qualificacao: Qualificacao) {
-        const id = qualificacao.id;
-        return (
-            <OptionQualificacao key={id} id={id} nome={qualificacao.nome} />
-        )
-    }
-
-    // Renderizando <option>'s de qualificação 
-    function renderizargerarOptionQualificacao() {
-        return (
-            select.map(gerarOptionQualificacao)
-        );
-    }
-
-
-    function changeQualificacao(select: HTMLSelectElement) {
-        const option = select.item(select.selectedIndex);
-        values.idQualificacao = parseInt(option?.id + '')
-        values.nome = option?.text + ''
-    }
-
-    // Selecionando qualificacao
-    function selecionar() {
-        if (!qualificacoesSelecionadas.some(
-            (item) => item.idQualificacao === values.idQualificacao
-        )) {
-            const selecionada: qualificacaoSelecionada = { idQualificacao: values.idQualificacao, nivel: values.nivel, nome: values.nome }
-            setQualificacoesSelecionadas(pre => [...pre, selecionada])
-        }
-    }
-
-
-    // Removendo qualificação da lista de selecionadas e devolvendo ao select como ultimo item
-    function removarSelecao(id: number) {
-        setQualificacoesSelecionadas((prev) => prev.filter(item => item.idQualificacao !== id))
-    }
-
-    // Criando componente de qualificação selecionada
-    function criarQualificacaoSelecionada(dados: qualificacaoSelecionada) {
-        return (
-            <QualificacaoSelecionada idQualificacao={dados.idQualificacao}
-                key={dados.idQualificacao} nivel={dados.nivel} nomeQualificacao={dados.nome} click={removarSelecao} />
-        )
-    }
-
-    function renderizarQualificacoesSelecionadas() {
-        return (
-            qualificacoesSelecionadas.map(criarQualificacaoSelecionada)
-        );
-    }
-
-    // Transformando as qualificações selecionadas em modelos para serem salvos no banco de dados
-    function criarQualificacaoUsuario(dados: qualificacaoSelecionada) {
-        const qualificacao: qualificacaoUsuario = { idQualificacao: dados.idQualificacao, nivel: dados.nivel };
-        return qualificacao;
-    }
-
-    // Enviando as qualificações ao back end
-    async function cadastrarQualificacoes() {
-        const token = ServicoSessao().getSessao()?.accessToken?.toString();
-        alert(token)
-        const qualificacoesUsuario = qualificacoesSelecionadas.map(criarQualificacaoUsuario)
-        if (token) {
-            await CandidatoService().salvarQualificacoes(qualificacoesUsuario, token);
-            router.push("/")
-        }
-    }
-
-
-    return (
-
-        <div className="w-[500px] border text-center border-gray-300  shadow-lg shadow-gray-600 bg-white m-auto mb-64 test rounded-lg  font-bold text-gray-800 mt-24 p-5">
-            <h2>Selecione as suas qualificações</h2>
-            <div className="">
-                <form onSubmit={handleSubmit}>
-
-                    <div className="grid grid-cols-2 gap-x-5 mt-16">
-                        <label className="text-left pl-1">Qualificação:</label>
-                        <label className="text-left pl-1">Nível:</label>
-                        <select id="idQualificacao" className=" border border-gray-500 h-8 rounded-lg pl-2" onChange={(event) => changeQualificacao(event.target)}>
-                            <option></option>
-                            {renderizargerarOptionQualificacao()}
-                        </select>
-
-                        <select className="border border-gray-500 rounded-lg pl-2" id="nivel" onChange={handleChange}>
-                            <option >BASICO</option>
-                            <option >INTERMEDIARIO</option>
-                            <option >AVANCADO</option>
-                        </select>
-                    </div>
-
-                    <input className="cursor-pointer border p-1 my-6 rounded-lg bg-gray-800 text-white" type="submit" value="Selecionar" />
-                </form>
-            </div>
-            <div id="" className=" flex flex-wrap gap-2 ">
-                {renderizarQualificacoesSelecionadas()}
-            </div>
-            <Instrucao />
-            <hr className="my-7" />
-            <button onClick={() => cadastrarQualificacoes()}
-                type="button" className="cursor-pointer bg-blue-800 text-white rounded-md p-2 mt-9 w-20">Salvar</button>
-
         </div>
 
     )
 }
-

@@ -1,6 +1,7 @@
-import { CadastroCurso } from "@/resources/curso/cursoResource";
-import { CadastroExperiencia } from "@/resources/experiencia/experineciaResource";
-import { CadastroFormacao } from "@/resources/formacao/formacaoResource";
+import { CadastroCurso, Curso } from "@/resources/curso/cursoResource";
+import { CadastroExperiencia, Experiencia } from "@/resources/experiencia/experineciaResource";
+import { CadastroFormacao, Formacao } from "@/resources/formacao/formacaoResource";
+import { qualificacaoUsuario } from "@/resources/qualificacao/qualificacaoResource";
 import * as yup from "yup";
 
 export interface dadosCadastroCandidato {
@@ -11,7 +12,6 @@ export interface dadosCadastroCandidato {
     dataNascimento?: Date;
     descricao: string;
     tel?: string;
-    cep: string;
     pcd: boolean;
     trabalhando: boolean;
     sexo: "MASCULINO" | "FEMININO";
@@ -20,12 +20,12 @@ export interface dadosCadastroCandidato {
     formacoes: CadastroFormacao[];
     experiencias: CadastroExperiencia[];
     cursos: CadastroCurso[];
-
+    qualificacoes: qualificacaoUsuario[];
 }
 
 
 
-export interface dadosFormulario {
+export interface dadosFormularioCadastroCandidato {
     cpf: string;
     nome: string;
     email: string;
@@ -34,7 +34,6 @@ export interface dadosFormulario {
     dataNascimento?: Date;
     descricao: string;
     tel?: string;
-    cep: string;
     pcd: boolean;
     trabalhando: boolean;
     sexo: "MASCULINO" | "FEMININO";
@@ -48,25 +47,27 @@ export interface dadosFormulario {
 }
 
 
-export const formValidation = yup.object().shape({
-    cpf: yup.string().trim("Campo obrigatorio"),
-    nome: yup.string().trim("Campo obrigatorio"),
-    email: yup.string().trim("Campo obrigatorio"),
-    senha: yup.string().trim("Campo obrigatorio"),
-    confirma_senha: yup.string().oneOf([yup.ref("senha")], "As senhas precisam ser iguais"),
-    cep: yup.string().trim("Campo obrigatorio"),
-    descricao: yup.string().trim("Campo obrigatorio"),
-    foto: yup.mixed<Blob>().required("Selecione uma foto"),
-    pcd: yup.boolean().required("Selecione uma opção"),
-    trabalhando: yup.boolean().required("Selecione uma opção"),
-    dataNascimento: yup.date().required("Informe a sua data de nascimento")
 
+
+export const formValidation = yup.object().shape({
+    cpf: yup.string().trim().required("Informe seu CPF").min(11, "Informe seu CPF"),
+    nome: yup.string().trim().required("Campo obrigatorio***"),
+    email: yup.string().trim().required("Campo obrigatorio***"),
+    senha: yup.string().trim().required("Campo obrigatorio***"),
+    confirma_senha: yup.string().oneOf([yup.ref("senha")], "As senhas precisam ser iguais***"),
+    descricao: yup.string().trim().required("Adicione uma descrição"),
+    foto: yup.mixed<Blob>().required("Selecione uma foto***"),
+    dataNascimento: yup.date().required("Informe a sua data de nascimento***"),
+    idEstado: yup.string().trim().required("Selecione o seu estado"),
+    idCidade: yup.string().trim().required("Selecione a sua cidade")
 })
 
-export const valoresIniciais: dadosFormulario = { foto: null, cpf: "88899", cep: "44094018",
-     descricao: "hhhhhhhhhhh", email: "p@ww", nome: "ppp", senha: "123", sexo: 'FEMININO', 
-     tel: "75991995516", pcd: false, trabalhando: false, confirma_senha: "123", idCidade: '',
-      idEstado: '',cursos: [], experiencias: [], formacoes: [],  }
+export const valoresIniciais: dadosFormularioCadastroCandidato = {
+    foto: null, cpf: "",
+    descricao: "", email: "", nome: "", senha: "", sexo: 'MASCULINO',
+    tel: "", pcd: false, trabalhando: false, confirma_senha: "", idCidade: '',
+    idEstado: '', cursos: [], experiencias: [], formacoes: [],
+}
 
 
 /***   FORMULÁRIO DE QUALIFICAÇÕES */

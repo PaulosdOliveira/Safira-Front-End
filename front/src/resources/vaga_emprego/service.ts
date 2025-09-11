@@ -30,7 +30,7 @@ class Service {
         })
 
 
-        const resultado = await fetch(`${this.urlBase}/buscar?${params.toString()}`, {
+        const resultado = await fetch(`${this.urlBase}?${params.toString()}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`

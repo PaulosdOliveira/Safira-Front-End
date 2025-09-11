@@ -1,7 +1,7 @@
 import { dadosCadastroCandidato } from "@/app/candidato/cadastro/formSchema";
 import { dadosLogin } from "../sessao/sessao";
 import { qualificacaoUsuario } from "../qualificacao/qualificacaoResource";
-import { dadosConsultaCandidato, PerfilCandidato } from "./candidatoResource";
+import { dadosConsultaCandidato, DadosSalvosCandidato, PerfilCandidato } from "./candidatoResource";
 
 class ServiceClass {
 
@@ -58,14 +58,13 @@ class ServiceClass {
         const dados = new FormData;
         dados.append("foto", foto ? foto : '');
         const resultado = await fetch(this.urlBase + "/foto", {
-            method: 'POST',
+            method: 'PUT',
             body: dados,
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         })
 
-        alert(resultado.status + "Foto")
     }
 
 
@@ -114,6 +113,26 @@ class ServiceClass {
     async carregarPerfil(id: string) {
         const resultado = await fetch(`${this.urlBase}/${id}`)
         return resultado.json();
+    }
+
+    async buscarDadosSalvos(token: string) {
+        const resultado = await fetch(`${this.urlBase}/dadosSalvos`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        return resultado.json();
+    }
+
+    async editarPerfil(dados: DadosSalvosCandidato, token: string) {
+        await fetch(this.urlBase, {
+            method: 'PUT',
+            body: JSON.stringify(dados),
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        })
     }
 
 }

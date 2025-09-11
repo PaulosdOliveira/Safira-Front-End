@@ -5,14 +5,17 @@ export class Qualificacao {
 }
 
 // Modelo de visualização de qualificações salvas em um perfil
-export class QualificacaoPerfil{
-    nome?: string;
+export class QualificacaoSalva{
+    idCandidato?: number;
+    idQualificacao?: number;
     nivel?: string;
+    nome?: string;
 }
 
 export interface qualificacaoUsuario {
-    idQualificacao: number;
+    idQualificacao?: number;
     nivel: string;
+    nome: string;
 }
 
 

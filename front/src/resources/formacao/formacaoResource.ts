@@ -1,7 +1,15 @@
 export class CadastroFormacao {
+    
     instituicao?: string;
     curso?: string;
-    nivel?: 'TECNICO' | 'TECNOLOGO' | 'GRADUACAO' | 'POS_GRADUACAO' | 'MESTRADO' | 'DOUTORADO';
-    inicio?: Date;
-    fim?: Date
+    nivel?: string;
+    situacao?: string;
+}
+
+export class Formacao {
+    id?: string;
+    instituicao?: string;
+    curso?: string;
+    nivel?: string;
+    situacao?: string;
 }
