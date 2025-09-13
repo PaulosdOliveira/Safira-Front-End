@@ -1,5 +1,5 @@
 export class CadastroFormacao {
-    
+
     instituicao?: string;
     curso?: string;
     nivel?: string;
@@ -12,4 +12,9 @@ export class Formacao {
     curso?: string;
     nivel?: string;
     situacao?: string;
+}
+
+export class OptionFormacaoDTO {
+    id?: string;
+    curso?: string;
 }

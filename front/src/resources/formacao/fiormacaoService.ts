@@ -14,6 +14,16 @@ class ServicoFormacao {
         })
     }
 
+    async buscarFormacoes(curso: string, token: string) {
+       const result =  await fetch(`${this.urlBase}?curso=${curso}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        return result.json();
+    }
+
 }
 
 export const FormacaoService = () => new ServicoFormacao();

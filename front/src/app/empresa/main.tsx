@@ -15,6 +15,8 @@ import { useRouter } from "next/navigation"
 import { Menu } from "@/components/menu"
 import { QualificacaoSelecionada } from "@/components/perfilCandidato/selecao"
 import AsyncSelect from "react-select/async"
+import { OptionFormacaoDTO } from "@/resources/formacao/formacaoResource"
+import { FormacaoService } from "@/resources/formacao/fiormacaoService"
 
 
 
@@ -24,12 +26,17 @@ export const MainEmpresa = () => {
     const [cidades, setCidades] = useState<cidade[]>([]);
     const sessao = ServicoSessao();
     const router = useRouter();
+    const [maisFiltros, setMaisFiltros] = useState<boolean>(false);
     const [candidatos, setCandidatos] = useState<ConsultaCandidatoDTO[]>([]);
-    const { values, handleSubmit, handleChange } = useFormik<dadosConsultaCandidato>({
+    const { values, handleChange, setFieldValue } = useFormik<dadosConsultaCandidato>({
         initialValues: initConsultaCandidato,
-        onSubmit: submit
+        onSubmit: submit,
+        enableReinitialize: true
     })
 
+    function abrirFiltros() {
+
+    }
 
     const loadOptions = async (inputValue: string) => {
         if (!inputValue.trim().length) return [];
@@ -37,6 +44,15 @@ export const MainEmpresa = () => {
         return result.map((q) => ({
             value: q.id,
             label: q.nome
+        }))
+    }
+
+    const loadCursos = async (valor: string) => {
+        if (!valor.trim().length) return [];
+        const result: OptionFormacaoDTO[] = await FormacaoService().buscarFormacoes(valor, `${sessao.getSessao()?.accessToken}`);
+        return result.map((f) => ({
+            value: f.id,
+            label: f.curso
         }))
     }
 
@@ -51,11 +67,9 @@ export const MainEmpresa = () => {
         if (!qualificacoesSelecionadas.some(
             (item) => item.idQualificacao === selecionada.idQualificacao
         )) {
-            setQualificacoesSelecionadas(pre => [...pre, selecionada]);
+            setQualificacoesSelecionadas(pre => [selecionada, ...pre]);
         }
     }
-
-
 
 
 
@@ -111,19 +125,14 @@ export const MainEmpresa = () => {
 
 
     return (
-        <div className="w-[100vw] min-h-screen bg-white">
-            <header className=" w-[100vw]  flex items-end pb-2 bg-white  border border-gray-100 shadow-2xl shadow-gray-200">
-                <div id="filtro" className=" flex items-end  w-[80%]">
-                    <div className="">
-                        <SelectEstadoCidade cidades={cidades} changeCidade={handleChange} changeEstado={(event) => selecionarEstado(event.target)} />
-                    </div>
-
+        <div className="w-full h-fit border bg-gray-200 ">
+            <header className=" w-full  flex items-end pb-2 bg-white  border border-gray-400 ">
+                <div id="filtro" className="text-[.8em] flex flex-wrap items-end  w-[80%]">
                     <div className="">
                         <div className="flex items-end rounded-lg p-2">
-
                             <div className="inline-block">
                                 <label className="mr-2">Qualificação:</label>
-                                <AsyncSelect
+                                <AsyncSelect className=""
                                     cacheOptions
                                     loadOptions={loadOptions}
                                     defaultOptions={[]}
@@ -132,82 +141,94 @@ export const MainEmpresa = () => {
                                         changeQualificacao(item?.label!, item?.value!)
                                     }}
                                 />
-
                             </div>
-
                             <div className="inline-block  mx-2">
                                 <label>Nivel:</label>
                                 <br />
-                                <select id="nivel" onChange={(event) => setNivel(event.target.value)} value={nivel}>
+                                <select className="border border-gray-200 rounded-sm p-0.5 h-9"
+                                    id="nivel" onChange={(event) => setNivel(event.target.value)} value={nivel}>
                                     <option value="BASICO">Basico</option>
                                     <option value="INTERMEDIARIO">Intermediário</option>
                                     <option value="AVANCADO">Avançado</option>
                                 </select>
                             </div>
-                            <button onClick={submit} className="border border-gray-300 rounded-sm bg-blue-600 text-white  px-3 cursor-pointer">Buscar</button>
                         </div>
+                    </div>
+                    <div className="flex items-end">
+                        <SelectEstadoCidade cidades={cidades} changeCidade={handleChange} changeEstado={(event) => selecionarEstado(event.target)} />
+                        <button onClick={submit} className="border mb-2.5 h-8  rounded-sm bg-blue-600 text-white  px-3 cursor-pointer ">Buscar</button>
                     </div>
                 </div>
                 <div className="w-[20%]">
                     <Menu />
                 </div>
-
             </header>
-            <section className="mt-1 flex  items-center  p-1  h-14  w-[100vw] overflow-auto"
+            <section className="mt-1 flex overflow-auto  p-1 pb-4"
                 id="filtros-selecionados">
                 {renderizarQualificacoesSelecionadas()}
             </section>
-            <main className="w-[100%] h-[79.2vh] bg-white flex mt-2">
-                <div id="mais-filtros" className="hidden  lg:flex flex-col items-center">
-                    <div id="filtros" className="rounded-lg flex flex-col p-3 mt-3">
+            <div className="">
+                <i onClick={() => setMaisFiltros(!maisFiltros)} className="material-symbols cursor-pointer">tune</i>
+            </div>
+            <main className="w-full flex  relative">
+                <div id="mais-filtros" className={` w-[250px] px-2 lg:flex flex-col items-center lg:relative lg:top-0 absolute h-[60vh] top-[-1.5%] -left-1.5
+                     ${!maisFiltros ? '-translate-x-[250px]' : '-translate-x-0'} transition duration-700 z-10`}>
+                    <div id="filtros"
+                        className=" rounded-lg flex flex-col  p-3 mt-3 bg-white border border-gray-400">
                         <h2 className="text-black text-2xl font-thin">Mais filtros</h2>
                         <div className="inline-block">
                             <label className="font-bold">Sexo:</label>
                             <br />
                             <div className="text-[.8em] flex  items-center gap-x-1">
-                                <label>Mas:</label>
-                                <input value="MASCULINO" onChange={handleChange} className="scale-75 mt-0.5" id="sexo" name="sexo" type="radio" />
-                                <label>Fem:</label>
-                                <input value="FEMININO" onChange={handleChange} className="scale-75 mt-0.5" id="sexo" name="sexo" type="radio" />
-                                <label>Todos:</label>
-                                <input value="" onChange={handleChange} className="scale-75 mt-0.5" id="sexo" name="sexo" type="radio" />
+                                <select id="sexo" onChange={handleChange} value={values.sexo}>
+                                    <option value="">Todos</option>
+                                    <option value="MASCULINO">Masculino</option>
+                                    <option value="FEMININO">Feminino</option>
+                                </select>
                             </div>
                         </div>
-
                         <div className="inline-block ">
-                            <label className="font-bold">Empregado:</label>
+                            <label className="font-bold">Empregados?:</label>
                             <br />
                             <div className="text-[.8em] flex items-center gap-x-1">
-                                <label>Sim:</label>
-                                <input onChange={handleChange} value="true" className="scale-75 mt-0.5" id="trabalhando" name="trabalhando" type="radio" />
-                                <label>Não:</label>
-                                <input onChange={handleChange} value="false" className="scale-75 mt-0.5" id="trabalhando" name="trabalhando" type="radio" />
-                                <label>Todos:</label>
-                                <input onChange={handleChange} value="" className="scale-75 mt-0.5" id="trabalhando" name="trabalhando" type="radio" />
+                                <select id="trabalhando" onChange={handleChange} value={`` + values.trabalhando}>
+                                    <option value="">Todos</option>
+                                    <option value="true">Sim</option>
+                                    <option value="false">Não</option>
+                                </select>
                             </div>
                         </div>
-
                         <div className="inline-block ">
                             <label className="font-bold">PCD?:</label>
                             <br />
                             <div className="text-[.8em] flex items-center gap-x-1">
-                                <label>Sim:</label>
-                                <input onChange={handleChange} value={"true"} className="scale-75 mt-0.5" id="pcd" name="pcd" type="radio" />
-                                <label>Não:</label>
-                                <input onChange={handleChange} value={"false"} className="scale-75 mt-0.5" id="pcd" name="pcd" type="radio" />
-                                <label>Todos:</label>
-                                <input onChange={handleChange} value="" className="scale-75 mt-0.5" id="pcd" name="pcd" type="radio" />
+                                <select id="pcd" onChange={handleChange} value={`` + values.pcd}>
+                                    <option value="">Todos</option>
+                                    <option value="true">Sim</option>
+                                    <option value="false">Não</option>
+                                </select>
                             </div>
+                        </div>
+                        <div className="inline-block mt-2">
+                            <label className="font-bold ">Formação:</label>
+                            <AsyncSelect
+                                cacheOptions
+                                isMulti
+                                loadOptions={loadCursos}
+                                defaultOptions={[]}
+                                placeholder="Busque aqui"
+                                onChange={(item) => {
+                                    const selecionados = item ? item.map(f => f.label) : [];
+                                    setFieldValue("formacoes", selecionados)
+                                }}
+                            />
                         </div>
                     </div>
                 </div>
-                <section className="pt-2 w-[500px] lg:w-[80vw] h-[100%] m-auto md:w-[700px] md:grid-cols-2 grid gap-x-5 lg:flex flex-wrap  justify-center overflow-auto">
+                <section className="flex pt-2 w-[400px] sm:w-[630px]  px-3 md:w-[780px] lg:w-[85vw] min-h-[100vh] max-h-fit  m-auto gap-5 lg:flex flex-wrap justify-center content-start">
                     {renderizarCardsUsuario()}
                 </section>
-
-
             </main>
-
         </div >
     )
 }

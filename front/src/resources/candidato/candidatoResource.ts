@@ -11,6 +11,7 @@ export interface dadosConsultaCandidato {
     sexo: string;
     pcd: boolean;
     trabalhando: Boolean | null;
+    formacoes: string[]
 }
 
 export class ConsultaCandidatoDTO {
@@ -72,6 +73,6 @@ export class DadosSalvosCandidato {
 
 
 
-export const initConsultaCandidato: dadosConsultaCandidato = { qualificacoes: [], idCidade: '', idEstado: '', pcd: false, sexo: '', trabalhando: null }
+export const initConsultaCandidato: dadosConsultaCandidato = { qualificacoes: [], idCidade: '', idEstado: '', pcd: false, sexo: '', trabalhando: null, formacoes: [] }
 
 

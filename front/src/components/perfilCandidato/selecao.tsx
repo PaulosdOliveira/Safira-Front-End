@@ -16,7 +16,7 @@ export const QualificacaoSelecionada: React.FC<qualificacaoSelecionadaProps> = (
 
     return (
 
-        <div className={` h-8  border border-gray-500 text-nowrap text-[.8em] w-fit  flex items-center gap-1  rounded-full mx-3 pl-2  font-bold  bg-gray-50`} >
+        <div className={`border border-gray-500 text-nowrap text-[.7em] w-fit flex items-center gap-1  rounded-full mx-3 pl-2  font-bold  bg-gray-50`} >
            <span className="">{nomeQualificacao} - {nivel}</span> 
             <i onClick={() => click(idQualificacao)}
                 className={`material-symbols cursor-pointer  scale-50 text-gray-800`}>close</i>

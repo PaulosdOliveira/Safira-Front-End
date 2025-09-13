@@ -48,11 +48,10 @@ export const SelectEstadoCidade: React.FC<localizacaoProps> = ({ changeEstado, c
     }
     return (
         <div className="flex p-2">
-
             <div className="inline-block mx-3">
                 <label>Estado:</label>
                 <br />
-                <select className=""
+                <select className="border border-gray-200 rounded-sm p-0.5 h-9"
                     id="idEstado" onChange={changeEstado}>
                     <option value={""}>Todos</option>
                     {renderizarOptionEstados()}
@@ -61,7 +60,8 @@ export const SelectEstadoCidade: React.FC<localizacaoProps> = ({ changeEstado, c
             <div className=" inline-block">
                 <label>Cidade:</label>
                 <br />
-                <select id="idCidade" onChange={changeCidade}>
+                <select className="border border-gray-200 rounded-sm p-0.5 h-9"
+                    id="idCidade" onChange={changeCidade}>
                     <option value={""}>Todos</option>
                     {renderizarOptionsCidade()}
                 </select>
