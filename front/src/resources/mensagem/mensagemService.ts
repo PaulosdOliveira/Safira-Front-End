@@ -57,8 +57,8 @@ class ServicoMensagem {
     }
 
     //VISUALIZANDO MENSAGEM RECEBIDA NO CHAT
-    async visualizarMensagem(token: string, idMensagem: string) {
-        await fetch(`${this.urlBse}/visualizar/${idMensagem}`, {
+    async visualizarMensagem(token: string, idMensagem: string, idUsuarioLogado: string) {
+        await fetch(`${this.urlBse}/visualizar/${idMensagem}/${idUsuarioLogado}`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`

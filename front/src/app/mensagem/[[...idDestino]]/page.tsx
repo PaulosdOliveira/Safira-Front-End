@@ -83,26 +83,18 @@ export default function Chat() {
                 let chatPresente = contatoRemetente.id == idDestinoRef.current;
 
                 // CASO O CONTATO JA FAÇA PARTE DA LISTA ATUAl
-
-
-                if (contatos.some((contato) => contato.id === contatoRemetente.id)) {
-
-                    setContatos(pre => {
-                        const naoVisualizadas = pre.find(item => item.id === contatoRemetente.id)?.naoVizualizadas;
-                        const update = pre.filter(item => item.id !== contatoRemetente.id);
-                        update.push({ ...contatoRemetente, naoVizualizadas: naoVisualizadas! + (chatPresente ? 0 : 1) })
-                        update.forEach((c, index) => c.indexContato = index)
-                        return update;
+                setContatos(pre => {
+                    return pre.map(c => {
+                        if (c.id == contatoRemetente.id) { 
+                            return(
+                                {
+                                    ...c, ultimaMensagem: contatoRemetente.ultimaMensagem, naoVizualizadas: c.naoVizualizadas! + (chatPresente ? 0 : 1)
+                                }
+                            )
+                        }
+                        return c;
                     })
-
-                } else {
-                    contatoRemetente.isNew = true;
-                    contatos.push(contatoRemetente);
-                }
-
-                /* REORGANIZANDO LISTA
-               
-                }*/
+                })
             })
         }
 
@@ -111,15 +103,15 @@ export default function Chat() {
             subscriptionVisualizarRef.current = clientRef.current.subscribe(`/mensagem/visualizar/${sessao?.id}`, (payLoad) => {
                 const idContato = JSON.parse(payLoad.body).idContato;
                 setContatos(pre => pre.map(
-                    contato => contato.id === idContato ? { ...contato, naoVisualizadas: 0 }
-                        : contato
+                    (contato) => contato.id == idContato ? {
+                        ...contato, naoVizualizadas: 0
+                    } : { ...contato }
                 ))
             })
         }
     }, [clientRef.current?.connected])
 
     function contatoToCard(contato: ContatosProps, key: number) {
-
         async function load() {
             contato.indexContato = key;
             if (idDestinoRef.current == contato.id) {
@@ -156,7 +148,6 @@ export default function Chat() {
     const renderizarContatos = () => { return contatos.map(contatoToCard) }
 
     if (idDestino?.length) {
-
         useEffect(() => {
             (async () => {
                 const dadosContato = await mensagemService.buscarDadosContato(idDestinoRef.current, `${sessao?.accessToken}`);
@@ -178,7 +169,6 @@ export default function Chat() {
 
     // MONTANDO CONEXÃO ENTRE USUÁRIOS
     useEffect(() => {
-
         (async () => {
             if (!clientRef.current?.connected) {
                 return
@@ -189,7 +179,7 @@ export default function Chat() {
             subscriptionRef.current = clientRef.current?.subscribe(`/mensagem/enviar-mensagem/${idDestinoRef.current}${sessao?.id}`, async (mensagem) => {
                 const mensagemRecebida: MensagemDTO = JSON.parse(mensagem.body);
                 setMensagens(pre => [mensagemRecebida, ...pre])
-                await mensagemService.visualizarMensagem(`${sessao?.accessToken}`, mensagemRecebida.id + '');
+                await mensagemService.visualizarMensagem(`${sessao?.accessToken}`, mensagemRecebida.id + '', `${sessao?.id}`);
             })
             const dadosContato = await mensagemService.buscarDadosContato(idDestinoRef.current, `${sessao?.accessToken}`);
             setDadosContato(dadosContato);
@@ -276,25 +266,25 @@ export default function Chat() {
                             <i onClick={() => setChatAberto(false)}
                                 title="Conversas" className="material-symbols ml-2 cursor-pointer absolute top-1 -left-2.5">Arrow_Back</i>
                         </div>
-                        <div className="border border-gray-200 flex items-center py-1 gap-3  h-[75px]">
+                        <div className="border border-gray-200 flex items-center py-2 gap-3  h-[75px] ">
                             <div style={{ backgroundImage: `url(${dadosContato.urlFoto})` }}
-                                className="border border-gray-200 w-14 h-14 rounded-full ml-7 bg-cover" />
-                            <a href={`/empresa/${idDestinoRef.current}`} target="_blank" className="text-[1.2em] font-bold" >{dadosContato.nome}</a>
+                                className="border border-gray-200 sm:w-15 sm:h-15 h-12 w-12 rounded-full ml-3 bg-cover " />
+                            <a href={`/empresa/${idDestinoRef.current}`} target="_blank" className="text-[1em] font-bold" >{dadosContato.nome}</a>
                         </div>
-                        <div onClick={() => alert(indexContato)} ref={divRef} style={{ backgroundImage: `url(https://images.vexels.com/media/users/3/100817/raw/d76360129ef87ca843789170dcb39ad2-abstract-floral-background-for-design.jpg)` }}
-                            className="border-b flex flex-col-reverse border-gray-300 bg-green-50 h-[77vh]  overflow-auto px-3 bg-cover bg-no-repeat"
+                        <div ref={divRef}
+                            className="border-b flex flex-col-reverse border-gray-300 bg-gray-100 h-[77vh]  overflow-auto px-3 bg-cover bg-no-repeat"
                             id="mensagens">
                             {renderizarMensagens()}
                         </div>
                         <div className="h-[12.36vh] flex sm:m-auto pt-4 sm:w-[440px] md:w-[500px] lg:w-[700px]">
-                            <input onKeyDown={(event) => { if (event.key === "Enter") { enviarMensagem() } }} id="mensagem" className="h-10 w-full rounded-full border border-gray-400 pl-4" type="text" placeholder="Mensagem" />
+                            <input onKeyDown={(event) => { if (event.key === "Enter") { enviarMensagem() } }} id="mensagem" className="h-10 w-full rounded-full border border-gray-400 pl-4 pr-15" type="text" placeholder="Mensagem" />
                             <div className="h-10 flex items-center">
                                 <i className="material-symbols  scale-125 -ml-9">send</i>
                             </div>
                         </div>
                     </div>
                 ) : (
-                    <div className={`h-[100vh]  bg-gray-300  w-[600px] sm:w-[70vw] sm:block hidden`}>
+                    <div className={`h-[100vh] bg-gray-300  w-[600px] sm:w-[70vw] sm:block hidden`}>
                     </div>
                 )}
             </main>
@@ -310,7 +300,7 @@ interface mensagenProps {
 const Mensagem: React.FC<mensagenProps> = ({ horaEnvio, texto }) => {
     return (
         <div
-            id="balao" className="inline-block max-w-[300px] md:max-w-[450px]  px-1 border border-gray-900 rounded-lg bg-gray-100 text-left ">
+            id="balao" className="inline-block max-w-[300px] md:max-w-[450px]  px-1 border border-gray-400 rounded-lg bg-gray-100 text-left ">
             <p className="break-words">{texto}</p>
             <p className=" text-right text-[.7em] -mt-1 ">{horaEnvio}</p>
         </div>
