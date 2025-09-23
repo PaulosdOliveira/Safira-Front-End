@@ -119,8 +119,6 @@ export default function MainCandidato() {
               <div onClick={() => pesquisar()} className="material-symbols cursor-pointer scale-125 text-black ml-3">search</div>
             </div>
           </div>
-
-
           <Menu />
         </div>
       </header>

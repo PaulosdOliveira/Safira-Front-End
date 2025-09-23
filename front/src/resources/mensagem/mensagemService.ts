@@ -21,7 +21,6 @@ class ServicoMensagem {
                 'Authorization': `Bearer ${token}`
             }
         })
-
         return resultado.json();
     }
 
@@ -34,6 +33,37 @@ class ServicoMensagem {
         })
 
         return resultado.json();
+    }
+
+
+    // BUSCANDO QUANTIDISDE DE NOTIFICAÇÕES DO USUÁRIO
+    async getNofificacoes(token: string) {
+        const result = await fetch(`${this.urlBse}/nofificacoes`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        return result.json();
+    }
+
+    // VISUALIZANDO MENSAGENS
+    async visualizarMensagens(token: string, idDestino: string) {
+        await fetch(`${this.urlBse}/visualizar?idDestinatario=${idDestino}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+    }
+
+    //VISUALIZANDO MENSAGEM RECEBIDA NO CHAT
+    async visualizarMensagem(token: string, idMensagem: string) {
+        await fetch(`${this.urlBse}/visualizar/${idMensagem}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
     }
 
 }

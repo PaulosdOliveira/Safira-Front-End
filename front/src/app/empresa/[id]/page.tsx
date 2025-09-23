@@ -7,13 +7,14 @@ import { dadosCadastroVaga } from "@/app/vaga/cadastro/formSchema";
 import { CardUsuario } from "@/components/cadUsuario";
 import { Menu } from "@/components/menu";
 import { CardRascunho, GerenciadorDeRascunhos } from "@/components/rascunho";
+import { SelectEstadoCidade } from "@/components/Select";
 import { CandidatoCadastrado, PerfilCandidato } from "@/resources/candidato/candidatoResource";
 import { CandidatoService } from "@/resources/candidato/servico";
 import { perfilEmpresa } from "@/resources/empresa/model";
 import { CadastroModeloDeProposta, ModeloDeProposta } from "@/resources/empresa/rascunho/rascunhoResource";
 import { ServicoEmpresa } from "@/resources/empresa/sevico"
 import { CadastroMensagemDTO, MensagemDTO } from "@/resources/mensagem/mensagemResource";
-import { QualificacaoPerfil } from "@/resources/qualificacao/qualificacaoResource";
+import { QualificacaoSalva } from "@/resources/qualificacao/qualificacaoResource";
 import { ServicoSessao } from "@/resources/sessao/sessao";
 import { cidade, estado, UtilsService } from "@/resources/utils/utils";
 import { dadosVaga, VagaEmpresaDTO } from "@/resources/vaga_emprego/DadosVaga";
@@ -59,29 +60,31 @@ export default function PerfilEmpresa() {
             setPerfil(perfilEncontrado)
             const vagas = await vagaService.buscarVagasEmpresa(`${id}`);
             setVagas(vagas);
-            const rascunhos = await service.buscarRascunhos(`${sessao.getSessao()?.accessToken}`);
-            setRascunhos(rascunhos);
+            if (sessao.getSessao()?.perfil === "empresa") {
+                const rascunhos = await service.buscarRascunhos(`${sessao.getSessao()?.accessToken}`);
+                setRascunhos(rascunhos);
+            }
         })()
 
         // OBJETO DE CONEXÃO COM WS
-        const client = new Client({
-            brokerURL: 'ws:localhost:8080/conect',
-            reconnectDelay: 15000,
-            heartbeatIncoming: 10000,
-            heartbeatOutgoing: 10000,
-            connectHeaders: {
-                'Authorization': `Bearer ${sessao.getSessao()?.accessToken}`
-            }
-        })
-
-        client.onStompError = (erro) => { alert("Erro de WS: " + erro) }
-        if (!clientRef.current?.connected) {
-            client.onConnect = () => {
-                console.log("CONECTOU!!!!!!!!!!")
-            }
-            client.activate();
-            clientRef.current = client;
-        }
+        /*  const client = new Client({
+              brokerURL: 'ws:localhost:8080/conect',
+              reconnectDelay: 15000,
+              heartbeatIncoming: 10000,
+              heartbeatOutgoing: 10000,
+              connectHeaders: {
+                  'Authorization': `Bearer ${sessao.getSessao()?.accessToken}`
+              }
+          })
+  
+          client.onStompError = (erro) => {  }
+          if (!clientRef.current?.connected) {
+              client.onConnect = () => {
+                  console.log("CONECTOU!!!!!!!!!!")
+              }
+              client.activate();
+              clientRef.current = client;
+          }*/
     }, [])
 
 
@@ -175,7 +178,7 @@ export default function PerfilEmpresa() {
         setIndexListaCandidato(indexListaCandidato);
     }
 
-    const toQualificacao = (qualificacao: QualificacaoPerfil, key: number) => {
+    const toQualificacao = (qualificacao: QualificacaoSalva, key: number) => {
         return <Qualificao key={key} nivel={qualificacao.nivel} nome={qualificacao.nome} />
     }
     const renderizarQualificacoes = () => { return dadosModalCandidato?.qualificacoes?.map(toQualificacao) }
@@ -217,60 +220,94 @@ export default function PerfilEmpresa() {
 
     return (
         <>
-            <div className="h-[500vh] w-[100vw] pl-4">
-                <header className="h-20 w-full  bg-gray-50">
+            <div className="h-[200vh] w-full bg-gray-200">
+                <header className="h-20 w-full  bg-gray-100">
                     <div className=" h-full flex flex-row-reverse items-end">
                         <Menu />
                     </div>
                 </header>
-                <main>
-                    <section id="informacoes" >
-                        <div className=" z-30 pb-3 pr-2 bg-white flex flex-row-reverse items-center">
-                            <img id="capa" className=" h-48 w-[100%] mt-2 rounded-2xl z-0"
+                <main className=" ">
+                    <section id="informacoes" className="" >
+                        <div className="z-30 pb-3  flex flex-row-reverse items-center justify-center">
+                            <img id="capa" className=" h-48 w-[98%] rounded-2xl mt-2  z-0"
                                 src={`http://localhost:8080/empresa/capa/${id}`} />
-                            <div id="foto" className="border-8 border-gray-700 h-32 w-32 rounded-full  -mr-32 mt-28 bg-no-repeat bg-contain z-10"
+                            <div id="foto" className="border-2 border-gray-800 h-32 w-32 rounded-full  -mr-32 mt-28 bg-no-repeat bg-contain z-10"
                                 style={{ backgroundImage: `url(http://localhost:8080/empresa/foto/${id})` }} />
                         </div>
-                        <h5>{perfil?.nome}</h5>
-                        <pre className="text-wrap w-[50%]">{perfil?.descricao}</pre>
+                        <h2 className="pl-2 pb-3">{perfil?.nome}</h2>
+                        <pre className="text-wrap font-[arial] text-justify px-2 text-[.9em] mb-6">{perfil?.descricao}</pre>
                     </section>
-                    <hr className="my-9 w-[97%] m-auto" />
-                    <section id="sei_la">
-                        <div className="flex gap-7">
-                            <h2 onClick={() => setAba("vagas")} className={`${aba === "vagas" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`}>Vagas</h2>
-                            {sessao.getSessao()?.perfil === "empresa" && (
-                                <h2 onClick={() => setAba("rascunhos")} className={`${perfil?.id == id ? '' : 'hidden'} cursor-pointer ${aba === "rascunhos" ? 'bg-gray-200' : ''} p-1 rounded-lg transition duration-700`}>Rascunhos</h2>
-                            )}
-                        </div>
-                        <div className="flex flex-wrap items-start gap-1 mt-16  px-4  rounded-md m-auto">
-
-
+                    <hr className="mt-9 w-[97%] m-auto hidden" />
+                    <section >
+                        <nav className="" >
+                            <ul className="bg-white border border-gray-300 w-fit px-3 h-14 pl-3 rounded-[23px] flex items-center m-auto">
+                                <li onClick={() => setAba("vagas")} className={`${aba === "vagas" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`}>
+                                    <div className="flex">
+                                        <i className={` material-symbols`}>work</i>
+                                        <span className={`${aba == 'vagas' ? 'block' : 'hidden'}`}>Vagas</span>
+                                    </div>
+                                </li>
+                                {sessao.getSessao()?.perfil === "empresa" && (
+                                    <li onClick={() => setAba("rascunhos")} className={`${perfil?.id == id ? '' : 'hidden'} cursor-pointer ${aba === "rascunhos" ? 'bg-gray-200' : ''} p-1 rounded-lg transition duration-700 w-fit`}>
+                                        <div className="flex">
+                                            <i className={`material-symbols`}>Note_Alt</i>
+                                            <span className={`${aba == "rascunhos" ? 'block' : 'hidden'}`}>Rascunhos</span>
+                                        </div>
+                                    </li>
+                                )}
+                            </ul>
+                        </nav>
+                        <div className="flex flex-wrap items-start gap-1 mt-16    rounded-md m-auto">
                             {aba === "vagas" ? (
                                 !idVagaSelecionada ? (
-                                    renderizarVagas()
+                                    <section className="flex flex-wrap justify-center w-full gap-x-3  p-2">
+                                        {renderizarVagas()}
+                                    </section>
                                 ) : (
-                                    <div className="flex flex-col">
-                                        <nav className="mb-10">
-                                            <ul className="flex gap-4">
-                                                <li className={`cursor-pointer`} onClick={voltar}>Voltar</li>
-                                                <li className={`cursor-pointer ${nav === "dados" ? 'underline' : ''}`} onClick={() => setNav("dados")}>Dados</li>
-                                                <li className={`cursor-pointer ${nav === "candidatos" ? 'underline' : ''}`} onClick={buscarCandidatos}>Candidatos</li>
-                                                <li className={`cursor-pointer ${nav === "editar" ? 'underline' : ''}`} onClick={buscarDadosCadastrais}>Editar</li>
+                                    <div className="flex flex-col w-full">
+                                        <nav className="mb-10 pl-4">
+                                            <ul className="bg-white border border-gray-300 w-fit px-3 h-14 pl-3 rounded-[23px] flex items-center gap-x-2 m-auto">
+                                                <li onClick={voltar} className={`cursor-pointer p-1 rounded-lg transition duration-700 material-symbols`} title="Voltar">arrow_Back</li>
+                                                <li onClick={() => setNav("dados")} className={`${nav === "dados" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`} title="Dados">
+                                                    <div className="flex">
+                                                        <i className={` material-symbols`}>Data_check</i>
+                                                        <span className={`${nav == 'dados' ? 'block' : 'hidden'}`}>Dados</span>
+                                                    </div>
+                                                </li>
+                                                <li onClick={buscarCandidatos} className={`${nav === "candidatos" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`} title="Candidatos">
+                                                    <div className="flex">
+                                                        <i className={` material-symbols`}>Person</i>
+                                                        <span className={`${nav == 'candidatos' ? 'block' : 'hidden'}`}>Candidatos</span>
+                                                    </div>
+                                                </li>
+                                                <li onClick={buscarDadosCadastrais} className={`${nav === "editar" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`} title="Editar vaga">
+                                                    <div className="flex">
+                                                        <i className={` material-symbols`}>edit</i>
+                                                        <span className={`${nav == 'editar' ? 'block' : 'hidden'}`}>Editar</span>
+                                                    </div>
+                                                </li>
                                             </ul>
                                         </nav>
-
                                         <br />
                                         {cardVaga?.id && (
-                                            <div className="flex">
+                                            <div className="flex w-full">
                                                 {nav === "dados" && (
-                                                    <Vaga vaga={cardVaga} />
+                                                    <div className="w-full">
+                                                        <Vaga vaga={cardVaga} />
+                                                    </div>
                                                 )}
                                                 {nav === "candidatos" && (
-                                                    <div>
-                                                        <span className={`cursor-pointer mx-3 ${statusCandidato === 'EM_ANALISE' ? 'underline' : ''}`} onClick={() => setStatusCandidato("EM_ANALISE")}>Em análise</span>
-                                                        <span className={`cursor-pointer mx-3 ${statusCandidato === 'SELECIONADO' ? 'underline' : ''}`} onClick={() => setStatusCandidato("SELECIONADO")}>Selecionados</span>
-                                                        <span className={`cursor-pointer mx-3 ${statusCandidato === 'DISPENSADO' ? 'underline' : ''}`} onClick={() => setStatusCandidato("DISPENSADO")}>Dispensados</span>
-                                                        {renderizarCardCandidato()}
+                                                    <div className="w-full">
+                                                        <nav>
+                                                            <ul className="bg-white border border-gray-300 w-fit px-3 h-14 pl-3 rounded-[23px] flex items-center gap-x-2 m-auto">
+                                                                <li onClick={() => setStatusCandidato("EM_ANALISE")} className={`${statusCandidato === "EM_ANALISE" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`} title="Dados">Em análise</li>
+                                                                <li onClick={() => setStatusCandidato("SELECIONADO")} className={`${statusCandidato === "SELECIONADO" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`} title="Dados">Selecionados</li>
+                                                                <li onClick={() => setStatusCandidato("DISPENSADO")} className={`${statusCandidato === "DISPENSADO" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`} title="Dados">Dispensados</li>
+                                                            </ul>
+                                                        </nav>
+                                                        <section className="ml-4 flex flex-wrap gap-5 mt-10">
+                                                            {renderizarCardCandidato()}
+                                                        </section>
                                                         {modalIsOpen && (
                                                             <div className="fixed inset-0  z-50 overflow-hidden">
                                                                 <div className="inset-0 bg-black  absolute overflow-hidden opacity-50" />
@@ -303,7 +340,6 @@ export default function PerfilEmpresa() {
                                                                     <button onClick={() => { setPopUpPropostaIsOpen(true), setSelecionar(true) }} className="bg-gray-950 text-white p-2 rounded-lg">Selecionar</button>
                                                                     <button onClick={() => { setPopUpPropostaIsOpen(true), setSelecionar(false) }} className="p-2 rounded-lg ml-5 border">Dispensar</button>
                                                                     <PopUp selecionar={selecionar} isOpen={popUpPropostaIsOpen} click={enviarMensagem} mensagemPadrao={selecionar ? cardVaga.mensagemConvocacao : cardVaga.mensagemDispensa} close={() => setPopUpPropostaIsOpen(false)} />
-
                                                                 </div>
                                                             </div>
                                                         )}
@@ -315,7 +351,6 @@ export default function PerfilEmpresa() {
                                     </div>
                                 )
                             ) : (
-
                                 <>
                                     <GerenciadorDeRascunhos condition={true} enviarForm={CadastrarRascunho}>
                                         {renderizarRascunhos()}
@@ -382,11 +417,14 @@ interface miniCardVagaProps {
 
 const MiniCardVaga: React.FC<miniCardVagaProps> = ({ id, tempo_decorrido, titulo, click, candidaturas }) => {
     return (
-        <div className="border border-gray-300 w-80 rounded-md p-2 cursor-pointer my-4" onClick={click}>
-            <h2 className=" text-wrap">{titulo}</h2>
-            <span className="flex"><i className="material-symbols">acute</i>{tempo_decorrido}</span>
-            <p>{candidaturas}</p>
-            <p className="text-blue-700 hover:underline">Mais detalhes</p>
+        <div className="border border-gray-400 bg-white w-[260px]  h-[170px] rounded-[25px] p-2 cursor-pointer my-4" onClick={click}>
+            <div className="mt-2 pl-2">
+                <h4 className="text-wrap h-fit">{titulo}</h4>
+                <span className="flex  gap-x-1 h-fit"><i className="material-symbols">acute</i>{tempo_decorrido}</span>
+                <p className="h-fit">{candidaturas}</p>
+                <p className="text-blue-700 hover:underline">Mais detalhes</p>
+
+            </div>
         </div>
     )
 }
@@ -461,135 +499,139 @@ const FormEditarVaga: React.FC<formEditProps> = ({ vaga, idVaga }) => {
         }
 
         return (
-            <form onSubmit={handleSubmit}>
-                <div className="grid gap-4 sm:grid-cols-2  ">
-                    <div className="grid">
-                        <label>Adicione um titulo:</label>
-                        <input onChange={handleChange} value={values.titulo} id="titulo" type="text" placeholder="Titulo" />
+            <div className="sm:w-[700px] w-[600px] bg-white border border-gray-500 shadow-2xl rounded-md  m-auto  font-[arial] pt-10">
+                <h2 className="text-center mb-10">Aditar dados da vaga</h2>
+                <form className="" onSubmit={handleSubmit}>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="grid w-[300px] m-auto">
+                            <label>Adicione um titulo:</label>
+                            <input className="border h-10 rounded-md"
+                                onChange={handleChange} value={values.titulo} id="titulo" type="text" placeholder="Titulo" />
+                        </div>
+
+                        <div className="grid  w-[300px] m-auto">
+                            <label>Prazo em dias:</label>
+                            <input className="border h-10 rounded-md"
+                                onChange={handleChange} id="diasEmAberto" onKeyDown={definirTeclasPermitidas} type="number" inputMode="numeric" pattern="[0-9]*" value={values.diasEmAberto} />
+                        </div>
+
+                        <div className="grid  w-[300px] m-auto">
+                            <label>Salario:</label>
+                            <input className="border h-10"
+                                value={values.salario} onChange={handleChange} id="salario" type="text" placeholder="Salario" onKeyDown={definirTeclasPermitidas} />
+                        </div>
+
+                        <div className="grid  w-[300px] m-auto">
+                            <label>Modelo:</label>
+                            <select id="modelo" onChange={handleChange} value={values.modelo} className="border h-10 rounded-md">
+                                <option>PRESENCIAL</option>
+                                <option>HIBRIDO</option>
+                                <option>REMOTO</option>
+                            </select>
+                        </div>
+
+
+                        <div className="grid  w-[300px] m-auto">
+                            <label>Nível exigido:</label>
+                            <select id="nivel" onChange={handleChange} value={values.nivel} className="border h-10 rounded-md">
+                                <option >JUNIOR</option>
+                                <option >PLENO</option>
+                                <option >SENIOR</option>
+                                <option >INDEFINIDO</option>
+                            </select>
+                        </div>
+
+
+                        <div className="grid  w-[300px] m-auto">
+                            <label>Tipo de contrato:</label>
+                            <select id="tipoContrato" onChange={handleChange} value={values.tipoContrato} className="border h-10 rounded-md">
+                                <option >CLT</option>
+                                <option >PJ</option>
+                                <option >ESTAGIO</option>
+                                <option >TEMPORARIO</option>
+                            </select>
+                        </div>
+                        <div className="grid  w-[300px] m-auto">
+                            <label>Estado:</label>
+                            <select id="idEstado" onChange={handleChange} value={values.idEstado} className="border h-10 rounded-md">
+                                {renderizarOptionEstados()}
+                            </select>
+                        </div>
+
+                        <div className="grid  w-[300px] m-auto">
+                            <label>Cidade:</label>
+                            <select id="idCidade" onChange={handleChange} value={values.idCidade} className="border h-10 rounded-md">
+                                {renderizarOptionsCidade()}
+                            </select>
+                        </div>
+
+                        <div className="grid  w-[300px] m-auto">
+                            <label>Exclusividade de sexo:</label>
+                            <select id="ExclusivoParaSexo" onChange={handleChange} className="border h-10 rounded-md"
+                                value={values.exclusivoParaSexo}>
+                                <option value="TODOS" >Todos</option>
+                                <option value="MASCULINO">Masculino</option>
+                                <option value="FEMININO">Feminino</option>
+                            </select>
+                        </div>
+
+                        <div className="grid  w-[300px] m-auto">
+                            <label>Excluiva para PCD?:</label>
+                            <select id="ExclusivoParaPcd" onChange={handleChange} value={values.exclusivoParaPcd + ''} className="border h-10 rounded-md">
+                                <option value="true">SIM</option>
+                                <option value="false">NÃO</option>
+                            </select>
+                        </div>
                     </div>
+                    <div className="grid mt-10 gap-y-7 px-3">
 
-                    <div className="grid">
-                        <label>Prazo em dias:</label>
-                        <input onChange={handleChange} id="diasEmAberto" onKeyDown={definirTeclasPermitidas} type="number" inputMode="numeric" pattern="[0-9]*" value={values.diasEmAberto} />
+                        <div className="grid">
+                            <label>Adicione uma introdução para a  descrição:</label>
+                            <textarea className="h-40 rounded-lg" id="descricao" placeholder="Introdução" onChange={handleChange} value={values.descricao} />
+                        </div>
+
+
+                        <div className="grid ">
+                            <label>Descreva as pricipais atividades:</label>
+                            <textarea className="h-40 rounded-lg" id="principais_atividades" placeholder="Principais atividades" onChange={handleChange} value={values.principais_atividades} />
+                        </div>
+
+                        <div className="grid ">
+                            <label>Requisitos da vaga:</label>
+                            <textarea className="h-40 rounded-lg" id="requisitos" placeholder="Reuisitos" onChange={handleChange} value={values.requisitos} />
+                        </div>
+
+                        <div className="grid ">
+                            <label>Diferenciais para a vaga:</label>
+                            <textarea className="h-40 rounded-lg" id="diferenciais" placeholder="Diferenciais" onChange={handleChange} value={values.diferenciais} />
+                        </div>
+
+                        <div className="grid ">
+                            <label>Fale sobre o local de trabalho:</label>
+                            <textarea className="h-40 rounded-lg" id="local_de_trabalho" placeholder="Local de trabalho" onChange={handleChange} value={values.local_de_trabalho} />
+                        </div>
+
+
+                        <div className="grid ">
+                            <label>Informações sobre horario e escala:</label>
+                            <textarea className="h-40 rounded-lg" id="horario" placeholder="Horário" onChange={handleChange} value={values.horario} />
+                        </div>
+
+                        <div className="grid ">
+                            <label>Mensagem padrão:</label>
+                            <textarea className="h-40 rounded-lg" id="mensagemConvocacao" placeholder="Mensagem recebida pelo usuário ao ser avaliado" onChange={handleChange} value={values.mensagemConvocacao} />
+                        </div>
+
+                        <div className="grid ">
+                            <label>Mensagem padrão:</label>
+                            <textarea className="h-40 rounded-lg" id="mensagemDispensa" placeholder="Mensagem recebida pelo usuário ao ser avaliado" onChange={handleChange} value={values.mensagemDispensa} />
+                        </div>
                     </div>
-
-                    <div className="grid">
-                        <label>Salario:</label>
-                        <input value={values.salario} onChange={handleChange} id="salario" type="text" placeholder="Salario" onKeyDown={definirTeclasPermitidas} />
+                    <div className="flex justify-center mt-8">
+                        <input type="submit" value="Enviar" className="bg-gray-950 text-white h-10 w-56 rounded-md cursor-pointer" />
                     </div>
-
-                    <div className="grid">
-                        <label>Modelo:</label>
-                        <select id="modelo" onChange={handleChange} value={values.modelo}>
-                            <option>PRESENCIAL</option>
-                            <option>HIBRIDO</option>
-                            <option>REMOTO</option>
-                        </select>
-                    </div>
-
-
-                    <div className="grid">
-                        <label>Nível exigido:</label>
-                        <select id="nivel" onChange={handleChange} value={values.nivel}>
-                            <option >JUNIOR</option>
-                            <option >PLENO</option>
-                            <option >SENIOR</option>
-                            <option >INDEFINIDO</option>
-                        </select>
-                    </div>
-
-
-                    <div className="grid">
-                        <label>Tipo de contrato:</label>
-                        <select id="tipoContrato" onChange={handleChange} value={values.tipoContrato}>
-                            <option >CLT</option>
-                            <option >PJ</option>
-                            <option >ESTAGIO</option>
-                            <option >TEMPORARIO</option>
-                        </select>
-                    </div>
-
-
-                    <div className="grid">
-                        <label>Estado:</label>
-                        <select id="idEstado" onChange={handleChange} value={values.idEstado}>
-                            {renderizarOptionEstados()}
-                        </select>
-                    </div>
-
-                    <div className="grid">
-                        <label>Cidade:</label>
-                        <select id="idCidade" onChange={handleChange} value={values.idCidade}>
-                            <option></option>
-                            {renderizarOptionsCidade()}
-                        </select>
-                    </div>
-
-                    <div className="grid">
-                        <label>Exclusividade de sexo:</label>
-                        <select id="ExclusivoParaSexo" onChange={handleChange} value={values.exclusivoParaSexo}>
-                            <option value="TODOS" >Todos</option>
-                            <option value="MASCULINO">Masculino</option>
-                            <option value="FEMININO">Feminino</option>
-                        </select>
-                    </div>
-
-                    <div className="grid">
-                        <label>Excluiva para PCD?:</label>
-                        <select id="ExclusivoParaPcd" onChange={handleChange} value={values.exclusivoParaPcd + ''}>
-                            <option value="true">SIM</option>
-                            <option value="false">NÃO</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="segundo" className="grid grid-cols-1">
-
-                    <div className="grid ">
-                        <label>Adicione uma introdução para a  descrição:</label>
-                        <textarea id="descricao" placeholder="Introdução" onChange={handleChange} value={values.descricao} />
-                    </div>
-
-
-                    <div className="grid ">
-                        <label>Descreva as pricipais atividades:</label>
-                        <textarea id="principais_atividades" placeholder="Principais atividades" onChange={handleChange} value={values.principais_atividades} />
-                    </div>
-
-                    <div className="grid ">
-                        <label>Requisitos da vaga:</label>
-                        <textarea id="requisitos" placeholder="Reuisitos" onChange={handleChange} value={values.requisitos} />
-                    </div>
-
-                    <div className="grid ">
-                        <label>Diferenciais para a vaga:</label>
-                        <textarea id="diferenciais" placeholder="Diferenciais" onChange={handleChange} value={values.diferenciais} />
-                    </div>
-
-                    <div className="grid ">
-                        <label>Fale sobre o local de trabalho:</label>
-                        <textarea id="local_de_trabalho" placeholder="Local de trabalho" onChange={handleChange} value={values.local_de_trabalho} />
-                    </div>
-
-
-                    <div className="grid ">
-                        <label>Informações sobre horario e escala:</label>
-                        <textarea id="horario" placeholder="Horário" onChange={handleChange} value={values.horario} />
-                    </div>
-
-                    <div className="grid ">
-                        <label>Mensagem padrão:</label>
-                        <textarea id="mensagemConvocacao" placeholder="Mensagem recebida pelo usuário ao ser avaliado" onChange={handleChange} value={values.mensagemConvocacao} />
-                    </div>
-
-                    <div className="grid ">
-                        <label>Mensagem padrão:</label>
-                        <textarea id="mensagemDispensa" placeholder="Mensagem recebida pelo usuário ao ser avaliado" onChange={handleChange} value={values.mensagemDispensa} />
-                    </div>
-                </div>
-                <div className="flex justify-center mt-8">
-                    <input type="submit" value="Enviar" className="bg-gray-800 text-white p-1 rounded-md cursor-pointer" />
-                </div>
-            </form>
+                </form>
+            </div>
         )
     }
 }

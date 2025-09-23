@@ -1,5 +1,6 @@
 
 export class MensagemDTO {
+   id?: string;
    idEmpresa?: string;
    idCandidato?: number;
    texto?: string;
@@ -17,11 +18,18 @@ export class CadastroMensagemDTO {
 export class ContatosProps {
    id?: string;
    nome?: string;
+   isNew?: boolean;
+   indexContato?: number;
    ultimaMensagem?: string;
    urlFoto?: string;
+   naoVizualizadas?: number;
+   click?: () => void;
+   load?: () => void;
+   mensagens?: MensagemDTO[] = [];
 }
 
-export class DadosContato{
+export class DadosContato {
    nome?: string;
    urlFoto?: string;
+   
 }

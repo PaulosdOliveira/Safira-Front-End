@@ -64,45 +64,47 @@ export const Vaga: React.FC<vagaProps> = ({ vaga }) => {
     }
 
     return (
-        <div className=" w-[100vw] h-[100vh] bg-gray-50">
-            <div className="border border-gray-400 w-[50%] m-auto mt-5 p-3 rounded-lg shadow-2xl shadow-gray-700">
-
-                <div className="flex items-center">
+        <div className=" w-full h-[100vh]">
+            <div className=" sm:w-[600px]  border border-gray-500 w-[350px]  m-auto mt-5 p-3 rounded-lg bg-white">
+                <h1 className="text-black  font-bold text-center">{vaga?.titulo}</h1>
+                <div className="flex items-center my-2">
                     <div style={{ backgroundImage: `url(${urlFotoEmpresa})` }}
-                        className="w-28 h-28 border rounded-full bg-contain "></div>
-                    <h1 className="text-black pl-2 ">{vaga?.nome_empresa}</h1>
+                        className="w-20 h-20 border rounded-full bg-contain "></div>
+                    <h3 className="text-black pl-2 ">{vaga?.nome_empresa}</h3>
                 </div>
-                <p className="text-black text-3xl font-bold">{vaga?.titulo}</p>
-
                 <section className=" grid grid-cols-2 p-3"
                     id="detalhes_vaga">
-                    <div>
+                    <div className="flex">
                         <i className="material-symbols">Distance</i>
                         <p className="text-black inline-block">{`${vaga?.cidade}, ${vaga?.estado}`}</p>
                     </div>
 
-                    <div>
+                    <div className="flex">
                         <i className="material-symbols">home_work</i>
                         <p className="text-black inline-block">{vaga?.modelo}</p>
                     </div>
 
-                    <div>
+                    <div className="flex">
                         <i className="material-symbols">Contract</i>
                         <p className="text-black inline-block">{vaga?.tipoContrato}</p>
 
                     </div>
 
-                    <div>
+                    <div className="flex">
                         <i className="material-symbols">work_history</i>
                         <p className="text-black inline-block">{vaga?.nivel}</p>
                     </div>
 
-                    <div className="hidden">
+                    <div className={`flex ${vaga?.exclusivoParaPcd? '' : 'hidden'}`}>
                         <i className="material-symbols">person</i>
-                        <p className="text-black inline-block">{vaga?.id_empresa}</p>
+                        <p className="text-black inline-block">Exclusiva para PCD</p>
+                    </div>
+                    <div className={`flex ${vaga?.exclusivoParaSexo !== "TODOS"? '' : 'hidden'}`}>
+                        <i className="material-symbols">person</i>
+                        <p className="text-black inline-block">Exclusiva para sexo {vaga?.exclusivoParaSexo}</p>
                     </div>
 
-                    <div>
+                    <div className="flex">
                         <i className="material-symbols">Attach_money</i>
                         <p className="text-black inline-block">{vaga?.salario == 0 ? "A combinar" : vaga?.salario}</p>
                     </div>

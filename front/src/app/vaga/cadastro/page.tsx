@@ -71,136 +71,126 @@ export default function CadastroVaga() {
     }
 
     return (
-        <div className="main">
+        <div className="font-[arial]">
             <div className=" w-[400px] sm:w-[600px] md:w-[680px] lg:w-[720px] border border-gray-300 bg-white m-auto mt-12 rounded-lg shadow-2xl shadow-gray-600  p-5">
+                <h1 className="text-center ">Cadastro de vaga</h1>
+                <hr className="text-gray-400 my-20 w-[90%] m-auto" />
                 <form onSubmit={handleSubmit}>
                     <div className="grid gap-4 sm:grid-cols-2  ">
-
                         <div className="grid">
                             <label>Adicione um titulo:</label>
-                            <input id="titulo" onChange={handleChange} type="text" placeholder="Titulo" />
+                            <input className="border border-gray-400 h-10 rounded-lg" id="titulo" onChange={handleChange} type="text" placeholder="Titulo" />
                         </div>
-
                         <div className="grid">
                             <label>Prazo em dias:</label>
-                            <input id="diasEmAberto" onChange={handleChange} onKeyDown={definirTeclasPermitidas} type="number" inputMode="numeric" pattern="[0-9]*" />
+                            <input className="border border-gray-400 h-10 rounded-lg"
+                                id="diasEmAberto" onChange={handleChange} onKeyDown={definirTeclasPermitidas} type="number" inputMode="numeric" pattern="[0-9]*" />
                         </div>
-
                         <div className="grid">
                             <label>Salario:</label>
-                            <input id="salario" onChange={handleChange} type="text" placeholder="Salario" onKeyDown={definirTeclasPermitidas} />
+                            <input className="border border-gray-400 h-10 rounded-lg" id="salario" onChange={handleChange} type="text" placeholder="Salario" onKeyDown={definirTeclasPermitidas} />
                         </div>
-
                         <div className="grid">
                             <label>Modelo:</label>
-                            <select id="modelo" onChange={handleChange}>
+                            <select className="border border-gray-400 h-10 rounded-lg" id="modelo" onChange={handleChange}>
                                 <option>PRESENCIAL</option>
                                 <option>HIBRIDO</option>
                                 <option>REMOTO</option>
                             </select>
                         </div>
-
-
                         <div className="grid">
                             <label>Nível exigido:</label>
-                            <select id="nivel" onChange={handleChange}>
+                            <select className="border border-gray-400 h-10 rounded-lg" id="nivel" onChange={handleChange}>
                                 <option >JUNIOR</option>
                                 <option >PLENO</option>
                                 <option >SENIOR</option>
                                 <option >INDEFINIDO</option>
                             </select>
                         </div>
-
-
                         <div className="grid">
                             <label>Tipo de contrato:</label>
-                            <select id="tipoContrato" onChange={handleChange}>
+                            <select className="border border-gray-400 h-10 rounded-lg" id="tipoContrato" onChange={handleChange}>
                                 <option >CLT</option>
                                 <option >PJ</option>
                                 <option >ESTAGIO</option>
                                 <option >TEMPORARIO</option>
                             </select>
                         </div>
-
-
                         <div className="grid">
                             <label>Estado:</label>
-                            <select id="idEstado" onChange={(event) => selecionarEstado(event.target)}>
+                            <select className="border border-gray-400 h-10 rounded-lg" id="idEstado" onChange={(event) => selecionarEstado(event.target)}>
                                 <option value={``}>Todos</option>
                                 {renderizarOptionEstados()}
                             </select>
                         </div>
-
                         <div className="grid">
                             <label>Cidade:</label>
-                            <select id="idCidade" onChange={handleChange}>
+                            <select className="border border-gray-400 h-10 rounded-lg" id="idCidade" onChange={handleChange}>
                                 <option value={``}>Todos</option>
                                 {renderizarOptionsCidade()}
                             </select>
                         </div>
-
                         <div className="grid">
                             <label>Exclusividade de sexo:</label>
-                            <select id="exclusivoParaSexo" onChange={handleChange}>
+                            <select className="border border-gray-400 h-10 rounded-lg" id="exclusivoParaSexo" onChange={handleChange}>
                                 <option >TODOS</option>
                                 <option >MASCULINO</option>
                                 <option >FEMININO</option>
                             </select>
                         </div>
-
                         <div className="grid">
                             <label>Excluiva para PCD?:</label>
-                            <select id="exclusivoParaPcd" onChange={handleChange}>
+                            <select className="border border-gray-400 h-10 rounded-lg" id="exclusivoParaPcd" onChange={handleChange}>
                                 <option value={`${true}`}>SIM</option>
                                 <option value={`${false}`}>NÃO</option>
                             </select>
                         </div>
                     </div>
-                    <div id="segundo" className="grid grid-cols-1">
+                    <div  className="grid grid-cols-1 gap-y-10 mt-10">
 
                         <div className="grid ">
-                            <label>Adicione uma introdução para a  descrição:</label>
-                            <textarea id="descricao" onChange={handleChange} placeholder="Introdução" />
+                            <label>Descrição:</label>
+                            <textarea className="h-[200px] rounded-lg" id="descricao" onChange={handleChange} placeholder="Adicione uma introdução para a  descrição" />
                         </div>
 
 
                         <div className="grid ">
-                            <label>Descreva as pricipais atividades:</label>
-                            <textarea id="principais_atividades" onChange={handleChange} placeholder="Principais atividades" />
+                            <label>pricipais atividades:</label>
+                            <textarea className="h-[200px] rounded-lg" id="principais_atividades" onChange={handleChange} placeholder="Descreva as pricipais atividades" />
                         </div>
 
                         <div className="grid ">
-                            <label>Requisitos da vaga:</label>
-                            <textarea id="requisitos" onChange={handleChange} placeholder="Reuisitos" />
+                            <label>Requisitos:</label>
+                            <textarea className="h-[200px] rounded-lg" id="requisitos" onChange={handleChange} placeholder="Requisitos" />
                         </div>
 
                         <div className="grid ">
-                            <label>Diferenciais paa a vaga:</label>
-                            <textarea id="diferenciais" onChange={handleChange} placeholder="Diferenciais" />
+                            <label>Diferenciais:</label>
+                            <textarea className="h-[200px] rounded-lg" id="diferenciais" onChange={handleChange} placeholder="Diferenciais" />
                         </div>
 
                         <div className="grid ">
-                            <label>Fale sobre o local de trabalho:</label>
-                            <textarea id="local_de_trabalho" onChange={handleChange} placeholder="Local de trabalho" />
+                            <label>Local de trabalho:</label>
+                            <textarea className="h-[200px] rounded-lg" id="local_de_trabalho" onChange={handleChange} placeholder="Local de trabalho" />
                         </div>
 
 
                         <div className="grid ">
-                            <label>Informações sobre horario e escala:</label>
-                            <textarea id="horario" onChange={handleChange} placeholder="Horário" />
+                            <label>Horario:</label>
+                            <textarea className="h-[200px] rounded-lg" id="horario" onChange={handleChange} placeholder="Informações sobre horario e escala" />
                         </div>
 
                         <div className="grid ">
-                            <label>Texto selecionar candidato:</label>
-                            <textarea value={values.mensagemConvocacao} id="mensagemConvocacao" onChange={handleChange} placeholder="Mensagem padrão para candidato selecionado" />
+                            <label>Texto selecionar candidato:</label> 
+                            <textarea className="h-[200px] rounded-lg" value={values.mensagemConvocacao} id="mensagemConvocacao" onChange={handleChange} placeholder="Mensagem que candidato receberá ao ser selecionado" />
                         </div>
                         <div className="grid ">
                             <label>Texto dispensar candidato:</label>
-                            <textarea value={values.mensagemDispensa} id="mensagemDispensa" onChange={handleChange} placeholder="Mensagem padrão para candidato dispensado" />
+                            <textarea className="h-[200px] rounded-lg" value={values.mensagemDispensa} id="mensagemDispensa" onChange={handleChange} placeholder="Mensagem que candidato receberá ao ser dispensado" />
                         </div>
                     </div>
                     <div className="flex justify-center mt-8">
-                        <input type="submit" value="Enviar" className="bg-gray-800 text-white p-1 rounded-md cursor-pointer" />
+                        <input type="submit" value="Enviar" className="bg-gray-800 text-white p-1 rounded-md cursor-pointer w-56 h-10" />
                     </div>
                 </form>
             </div>
