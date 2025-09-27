@@ -5,7 +5,7 @@ import { Option } from "@/app/candidato/page";
 import { Vaga } from "@/app/vaga/[idVaga]/page";
 import { dadosCadastroVaga } from "@/app/vaga/cadastro/formSchema";
 import { CardUsuario } from "@/components/cadUsuario";
-import { Menu } from "@/components/menu";
+import { Menu } from "@/components/header";
 import { CardRascunho, GerenciadorDeRascunhos } from "@/components/rascunho";
 import { SelectEstadoCidade } from "@/components/Select";
 import { CandidatoCadastrado, PerfilCandidato } from "@/resources/candidato/candidatoResource";

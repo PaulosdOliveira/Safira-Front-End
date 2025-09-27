@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Belleza } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,9 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SelectAspi",
-  description: "SelectAspi",
-  
+  title: "Safira",
+  description: "Descricao",
 };
 
 export default function RootLayout({
@@ -27,6 +26,7 @@ export default function RootLayout({
     <html lang="pt-br">
     <head>
        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols"/>
+       <link rel="shortcut icon" href="/favi_safira.png" type="png" />
     </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased `}

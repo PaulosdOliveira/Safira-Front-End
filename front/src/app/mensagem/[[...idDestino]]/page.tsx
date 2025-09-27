@@ -85,8 +85,8 @@ export default function Chat() {
                 // CASO O CONTATO JA FAÇA PARTE DA LISTA ATUAl
                 setContatos(pre => {
                     return pre.map(c => {
-                        if (c.id == contatoRemetente.id) { 
-                            return(
+                        if (c.id == contatoRemetente.id) {
+                            return (
                                 {
                                     ...c, ultimaMensagem: contatoRemetente.ultimaMensagem, naoVizualizadas: c.naoVizualizadas! + (chatPresente ? 0 : 1)
                                 }
@@ -289,7 +289,6 @@ export default function Chat() {
                 )}
             </main>
         </div>
-
     )
 }
 

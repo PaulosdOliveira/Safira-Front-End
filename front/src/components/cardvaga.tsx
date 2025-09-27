@@ -11,16 +11,17 @@ export interface cardVagaProps {
     sexo_exclusivo?: string;
     exclusivo_pcd: boolean;
     periodo: string;
+    load: boolean;
 }
 
-export const CardVaga: React.FC<cardVagaProps> = ({ id, cidade, nome_empresa, estado, modelo, nivel, salario, tipo_contrato, titulo, exclusivo_pcd, sexo_exclusivo, periodo }) => {
+export const CardVaga: React.FC<cardVagaProps> = ({ id, cidade, nome_empresa, estado, modelo, nivel, salario, tipo_contrato, titulo, exclusivo_pcd, sexo_exclusivo, periodo, load }) => {
     let icone_modelo = "Domain";
     if (modelo === "HIBRIDO") icone_modelo = "home_work";
     else if (modelo === "REMOTO") icone_modelo = "home";
 
     return (
         <a href={`/vaga/${id}`} target="_blank"
-            className="border vaga border-gray-200 w-64 p-3 rounded-2xl bg-white shadow shadow-gray-300 cursor-pointer m-5">
+            className={`border vaga border-gray-200 w-64 p-3 rounded-2xl bg-white shadow shadow-gray-300 cursor-pointer m-5 ${load? 'animate-pulse' : ''}`}>
             <h3 className="text-justify pb-2">{titulo}</h3>
             <div className="flex">
                 <i className="material-symbols text-slate-600">Domain</i>

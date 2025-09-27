@@ -21,6 +21,7 @@ import { Curso, Experiencia, Formacao, QualificacaoComponent } from "@/component
 import { FormacaoService } from "@/resources/formacao/fiormacaoService";
 import { ExperienciaService } from "@/resources/experiencia/experienciaService";
 import { CursoService } from "@/resources/curso/cursoService";
+import { Header, Menu } from "@/components/header";
 
 
 
@@ -180,19 +181,7 @@ export default function PagePerfilCandidato() {
     if (perfil) {
         return (
             <div className="w-[100%] min-h-[100vh] max-h-fit bg-gray-200">
-                <header className=" h-[120px] bg-white shadow-sm shadow-gray-200 flex flex-col justify-end items-center py-2 z-10">
-                    <h1 className="hidden">SelectAspi</h1>
-                    <div className="w-80 h-20  bg-contain "
-                        style={{
-                            backgroundPosition: "center center",
-                            backgroundImage: `url(${"https://i.pinimg.com/736x/ff/b5/4c/ffb54c4c1b415d54f5bbab7729a359af.jpg"})`
-                        }} />
-                    <nav className="w-[100%]">
-                        <ul className="text-gray-950 text-right">
-                            <li className="inline-block hover:underline pr-4 pb-1"><a target="_self" href="/candidato/login">Bom dia</a></li>
-                        </ul>
-                    </nav>
-                </header>
+               <Header/>
                 <main className="bg-gray-020 py-5">
                     <div className=" w-[100vw] sm:w-[570px] md:w-[755px] lg:w-[900px] bg-white  flex items-center  px-2 pb-2 sm:m-auto border border-gray-300 shadow-lg">
                         <div className="">

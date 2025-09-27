@@ -1,0 +1,98 @@
+'use client'
+
+import { MensagemService } from "@/resources/mensagem/mensagemService";
+import { ServicoSessao } from "@/resources/sessao/sessao";
+import { Client } from "@stomp/stompjs";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+
+
+// HEADER
+export const Header = () => {
+    return (
+        <header className=" bg-white shadow-sm shadow-gray-200 flex items-end  py-2 z-10 text-center">
+            <div className=" pl-3.5 flex items-center gap-x-3">
+                <img className="h-[50px] w-[50px]" src="/favi_safira.png" />
+                <h1 style={{WebkitBackgroundClip: 'text', backgroundImage: 'linear-gradient(to left, #191970 0%, #182848 100%)'}} 
+                className="pt-1 font-[Belleza] text-transparent ">SAFIRA</h1>
+            </div>
+            <Menu />
+        </header>
+    )
+}
+
+// MENU DE NAVEGAÇÃO DO HEARDER (PERFIL, SAIR)
+export const Menu = () => {
+
+    const sessao = ServicoSessao().getSessao();
+    const router = useRouter();
+    const mensagemService = MensagemService();
+    const [menuAberto, setMenuAberto] = useState<boolean>(false);
+
+    const [notificacoes, setNotificacoes] = useState<string[]>([])
+    const notificacoesRef = useRef<string[]>([])
+    const clientRef = useRef<Client | null>(null);
+    const client = new Client({
+        brokerURL: 'ws://localhost:8080/conect',
+        heartbeatIncoming: 10000,
+        heartbeatOutgoing: 10000,
+        reconnectDelay: 20000,
+        connectHeaders: {
+            'Authorization': `Bearer ${sessao?.accessToken}`
+        }
+    });
+
+    useEffect(() => {
+        (async () => {
+            const result = await mensagemService.getNofificacoes(`${sessao?.accessToken}`);
+            setNotificacoes(result)
+            notificacoesRef.current = result;
+
+            // CONFIGURANDO WS
+            if (!clientRef.current?.connected) {
+                client.onConnect = () => {
+                    clientRef.current?.subscribe(`/mensagem/enviar-mensagem/${sessao?.id}`, (message) => {
+                        // ID DO REMETENTE DA MENSAGEM
+                        let id = sessao?.perfil == 'candidato' ? JSON.parse(message.body).idEmpresa : JSON.parse(message.body).idCandidato;
+                        if (!notificacoesRef.current.some(item => item === id)) {
+                            notificacoesRef.current.push(id);
+                            setNotificacoes(pre => [...pre]);
+                        }
+                    })
+                }
+                client.activate();
+                clientRef.current = client;
+            }
+        })()
+
+    }, [])
+
+    function sair() {
+        ServicoSessao().sair();
+        router.push("/empresa/login")
+    }
+
+    return (
+        <div className="flex justify-end items-end h-6 w-full">
+            <div className="flex relative">
+                <i title="Mensagens" className="material-symbols  cursor-pointer mx-5" onClick={() => router.push("/mensagem")}>chat</i>
+                <span onClick={() => alert(JSON.stringify(notificacoes))}
+                    className={`${notificacoes.length > 0 ? '' : 'hidden'} absolute left-8 border rounded-full h-5 w-5  flex justify-center items-center text-white bg-gray-800`}
+                    id="qtd_mensagens">{notificacoes.length}</span>
+            </div>
+            <div className="flex pr-3">
+                <div style={{ backgroundImage: `url(http://localhost:8080/${sessao?.perfil}/foto/${sessao?.id})` }}
+                    className="h-8 w-8 rounded-full border border-gray-200 bg-contain" />
+                <i onClick={() => setMenuAberto(!menuAberto)} className="material-symbols cursor-pointer">arrow_drop_down</i>
+            </div>
+            <div className="relative">
+                <nav className={`border border-gray-400 mt-0.5 rounded-md z-30 bg-white w-20 text-center absolute -left-21 ${!menuAberto ? 'hidden' : ''}`}>
+                    <ul>
+                        <li onClick={() => router.push(`/${sessao?.perfil}/${sessao?.id}`)} className="cursor-pointer hover:bg-gray-200 rounded-md p-0.5">Perfil</li>
+                        <li onClick={sair} className="cursor-pointer hover:bg-gray-200 rounded-md p-0.5">Sair</li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    )
+}

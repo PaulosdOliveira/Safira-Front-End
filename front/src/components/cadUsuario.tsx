@@ -6,13 +6,15 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 
-
-export const CardUsuario: React.FC<ConsultaCandidatoDTO> = ({ nome, id, cidade, estado, idade }) => {
+interface cardProps extends ConsultaCandidatoDTO {
+    load: boolean;
+}
+export const CardUsuario: React.FC<cardProps> = ({ nome, id, cidade, estado, idade, load }) => {
 
 
     return (
         < a href={`/candidato/${id}`} target="_blank"
-            className="border border-gray-300 bg-white rounded-lg shadow-md shadow-gray-400 cursor-pointer w-72 p-2  h-32 ">
+            className={`border border-gray-300 bg-white rounded-lg shadow-md shadow-gray-400 cursor-pointer w-72 p-2 h-32 ${load ? 'animate-pulse' : ''}`}>
             <div className="flex items-center">
                 <div style={{ backgroundImage: `url(http://localhost:8080/candidato/foto/${id})` }}
                     className="border border-gray-100 w-20 h-20 rounded-full bg-cover bg-no-repeat" />

@@ -1,26 +1,38 @@
 'use client'
 
 
-import { ServicoSessao } from "@/resources/sessao/sessao";
+import { ServicoSessao, Sessao } from "@/resources/sessao/sessao";
 import { useEffect, useState } from "react";
-import { MainEmpresa } from "./empresa/main";
 import MainCandidato from "./candidato/page";
+import MainEmpresa from "./empresa/page";
+import { useRouter } from "next/navigation";
+import { Loading } from "@/components/load/loadingPage";
 
 export default function Home() {
-  const [perfil, setPerfil] = useState<any>("");
+  const [sessao, setSessao] = useState<Sessao | null>(null);
+  const router = useRouter();
+
+
 
   useEffect(() => {
-    setPerfil(ServicoSessao().getSessao()?.perfil);
+    setTimeout(() => {
+      const sessao = ServicoSessao().getSessao();
+      if (!sessao) router.push("/candidato/login");
+      setSessao(sessao);
+    }, 5000)
+
   }, [])
 
+  if (!sessao) return <Loading/>;
 
-  if (perfil === "candidato") {
+  // Página principal caso seja candidato
+  if (sessao!.perfil === "candidato") {
     return (
       <div className="">
         <MainCandidato />
       </div>);
   }
-
+  // Página principal caso seja candidato
   return <MainEmpresa />
 }
 

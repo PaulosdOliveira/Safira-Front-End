@@ -5,7 +5,7 @@ import { accessToken, dadosLogin, formLoginValidator, ServicoSessao, valoresInic
 import { useFormik } from "formik";
 
 
-export default function candidatoLoginPage() {
+export default function LoginPageCandidato() {
 
 
     const service = CandidatoService();

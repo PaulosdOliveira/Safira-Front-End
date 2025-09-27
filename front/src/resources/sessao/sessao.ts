@@ -61,7 +61,7 @@ class SessaoService {
             const login: Sessao = JSON.parse(sessao ? sessao : '');
             return login;
         } catch (erro) {
-
+            return null;
         }
     }
 

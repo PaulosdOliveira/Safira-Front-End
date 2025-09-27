@@ -12,15 +12,16 @@ import { Qualificacao, qualificacaoSelecionada, qualificacaoUsuario } from "@/re
 import { QualificacaoService } from "@/resources/qualificacao/qualificacaoService"
 import { CardUsuario } from "@/components/cadUsuario"
 import { useRouter } from "next/navigation"
-import { Menu } from "@/components/menu"
+import { Menu } from "@/components/header"
 import { QualificacaoSelecionada } from "@/components/perfilCandidato/selecao"
 import AsyncSelect from "react-select/async"
 import { OptionFormacaoDTO } from "@/resources/formacao/formacaoResource"
 import { FormacaoService } from "@/resources/formacao/fiormacaoService"
+import { Loading } from "@/components/load/loadingPage"
 
 
 
-export const MainEmpresa = () => {
+export default function MainEmpresa() {
     const [nivel, setNivel] = useState<string>("INTERMEDIARIO");
     const [qualificacoesSelecionadas, setQualificacoesSelecionadas] = useState<qualificacaoSelecionada[]>([]);
     const [cidades, setCidades] = useState<cidade[]>([]);
@@ -33,10 +34,15 @@ export const MainEmpresa = () => {
         onSubmit: submit,
         enableReinitialize: true
     })
+    const [buscando, setBuscando] = useState(false);
 
-    function abrirFiltros() {
-
-    }
+    // ---->>>>>>> CARANTINDO QUE A PÁGINA SÓ SERÁ RENDERIZADA APOS MONTAR TODOS OS COMPONENTES  <<<<<----------
+    const [montado, setMontado] = useState(false);
+    useEffect(() => {
+        setMontado(true);
+    }, [])
+    if (!montado) return <Loading />;
+    // ---->>>>>>> CARANTINDO QUE A PÁGINA SÓ SERÁ RENDERIZADA APOS MONTAR TODOS OS COMPONENTES  <<<--------------
 
     const loadOptions = async (inputValue: string) => {
         if (!inputValue.trim().length) return [];
@@ -89,6 +95,7 @@ export const MainEmpresa = () => {
     }
 
     async function submit() {
+        setBuscando(true)
         values.qualificacoes = qualificacoesSelecionadas.map(mapearQualificacoesSelecionadas);
         const token = sessao.getSessao()?.accessToken;
         if (token) {
@@ -97,11 +104,13 @@ export const MainEmpresa = () => {
                 setCandidatos(resultado)
             else setCandidatos([])
         }
+        setBuscando(false)
     }
 
     function gerarCardUsuario(candidato: ConsultaCandidatoDTO) {
         return <CardUsuario cidade={candidato.cidade} estado={candidato.estado}
-            nome={`${candidato.nome}`} key={candidato.id} id={candidato.id} idade={candidato.idade} />
+            nome={`${candidato.nome}`} key={candidato.id} id={candidato.id} idade={candidato.idade}
+            load={buscando} />
     }
 
     function renderizarCardsUsuario() {
@@ -126,7 +135,7 @@ export const MainEmpresa = () => {
 
     return (
         <div className="w-full h-fit border bg-gray-200 ">
-            <header className=" w-full  flex items-end pb-2 bg-white  border border-gray-400 ">
+            <header className="w-full flex items-end pb-2 bg-white  border border-gray-400 ">
                 <div id="filtro" className="text-[.8em] flex flex-wrap items-end  w-[80%]">
                     <div className="">
                         <div className="flex items-end rounded-lg p-2">
@@ -171,7 +180,7 @@ export const MainEmpresa = () => {
                 <i onClick={() => setMaisFiltros(!maisFiltros)} className="material-symbols cursor-pointer">tune</i>
             </div>
             <main className="w-full flex  relative">
-                <div id="mais-filtros" className={` w-[250px] px-2 lg:flex flex-col items-center lg:relative lg:top-0 absolute h-[60vh] top-[-1.5%] -left-1.5
+                <div id="mais-filtros" className={` w-[240px] px-2  flex-col items-center lg:relative lg:top-0 absolute  -top-2 -left-1.5
                      ${!maisFiltros ? '-translate-x-[250px]' : '-translate-x-0'} transition duration-700 z-10`}>
                     <div id="filtros"
                         className=" rounded-lg flex flex-col  p-3 mt-3 bg-white border border-gray-400">
@@ -180,7 +189,8 @@ export const MainEmpresa = () => {
                             <label className="font-bold">Sexo:</label>
                             <br />
                             <div className="text-[.8em] flex  items-center gap-x-1">
-                                <select id="sexo" onChange={handleChange} value={values.sexo}>
+                                <select className="border border-gray-400 h-6"
+                                    id="sexo" onChange={handleChange} value={values.sexo}>
                                     <option value="">Todos</option>
                                     <option value="MASCULINO">Masculino</option>
                                     <option value="FEMININO">Feminino</option>
@@ -188,13 +198,14 @@ export const MainEmpresa = () => {
                             </div>
                         </div>
                         <div className="inline-block ">
-                            <label className="font-bold">Empregados?:</label>
+                            <label className="font-bold">Status:</label>
                             <br />
                             <div className="text-[.8em] flex items-center gap-x-1">
-                                <select id="trabalhando" onChange={handleChange} value={`` + values.trabalhando}>
+                                <select className="border border-gray-400 h-6 mt-1"
+                                    id="trabalhando" onChange={handleChange} value={`` + values.trabalhando}>
                                     <option value="">Todos</option>
-                                    <option value="true">Sim</option>
-                                    <option value="false">Não</option>
+                                    <option value="true">Empregado</option>
+                                    <option value="false">Desempregado</option>
                                 </select>
                             </div>
                         </div>
@@ -202,7 +213,8 @@ export const MainEmpresa = () => {
                             <label className="font-bold">PCD?:</label>
                             <br />
                             <div className="text-[.8em] flex items-center gap-x-1">
-                                <select id="pcd" onChange={handleChange} value={`` + values.pcd}>
+                                <select className="border border-gray-400 h-6"
+                                    id="pcd" onChange={handleChange} value={`` + values.pcd}>
                                     <option value="">Todos</option>
                                     <option value="true">Sim</option>
                                     <option value="false">Não</option>
