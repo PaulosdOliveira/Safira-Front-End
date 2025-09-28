@@ -136,7 +136,7 @@ export default function MainCandidato() {
 
   return (
     <div ref={divRef} className="min-h-[100vh] h-auto bg-[rgb(249,249,249)] font-[arial]">
-      <Header />
+      <Header logado={true}/>
       <div className="pb-1">
         <div className="w-[100%] flex justify-center items-center h-20">
           <div className="flex items-center justify-center w-full">

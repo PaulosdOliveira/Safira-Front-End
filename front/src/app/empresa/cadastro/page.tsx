@@ -5,6 +5,8 @@ import { dadosCadastroEmpresa, dadosFormCadastroEmpresa, validation, valoresInic
 import { useState } from "react"
 import { ServicoEmpresa } from "@/resources/empresa/sevico";
 import { accessToken, dadosLogin, ServicoSessao } from "@/resources/sessao/sessao";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 
 export default function cadastroEmpresa() {
@@ -49,9 +51,10 @@ export default function cadastroEmpresa() {
     }
 
     return (
-        <>
-            <div className="border border-gray-300 w-[660px] px-10 m-auto mt-16 text-center rounded-sm py-8 font-[arial] mb-16">
-                <h1>Cadastro PJ</h1>
+        <div className="bg-gray-50">
+        <Header logado={false}/>
+            <div className="border border-gray-300 bg-white shadow w-full sm:w-[660px] px-10 m-auto mt-16 text-center rounded-sm py-8 font-[arial] mb-16">
+                <h1 className="my-5">Cadastro PJ</h1>
                 <form onSubmit={handleSubmit} className="">
                     <div style={{ backgroundImage: `url(${urlFoto})` }} className=" w-32 h-32 mb-5 flex m-auto bg-cover rounded-full border border-gray-400">
                         <label className=" w-full cursor-pointer ">
@@ -83,7 +86,8 @@ export default function cadastroEmpresa() {
                     <input className=" h-10 rounded-full w-[270px]  text-white bg-gray-900 px-2 cursor-pointer" type="submit" value="Cadastrar-se" />
                 </form>
             </div>
-        </>
+            <Footer/>
+        </div>
     )
 
 }

@@ -14,13 +14,20 @@ import { CadastroExperiencia } from "@/resources/experiencia/experineciaResource
 import { CadastroCurso } from "@/resources/curso/cursoResource";
 import { Curso, Experiencia, Formacao, QualificacaoComponent } from "@/components/perfilCandidato/CompoentsCadastroCandidato";
 import { dadosFormCadastroEmpresa } from "@/app/empresa/cadastro/formSchema";
+import AsyncSelect from "react-select/async";
+import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
 
 
 
 
 
 export default function cadastroCandidato() {
+    return <FormCadastro />
+}
 
+
+const FormCadastro = () => {
     const [urlFoto, setUrlFoto] = useState<string>("");
     const [nomePdf, setNomePdf] = useState<string>("Selecionar");
     const service = CandidatoService();
@@ -160,12 +167,10 @@ export default function cadastroCandidato() {
 
     // BUSCANDO QUALIFICAÇÕES NO BANCO DE DADOS
     async function buscarQualificacoes(nome: string) {
-        if (!nome || nome.trim().length === 0) {
-            setResultQualificacoes([]);
-        } else {
-            const qualificacoesEncontradas: Qualificacao[] = await qualificacaoService.buscarQualificacoes(nome);
-            setResultQualificacoes(qualificacoesEncontradas);
-        }
+        const qualificacoesEncontradas: Qualificacao[] = await qualificacaoService.buscarQualificacoes(nome);
+        return qualificacoesEncontradas.map((q) => ({
+            value: q.id, label: q.nome
+        }))
     }
     // RENDERIZAR RESULTADO DA BUSCA PRO QUALIFICAÇÕES
     const renderizarQUalificacoesEncontradas = () => {
@@ -271,23 +276,12 @@ export default function cadastroCandidato() {
 
 
     return (
-        <div className="bg-gray-100">
-            <header className="h-[100px] shadow-sm shadow-gray-200 flex flex-col justify-end items-center py-2 z-10 bg-white">
-                <div className="w-80 h-20  bg-cover"
-                    style={{
-                        backgroundPosition: "center center",
-                        backgroundImage: `url(${"https://sdmntprnorthcentralus.oaiusercontent.com/files/00000000-ab98-622f-8ea1-1a044a1eed60/raw?se=2025-08-31T07%3A05%3A54Z&sp=r&sv=2024-08-04&sr=b&scid=4b3e33c9-b272-5a86-be4d-694409c802f2&skoid=c953efd6-2ae8-41b4-a6d6-34b1475ac07c&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-08-31T00%3A48%3A05Z&ske=2025-09-01T00%3A48%3A05Z&sks=b&skv=2024-08-04&sig=GTnYTKvKp65xR6pok4gX2vzXaWr%2Bzi0N70zb8gXkMss%3D"})`
-                    }} />
-                <nav className="w-[100%]">
-                    <ul className="text-gray-950 text-right">
-                        <li className="inline-block hover:underline pr-4 pb-1 text-blue-600"><a target="_self" href="/empresa/login">Login para empresas</a></li>
-                    </ul>
-                </nav>
-            </header>
-            <main className="font-[arial] pt-10">
+        <div className="bg-gray-100 ">
+           <Header/>
+            <main className="font-[arial] h-full mb-20 pt-10 ">
                 <h2 className="text-center">Construa o seu perfil profissional</h2>
                 <form onSubmit={handleSubmit}
-                    className=" w-[370px] sm:w-[600px] md:w-[700px] border-[.7px] border-gray-500 shadow-lg shadow-gray-400  mt-3 p-5 rounded-lg bg-white  m-auto">
+                    className=" w-full sm:w-[600px] md:w-[700px] border-[.7px] border-gray-500 shadow-lg shadow-gray-400  mt-3 p-5 rounded-lg bg-white  m-auto">
                     <div id="Foto" className="flex mt-6 mb-2   w-[100%]" >
                         <label className=" foto rounded-full m-auto cursor-pointer border border-gray-500 bg-cover bg-no-repeat w-36 h-36"
                             style={{ backgroundImage: `url(${urlFoto})` }}>
@@ -375,7 +369,7 @@ export default function cadastroCandidato() {
                                 <option>NÃO</option>
                                 <option>SIM</option>
                             </select>
-                            <span className=" min-h-[16px]">{}</span>
+                            <span className=" min-h-[16px]">{ }</span>
                         </div>
                         <div className="grid">
                             <label htmlFor="dataNascimento">Data de nascimento:</label>
@@ -384,141 +378,161 @@ export default function cadastroCandidato() {
                             <span className="text-[.6em] min-h-[16px]  text-red-700 ">{errors.dataNascimento}</span>
                         </div>
                     </div>
-                    <h3>Adicione suas formações <span className="text-[.6em]">(Opcional/Importante)</span></h3>
-                    <i onClick={() => setAddFormacao(!addFormacao)} className="material-symbols cursor-pointer">{addFormacao ? "done" : "add"}</i>
-                    {addFormacao && (
-                        <>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit">
-                                <div className="grid">
-                                    <input id="fInstituicao" type="text" placeholder="Instituição"
-                                        className="h-8 rounded-md border" />
-                                </div>
-                                <div className="grid">
-                                    <input id="fCurso" type="text" placeholder="Curso"
-                                        className="h-8 rounded-sm border" />
-                                </div>
-                                <div className="grid">
-                                    <label htmlFor="fNivel" className="">Nivel: </label>
-                                    <select className="border  h-9 rounded-sm" id="fNivel">
-                                        <option>TECNICO </option>
-                                        <option>TECNOLOGO </option>
-                                        <option>GRADUACAO </option>
-                                        <option>POS_GRADUACAO </option>
-                                        <option>MESTRADO </option>
-                                        <option>DOUTORADO </option>
-                                    </select>
-                                </div>
-                                <div className="grid">
-                                    <label htmlFor="fSituacao" className="">Situação: </label><div />
-                                    <select className="border h-9 rounded-sm" id="fSituacao">
-                                        <option value="CONCLUIDO">Concluido</option>
-                                        <option value="EM_ANDAMENTO">Em andamento</option>
-                                    </select>
-                                </div>
-                                <div className="" >
-                                    <div className="w-36 h-9 flex flex-col justify-center border text-center  rounded-md cursor-pointer" onClick={adicionarFormacao}>Adicionar</div>
-                                </div>
-                            </div>
-                            {renderizarFormacoes()}
-                        </>
-                    )}
-
-                    <h3>Suas experiencia <span className="text-[.6em]">(Opcional/Importante)</span></h3>
-                    <i onClick={() => setAddExperiencia(!addExperiencia)} className="material-symbols cursor-pointer">{addExperiencia ? "done" : "add"}</i>
-                    {addExperiencia && (
-                        <>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit">
-                                <div>
-                                    <input id="eEmpresa" type="text" placeholder="Empresa" className="w-[210px] h-8 rounded-sm border" />
-                                </div>
-                                <div>
-                                    <input id="eCargo" type="text" placeholder="Cargo" className="w-[210px] h-8 rounded-sm border" />
-
-                                </div>
-                                <div className="grid">
-                                    <label htmlFor="eDuracao">Duração:</label>
-                                    <input id="eDuracao" type="text" placeholder="Ex: 1 ano e 7 meses"
-                                        className=" h-8 rounded-sm border" />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 pt-10">
-                                <label htmlFor="eDescricao">Descrição:</label>
-                                <textarea id="eDescricao" placeholder="Descrição" className="rounded-lg mt-3 h-32 pl-1 mb-5" />
-                            </div>
-
-                            <div className="">
-                                <div className="m-auto w-36 h-9 flex flex-col justify-center border text-center  rounded-md cursor-pointer" onClick={adicionarExperiencia}>Adicionar</div>
-                            </div>
-                            {renderizarExperiencias()}
-                        </>
-
-                    )}
-                    <h3>Cursos complementares <span className="text-[.6em]">(Opcional)</span></h3>
-                    <i onClick={() => setAddCurso(!addCurso)} className="material-symbols cursor-pointer">{addCurso ? "done" : "add"}</i>
-                    {addCurso && (
-                        <>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit">
-                                <div className="grid">
-                                    <label htmlFor="cInstituicao">Instituição:</label>
-                                    <input id="cInstituicao" type="text" placeholder="Instituição" className="h-8 w-[220px] border" />
-                                </div>
-                                <div className="grid">
-                                    <label htmlFor="cCurso">Curso:</label>
-                                    <input id="cCurso" type="text" placeholder="Nome do curso" className="h-8 w-[220px] border" />
-                                </div>
-                                <input id="cCargaHoraria" type="number" placeholder="Carga horária" className="h-8 w-[220px] border" />
-                                <div className="w-36 h-8  flex flex-col justify-center border text-center rounded-sm cursor-pointer" onClick={adicionarCurso}>Adicionar</div>
-                            </div>
-                            {renderizarCurso()}
-                        </>
-                    )
-                    }
-                    <h3>Qualificações <span className="text-[.6em]">(Opcional/Importante)</span></h3>
-                    <i onClick={() => setAddQualificacoes(!addQualificacoes)} className="material-symbols cursor-pointer">{addQualificacoes ? "done" : "add"}</i>
-                    {addQualificacoes && (
-                        <>
-                            <div className="grid  gap-2 w-fit">
-                                <div className="grid ">
-                                    <label htmlFor="nivel">Nivel:</label>
-                                    <select className="border border-gray-500 pl-2 w-fit h-8" id="nivel" onChange={handleChange}>
-                                        <option value="BASICO">Básico</option>
-                                        <option value="INTERMEDIARIO">Intermediario</option>
-                                        <option value="INTERMEDIARIO">Avançado</option>
-                                    </select>
-                                </div>
-                                <div className=" relative">
-                                    <div className="grid relative">
-
-                                        <label htmlFor="nome_qualificacao">Qualificação:</label>
-                                        <input onChange={(event) => buscarQualificacoes(event.target.value)} id="nome_qualificacao" type="text" placeholder="Busque aqui" className="w-[210px] rounded-md h-8 border" />
+                    <div className="pl-3">
+                        <h3>Adicione suas formações <span className="text-[.6em]">(Opcional/Importante)</span></h3>
+                        <i onClick={() => setAddFormacao(!addFormacao)} className="material-symbols cursor-pointer">{addFormacao ? "done" : "add"}</i>
+                        {addFormacao && (
+                            <>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit">
+                                    <div className="grid">
+                                        <input id="fInstituicao" type="text" placeholder="Instituição"
+                                            className="h-8 rounded-md border" />
                                     </div>
-                                    <div className={`border border-gray-200 w-[210px] absolute top-[100%] z-10  bg-white `}>
-                                        {renderizarQUalificacoesEncontradas()}
+                                    <div className="grid">
+                                        <input id="fCurso" type="text" placeholder="Curso"
+                                            className="h-8 rounded-sm border" />
+                                    </div>
+                                    <div className="grid">
+                                        <label htmlFor="fNivel" className="">Nivel: </label>
+                                        <select className="border  h-9 rounded-sm" id="fNivel">
+                                            <option>TECNICO </option>
+                                            <option>TECNOLOGO </option>
+                                            <option>GRADUACAO </option>
+                                            <option>POS_GRADUACAO </option>
+                                            <option>MESTRADO </option>
+                                            <option>DOUTORADO </option>
+                                        </select>
+                                    </div>
+                                    <div className="grid">
+                                        <label htmlFor="fSituacao" className="">Situação: </label><div />
+                                        <select className="border h-9 rounded-sm" id="fSituacao">
+                                            <option value="CONCLUIDO">Concluido</option>
+                                            <option value="EM_ANDAMENTO">Em andamento</option>
+                                        </select>
+                                    </div>
+                                    <div className="" >
+                                        <div className="w-36 h-9 flex flex-col justify-center border text-center  rounded-md cursor-pointer" onClick={adicionarFormacao}>Adicionar</div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="w-36 h-9 flex flex-col justify-center border text-center my-5 rounded-md cursor-pointer" onClick={selecionarQualificacao}>Adicionar</div>
 
-                            <div className=" text-nowrap flex gap-x-3 px-4 overflow-x-auto ">
-                                {renderizarQualificacoes()}
-                            </div>
-                        </>
-                    )
-                    }
+                                <h4>Formações adicionadas</h4>
+                                <section className="flex gap-x-4 overflow-x-auto">
+                                    {renderizarFormacoes()}
+                                </section>
+                                <hr className="w-[85%] text-gray-600 my-5 m-auto" />
+                            </>
+                        )}
 
+                        <h3>Suas experiencia <span className="text-[.6em]">(Opcional/Importante)</span></h3>
+                        <i onClick={() => setAddExperiencia(!addExperiencia)} className="material-symbols cursor-pointer">{addExperiencia ? "done" : "add"}</i>
+                        {addExperiencia && (
+                            <>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit">
+                                    <div>
+                                        <input id="eEmpresa" type="text" placeholder="Empresa" className="w-[210px] h-8 rounded-sm border" />
+                                    </div>
+                                    <div>
+                                        <input id="eCargo" type="text" placeholder="Cargo" className="w-[210px] h-8 rounded-sm border" />
+                                    </div>
+                                    <div className="grid">
+                                        <label htmlFor="eDuracao">Duração:</label>
+                                        <input id="eDuracao" type="text" placeholder="Ex: 1 ano e 7 meses"
+                                            className=" h-8 rounded-sm border" />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-1 pt-10">
+                                    <label htmlFor="eDescricao">Descrição:</label>
+                                    <textarea id="eDescricao" placeholder="Descrição" className="rounded-lg mt-3 h-32 pl-1 mb-5" />
+                                </div>
+
+                                <div className="">
+                                    <div className="m-auto w-36 h-9 flex flex-col justify-center border text-center  rounded-md cursor-pointer" onClick={adicionarExperiencia}>Adicionar</div>
+                                </div>
+                                <h4>Experiencias adicionadas</h4>
+                                <section className="min-h-fit max-h-72 grid gap-y-3 overflow-x-auto">
+                                    {renderizarExperiencias()}
+                                </section>
+                                <hr className="w-[85%] text-gray-600 my-5 m-auto" />
+                            </>
+
+                        )}
+                        <h3>Cursos complementares <span className="text-[.6em]">(Opcional)</span></h3>
+                        <i onClick={() => setAddCurso(!addCurso)} className="material-symbols cursor-pointer">{addCurso ? "done" : "add"}</i>
+                        {addCurso && (
+                            <>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit">
+                                    <div className="grid">
+                                        <label htmlFor="cInstituicao">Instituição:</label>
+                                        <input id="cInstituicao" type="text" placeholder="Instituição" className="h-8 w-[220px] border" />
+                                    </div>
+                                    <div className="grid">
+                                        <label htmlFor="cCurso">Curso:</label>
+                                        <input id="cCurso" type="text" placeholder="Nome do curso" className="h-8 w-[220px] border" />
+                                    </div>
+                                    <input id="cCargaHoraria" type="number" placeholder="Carga horária" className="h-8 w-[220px] border" />
+                                    <div className="w-36 h-8  flex flex-col justify-center border text-center rounded-sm cursor-pointer" onClick={adicionarCurso}>Adicionar</div>
+                                </div>
+                                <h4>Cursos adicionados</h4>
+                                <div className="min-h-fit flex gap-x-4   my-5 overflow-x-auto">
+                                    {renderizarCurso()}
+                                </div>
+                                <hr className="w-[85%] text-gray-600 my-5 m-auto" />
+                            </>
+                        )
+                        }
+                        <h3>Qualificações <span className="text-[.6em]">(Opcional/Importante)</span></h3>
+                        <i onClick={() => setAddQualificacoes(!addQualificacoes)} className="material-symbols cursor-pointer">{addQualificacoes ? "done" : "add"}</i>
+                        {addQualificacoes && (
+                            <>
+                                <div className="flex gap-x-4 w-fit">
+                                    <div className="grid">
+                                        <label htmlFor="nivel">Nivel:</label>
+                                        <select className="border border-gray-500 pl-2 w-fit h-8" id="nivel" onChange={handleChange}>
+                                            <option value="BASICO">Básico</option>
+                                            <option value="INTERMEDIARIO">Intermediario</option>
+                                            <option value="AVANCADO">Avançado</option>
+                                        </select>
+                                    </div>
+                                    <div className="">
+                                        <div className="grid ">
+                                            <label htmlFor="nome_qualificacao">Qualificação:</label>
+                                            <AsyncSelect
+                                                cacheOptions
+                                                defaultOptions={[]}
+                                                placeholder="Busque qualificações"
+                                                loadOptions={buscarQualificacoes}
+                                                onChange={(event) => {
+                                                    if (!qualificacoes.some((item) => item.idQualificacao === event?.value
+                                                    )) {
+                                                        const nivel = document.getElementById("nivel") as HTMLSelectElement;
+                                                        const qualificacaoUsuario: qualificacaoUsuario =
+                                                            { nivel: nivel.value, nome: event?.label!, idQualificacao: event?.value }
+                                                        setQualificacoes(pre => [...pre, qualificacaoUsuario]);
+                                                    }
+                                                }}
+                                            />
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <h4>Qualificações adidiconadas</h4>
+                                <section className=" text-nowrap flex gap-x-3 p-4  overflow-x-auto ">
+                                    {renderizarQualificacoes()}
+                                </section>
+                                <hr className="w-[85%] text-gray-600 my-5 m-auto" />
+                            </>
+                        )
+                        }
+                    </div>
                     <div className="grid grid-cols-1 pt-10">
                         <label htmlFor="descricao">Descrição:</label>
                         <textarea id="descricao" name="descricao" placeholder="Fale sobre seu eu profissional" className="rounded-lg mt-3 h-32 sm:h-56 pl-1 " value={values.descricao} onChange={handleChange} />
-                        <span className="text-[.6em] min-h-[16px]  text-red-700 ">{errors.descricao}</span>
+                        <span className="text-[.6em] min-h-[16px] text-red-700 ">{errors.descricao}</span>
                         <input type="submit" value="Enviar" className="cursor-pointer w-[230px] h-10  border rounded-lg text-white bg-gray-800 mt-16 m-auto" />
                     </div>
                 </form>
             </main>
-
-
-            <footer className="border mt-20 h-40"></footer>
+            <Footer />
         </div>
-
     )
 }

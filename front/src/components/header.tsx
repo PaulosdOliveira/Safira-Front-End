@@ -4,20 +4,58 @@ import { MensagemService } from "@/resources/mensagem/mensagemService";
 import { ServicoSessao } from "@/resources/sessao/sessao";
 import { Client } from "@stomp/stompjs";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
-
+interface headerProps {
+    logado?: boolean
+}
 // HEADER
-export const Header = () => {
+export const Header: React.FC<headerProps> = ({ logado }) => {
     const router = useRouter();
+    const [navCandidato, setNaviCandidato] = useState(false);
+    const [navEmpresa, setNaviEmpresa] = useState(false);
+
     return (
-        <header className="border-b border-gray-200 bg-white shadow-sm shadow-gray-300 flex items-end  py-2 z-10 text-center">
+        <header className="border-b border-gray-200 bg-white shadow-sm shadow-gray-300 flex items-end   pt-2 pb-6 z-10 text-center">
             <div onClick={() => router.push("/")} className=" pl-3.5 flex items-center gap-x-3 cursor-pointer">
                 <img className="h-[50px] w-[50px]" src="/favi_safira.png" />
                 <h1 style={{ WebkitBackgroundClip: 'text', backgroundImage: 'linear-gradient(to left, #191970 0%, #182848 100%)' }}
                     className="pt-1 font-[Belleza] text-transparent ">SAFIRA</h1>
             </div>
-            <Menu />
+            {logado ? (
+                <Menu />
+            ) : (
+                <div className="w-full flex flex-row-reverse pr-8 h-5 -mb-5 z-30">
+                    <ul className="flex gap-x-4">
+                        <li onMouseEnter={() => setNaviCandidato(true)}
+                            onClick={() => setNaviCandidato(!navCandidato)} className="cursor-pointer">
+                            <span className=" flex">
+                                Candidato
+                                <i className="material-symbols">arrow_drop_down</i>
+                            </span>
+                            <ul onMouseLeave={() => setNaviCandidato(false)}
+                                className={`flex flex-col  border border-gray-300 bg-white ${navCandidato ? '' : 'hidden'} cursor-pointer `}>
+                                <li onClick={() => router.push("/candidato/login")} className="hover:bg-gray-200 h-8 flex justify-center items-center rounded-sm">Logar</li>
+                                <li onClick={() => router.push("/candidato/cadastro")} className="hover:bg-gray-200 h-8 flex justify-center items-center rounded-sm">Cadastrar</li>
+                            </ul>
+                        </li>
+                        <li onMouseEnter={() => setNaviEmpresa(true)}
+                            onClick={() => setNaviEmpresa(!navEmpresa)} className="relative cursor-pointer">
+                            <span className=" flex">
+                                Empresa
+                                <i className="material-symbols">arrow_drop_down</i>
+                            </span>
+
+                            <ul onMouseLeave={() => setNaviEmpresa(false)}
+                                className={`border border-gray-300  flex flex-col bg-white ${navEmpresa ? '' : 'hidden'} cursor-pointer`}>
+                                <li onClick={() => router.push("/empresa/login")} className="hover:bg-gray-200 h-8 flex justify-center items-center rounded-sm">Logar</li>
+                                <li onClick={() => router.push("/empresa/cadastro")} className="hover:bg-gray-200 h-8 flex justify-center items-center rounded-sm">Cadastrar</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+            )}
         </header>
     )
 }
@@ -74,7 +112,7 @@ export const Menu = () => {
     }
 
     return (
-        <div className="flex justify-end items-end h-6 w-full">
+        <div className="flex justify-end items-end h-6 w-full -mb-5  pr-4">
             <div className="flex relative">
                 <i title="Mensagens" className="material-symbols  cursor-pointer mx-5" onClick={() => router.push("/mensagem")}>chat</i>
                 <span onClick={() => alert(JSON.stringify(notificacoes))}
@@ -87,7 +125,7 @@ export const Menu = () => {
                 <i onClick={() => setMenuAberto(!menuAberto)} className="material-symbols cursor-pointer">arrow_drop_down</i>
             </div>
             <div className="relative">
-                <nav className={`border border-gray-400 mt-0.5 rounded-md z-30 bg-white w-20 text-center absolute -left-21 ${!menuAberto ? 'hidden' : ''}`}>
+                <nav className={`border border-gray-400 mt-0.5  z-30 bg-white w-20 text-center absolute -left-21 ${!menuAberto ? 'hidden' : ''}`}>
                     <ul>
                         <li onClick={() => router.push("/")} className="cursor-pointer hover:bg-gray-200 rounded-md p-0.5">Início</li>
                         <li onClick={() => router.push(`/${sessao?.perfil}/${sessao?.id}`)} className="cursor-pointer hover:bg-gray-200 rounded-md p-0.5">Perfil</li>
