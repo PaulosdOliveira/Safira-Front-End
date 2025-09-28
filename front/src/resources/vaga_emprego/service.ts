@@ -26,7 +26,8 @@ class Service {
             idCidade: dadosForm.idCidade != null ? dadosForm.idCidade + "" : "",
             senioridade: dadosForm.senioridade,
             modelo: dadosForm.modelo,
-            tipo_contrato: dadosForm.tipo_contrato
+            tipo_contrato: dadosForm.tipo_contrato,
+            pageNumber: dadosForm.pageNumber.toString()
         })
 
 
@@ -72,8 +73,8 @@ class Service {
         return resultado.status;
     }
 
-    async buscar_candidaturas(token: string): Promise<CandidaturaCandidato[]>{
-        const resultado = await fetch(`${this.urlBase}/candidaturas`,{
+    async buscar_candidaturas(token: string): Promise<CandidaturaCandidato[]> {
+        const resultado = await fetch(`${this.urlBase}/candidaturas`, {
             headers: {
                 'Authorization': `Bearer ${token}`
             }

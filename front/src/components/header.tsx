@@ -9,12 +9,13 @@ import { useEffect, useRef, useState } from "react";
 
 // HEADER
 export const Header = () => {
+    const router = useRouter();
     return (
-        <header className=" bg-white shadow-sm shadow-gray-200 flex items-end  py-2 z-10 text-center">
-            <div className=" pl-3.5 flex items-center gap-x-3">
+        <header className="border-b border-gray-200 bg-white shadow-sm shadow-gray-300 flex items-end  py-2 z-10 text-center">
+            <div onClick={() => router.push("/")} className=" pl-3.5 flex items-center gap-x-3 cursor-pointer">
                 <img className="h-[50px] w-[50px]" src="/favi_safira.png" />
-                <h1 style={{WebkitBackgroundClip: 'text', backgroundImage: 'linear-gradient(to left, #191970 0%, #182848 100%)'}} 
-                className="pt-1 font-[Belleza] text-transparent ">SAFIRA</h1>
+                <h1 style={{ WebkitBackgroundClip: 'text', backgroundImage: 'linear-gradient(to left, #191970 0%, #182848 100%)' }}
+                    className="pt-1 font-[Belleza] text-transparent ">SAFIRA</h1>
             </div>
             <Menu />
         </header>
@@ -88,6 +89,7 @@ export const Menu = () => {
             <div className="relative">
                 <nav className={`border border-gray-400 mt-0.5 rounded-md z-30 bg-white w-20 text-center absolute -left-21 ${!menuAberto ? 'hidden' : ''}`}>
                     <ul>
+                        <li onClick={() => router.push("/")} className="cursor-pointer hover:bg-gray-200 rounded-md p-0.5">Início</li>
                         <li onClick={() => router.push(`/${sessao?.perfil}/${sessao?.id}`)} className="cursor-pointer hover:bg-gray-200 rounded-md p-0.5">Perfil</li>
                         <li onClick={sair} className="cursor-pointer hover:bg-gray-200 rounded-md p-0.5">Sair</li>
                     </ul>

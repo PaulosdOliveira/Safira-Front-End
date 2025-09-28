@@ -21,7 +21,7 @@ export const CardVaga: React.FC<cardVagaProps> = ({ id, cidade, nome_empresa, es
 
     return (
         <a href={`/vaga/${id}`} target="_blank"
-            className={`border vaga border-gray-200 w-64 p-3 rounded-2xl bg-white shadow shadow-gray-300 cursor-pointer m-5 ${load? 'animate-pulse' : ''}`}>
+            className={`border vaga border-gray-400 w-64 p-3 rounded-md bg-white shadow-sm shadow-gray-500 cursor-pointer m-5 ${load? 'animate-pulse' : ''}`}>
             <h3 className="text-justify pb-2">{titulo}</h3>
             <div className="flex">
                 <i className="material-symbols text-slate-600">Domain</i>

@@ -24,10 +24,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-br">
-    <head>
-       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols"/>
-       <link rel="shortcut icon" href="/favi_safira.png" type="png" />
-    </head>
+      <head>
+        <link rel="shortcut icon" href="/favi_safira.png" type="png" />
+        {/*Link para icones do google */}
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols" />
+        {/*Font do google*/}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
+        <link href="https://fonts.googleapis.com/css2?family=Fredericka+the+Great&display=swap" rel="stylesheet"/>
+
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >

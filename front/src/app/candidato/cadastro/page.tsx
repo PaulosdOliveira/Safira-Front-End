@@ -117,9 +117,9 @@ export default function cadastroCandidato() {
         const curso = document.getElementById("fCurso") as HTMLInputElement
         const nivel = document.getElementById("fNivel") as HTMLSelectElement
         const situacao = document.getElementById("fSituacao") as HTMLSelectElement
-    
+
         if (instituicao.value.length && curso.value.length) {
-            const formacao: CadastroFormacao = { curso: curso.value,instituicao: instituicao.value, nivel: nivel.value, situacao: situacao.value }
+            const formacao: CadastroFormacao = { curso: curso.value, instituicao: instituicao.value, nivel: nivel.value, situacao: situacao.value }
             setFornacoes(pre => [...pre, formacao]);
             instituicao.value = "";
             curso.value = "";
@@ -272,7 +272,7 @@ export default function cadastroCandidato() {
 
     return (
         <div className="bg-gray-100">
-            <header className="h-[120px] shadow-sm shadow-gray-200 flex flex-col justify-end items-center py-2 z-10 bg-white">
+            <header className="h-[100px] shadow-sm shadow-gray-200 flex flex-col justify-end items-center py-2 z-10 bg-white">
                 <div className="w-80 h-20  bg-cover"
                     style={{
                         backgroundPosition: "center center",
@@ -280,7 +280,7 @@ export default function cadastroCandidato() {
                     }} />
                 <nav className="w-[100%]">
                     <ul className="text-gray-950 text-right">
-                        <li className="inline-block hover:underline pr-4 pb-1"><a target="_self" href="/empresa/login">Login para empresas</a></li>
+                        <li className="inline-block hover:underline pr-4 pb-1 text-blue-600"><a target="_self" href="/empresa/login">Login para empresas</a></li>
                     </ul>
                 </nav>
             </header>
@@ -300,7 +300,7 @@ export default function cadastroCandidato() {
                     <div className="mb-10 mt-3 text-center">
                         <label className="bg-gray-900 p-2 rounded-md text-white cursor-pointer" htmlFor="foto">Seleione uma foto</label>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit  m-auto">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit m-auto mb-10">
                         <div className="grid ">
                             <label htmlFor="cpf">CPF: </label>
                             <input id="cpf" name="cpf" onChange={handleChange} maxLength={14} className="border border-gray-400  h-10 rounded-sm sm:w-[260px] "
@@ -375,10 +375,11 @@ export default function cadastroCandidato() {
                                 <option>NÃO</option>
                                 <option>SIM</option>
                             </select>
+                            <span className=" min-h-[16px]">{}</span>
                         </div>
                         <div className="grid">
                             <label htmlFor="dataNascimento">Data de nascimento:</label>
-                            <input id="dataNascimento" name="dataNascimento" onChange={handleChange} className="h-10 rounded-sm"
+                            <input id="dataNascimento" name="dataNascimento" onChange={handleChange} className="h-10 rounded-sm border"
                                 type="date" placeholder="Senha" />
                             <span className="text-[.6em] min-h-[16px]  text-red-700 ">{errors.dataNascimento}</span>
                         </div>
@@ -390,11 +391,11 @@ export default function cadastroCandidato() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit">
                                 <div className="grid">
                                     <input id="fInstituicao" type="text" placeholder="Instituição"
-                                        className=" h-8 rounded-md " />
+                                        className="h-8 rounded-md border" />
                                 </div>
                                 <div className="grid">
                                     <input id="fCurso" type="text" placeholder="Curso"
-                                        className=" h-8 rounded-sm" />
+                                        className="h-8 rounded-sm border" />
                                 </div>
                                 <div className="grid">
                                     <label htmlFor="fNivel" className="">Nivel: </label>
@@ -409,7 +410,7 @@ export default function cadastroCandidato() {
                                 </div>
                                 <div className="grid">
                                     <label htmlFor="fSituacao" className="">Situação: </label><div />
-                                    <select className="border  h-9 rounded-sm" id="fSituacao">
+                                    <select className="border h-9 rounded-sm" id="fSituacao">
                                         <option value="CONCLUIDO">Concluido</option>
                                         <option value="EM_ANDAMENTO">Em andamento</option>
                                     </select>
@@ -428,16 +429,16 @@ export default function cadastroCandidato() {
                         <>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit">
                                 <div>
-                                    <input id="eEmpresa" type="text" placeholder="Empresa" className="w-[210px] h-8 rounded-sm" />
+                                    <input id="eEmpresa" type="text" placeholder="Empresa" className="w-[210px] h-8 rounded-sm border" />
                                 </div>
                                 <div>
-                                    <input id="eCargo" type="text" placeholder="Cargo" className="w-[210px] h-8 rounded-sm" />
+                                    <input id="eCargo" type="text" placeholder="Cargo" className="w-[210px] h-8 rounded-sm border" />
 
                                 </div>
                                 <div className="grid">
                                     <label htmlFor="eDuracao">Duração:</label>
                                     <input id="eDuracao" type="text" placeholder="Ex: 1 ano e 7 meses"
-                                        className=" h-8 rounded-sm" />
+                                        className=" h-8 rounded-sm border" />
                                 </div>
                             </div>
 
@@ -460,13 +461,13 @@ export default function cadastroCandidato() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit">
                                 <div className="grid">
                                     <label htmlFor="cInstituicao">Instituição:</label>
-                                    <input id="cInstituicao" type="text" placeholder="Instituição" className="h-8 w-[220px]" />
+                                    <input id="cInstituicao" type="text" placeholder="Instituição" className="h-8 w-[220px] border" />
                                 </div>
                                 <div className="grid">
                                     <label htmlFor="cCurso">Curso:</label>
-                                    <input id="cCurso" type="text" placeholder="Nome do curso" className="h-8 w-[220px]" />
+                                    <input id="cCurso" type="text" placeholder="Nome do curso" className="h-8 w-[220px] border" />
                                 </div>
-                                <input id="cCargaHoraria" type="number" placeholder="Carga horária" className="h-8 w-[220px]" />
+                                <input id="cCargaHoraria" type="number" placeholder="Carga horária" className="h-8 w-[220px] border" />
                                 <div className="w-36 h-8  flex flex-col justify-center border text-center rounded-sm cursor-pointer" onClick={adicionarCurso}>Adicionar</div>
                             </div>
                             {renderizarCurso()}
@@ -490,7 +491,7 @@ export default function cadastroCandidato() {
                                     <div className="grid relative">
 
                                         <label htmlFor="nome_qualificacao">Qualificação:</label>
-                                        <input onChange={(event) => buscarQualificacoes(event.target.value)} id="nome_qualificacao" type="text" placeholder="Busque aqui" className="w-[210px] rounded-md h-8" />
+                                        <input onChange={(event) => buscarQualificacoes(event.target.value)} id="nome_qualificacao" type="text" placeholder="Busque aqui" className="w-[210px] rounded-md h-8 border" />
                                     </div>
                                     <div className={`border border-gray-200 w-[210px] absolute top-[100%] z-10  bg-white `}>
                                         {renderizarQUalificacoesEncontradas()}

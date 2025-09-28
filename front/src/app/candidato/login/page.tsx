@@ -1,5 +1,6 @@
 'use client'
 
+import { Footer } from "@/components/footer";
 import { CandidatoService } from "@/resources/candidato/servico"
 import { accessToken, dadosLogin, formLoginValidator, ServicoSessao, valoresIniciais } from "@/resources/sessao/sessao";
 import { useFormik } from "formik";
@@ -43,19 +44,19 @@ export default function LoginPageCandidato() {
                     </ul>
                 </nav>
             </header>
-            <main className="h-[100vh] w-[100vw] bg-stone-50 pt-20">
+            <main className="h-[90vh] w-[100vw] bg-stone-50 pt-20">
 
                 <div className="border border-gray-400 bg-white w-[470px] max-h-screen m-auto  rounded-sm py-9 font-[arial]">
                     <h1 className="text-center">Bem vindo de volta!</h1>
                     <form onSubmit={handleSubmit} className="text-center">
-                        <div className="">
+                        <div className="mt-8">
                             <label className="w-[280px] mb-1 m-auto block text-left" htmlFor="login">Email ou CPF:</label>
-                            <input id="login" onChange={handleChange} className="w-[290px] h-10 rounded-full pl-3" type="text" placeholder="Login" />
+                            <input id="login" onChange={handleChange} className="w-[290px] h-10 rounded-full pl-3 border border-gray-500" type="text" placeholder="Login" />
                         </div>
 
                         <div className="my-3">
                             <label className="w-[280px] mb-1 m-auto block text-left" htmlFor="login">Senha:</label>
-                            <input id="senha" onChange={handleChange} className="w-[290px] h-10 rounded-full pl-3" type="password" placeholder="Senha" />
+                            <input id="senha" onChange={handleChange} className="w-[290px] h-10 rounded-full pl-3 border border-gray-500" type="password" placeholder="Senha" />
                         </div>
 
                         <div className="text-center my-10">
@@ -64,10 +65,9 @@ export default function LoginPageCandidato() {
                         <a href="#" className="hover:underline">Esqueceu a senha?</a><br /><br />
                         <a href="/candidato/cadastro" className="hover:underline">Criar conta</a>
                     </form>
-
                 </div>
-
             </main>
+            <Footer/>
         </>
     )
 }

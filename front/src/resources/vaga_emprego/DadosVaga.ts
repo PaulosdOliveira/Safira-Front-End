@@ -1,3 +1,4 @@
+import { cardVagaProps } from "@/components/cardvaga";
 
 
 
@@ -10,10 +11,11 @@ export interface dadosConsultaVagaDTO {
     senioridade: string;
     modelo: string;
     tipo_contrato: string;
+    pageNumber: number;
 }
 
 // Valores inicias do formulário de busca por vagas
-export const initConsultaVaga: dadosConsultaVagaDTO = { idCidade: '', idEstado: '', modelo: '', senioridade: '', titulo: '', tipo_contrato: '' };
+export const initConsultaVaga: dadosConsultaVagaDTO = { idCidade: '', idEstado: '', modelo: '', senioridade: '', titulo: '', tipo_contrato: '', pageNumber: 0 };
 
 
 
@@ -62,4 +64,11 @@ export class CandidaturaCandidato {
     idEmpresa?: string;
     status?: string;
     finalizada?: boolean;
+}
+
+
+export class PageCardVaga {
+    vagas?: cardVagaProps[];
+    pageNumber?: number;
+    totalPages?: number;
 }
