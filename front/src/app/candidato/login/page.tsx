@@ -32,21 +32,20 @@ export default function LoginPageCandidato() {
 
 
     return (
-        <>
+        <div className="w-full flex flex-col min-h-screen">
             <Header />
-            <main className="h-[90vh] w-[100vw] bg-stone-50 pt-20">
+            <main className="w-full  flex-1/2  bg-slate-100  py-20 sm:px-0 px-1">
 
-                <div className="border border-gray-400 bg-white w-[470px] max-h-screen m-auto  rounded-sm py-9 font-[arial]">
-                    <h1 className="text-center">Bem vindo de volta!</h1>
+                <div className="sm:border border-gray-400 sm:bg-white w-full sm:w-[460px] rounded-2xl max-h-screen m-auto py-9 font-[arial]">
+                    <h2 className="text-center">Bem vindo de volta!</h2>
                     <form onSubmit={handleSubmit} className="text-center">
                         <div className="mt-8">
                             <label className="w-[280px] mb-1 m-auto block text-left" htmlFor="login">Email ou CPF:</label>
-                            <input id="login" onChange={handleChange} className="w-[290px] h-10 rounded-full pl-3 border border-gray-500" type="text" placeholder="Login" />
+                            <input id="login" onChange={handleChange} className="w-[290px] h-10 rounded-full pl-3 border border-gray-500 bg-white" type="text" placeholder="Login" />
                         </div>
-
                         <div className="my-3">
                             <label className="w-[280px] mb-1 m-auto block text-left" htmlFor="login">Senha:</label>
-                            <input id="senha" onChange={handleChange} className="w-[290px] h-10 rounded-full pl-3 border border-gray-500" type="password" placeholder="Senha" />
+                            <input id="senha" onChange={handleChange} className="w-[290px] h-10 rounded-full pl-3 border border-gray-500 bg-white" type="password" placeholder="Senha" />
                         </div>
 
                         <div className="text-center my-10">
@@ -54,10 +53,11 @@ export default function LoginPageCandidato() {
                         </div>
                         <a href="#" className="hover:underline">Esqueceu a senha?</a><br /><br />
                         <a href="/candidato/cadastro" className="hover:underline">Criar conta</a>
+                        <a href="/empresa/login" className="hover:underline block mt-2">Login para empresas</a>
                     </form>
                 </div>
             </main>
             <Footer />
-        </>
+        </div>
     )
 }

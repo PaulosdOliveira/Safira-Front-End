@@ -281,7 +281,7 @@ const FormCadastro = () => {
             <main className="font-[arial] h-full mb-20 pt-10 ">
                 <h2 className="text-center">Construa o seu perfil profissional</h2>
                 <form onSubmit={handleSubmit}
-                    className=" w-full sm:w-[600px] md:w-[700px] border-[.7px] border-gray-500 shadow-lg shadow-gray-400  mt-3 p-5 rounded-lg bg-white  m-auto">
+                    className=" w-full sm:w-[600px] md:w-[700px] lg:w-[840px] border-[.7px] border-gray-500 shadow-lg shadow-gray-400  mt-3 p-5 rounded-lg bg-white  m-auto">
                     <div id="Foto" className="flex mt-6 mb-2   w-[100%]" >
                         <label className=" foto rounded-full m-auto cursor-pointer border border-gray-500 bg-cover bg-no-repeat w-36 h-36"
                             style={{ backgroundImage: `url(${urlFoto})` }}>

@@ -2,6 +2,7 @@
 
 export const Footer = () => {
     return (
+
         <footer className=" w-full bottom-0 bg-gray-900 h-fit py-10">
 
             <div id="dados"
