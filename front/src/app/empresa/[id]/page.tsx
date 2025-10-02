@@ -206,7 +206,7 @@ export default function PerfilEmpresa() {
         if (statusCandidato === dados.status)
             return (
                 <div className="flex items-center" key={"1" + key}>
-                    <CardUsuario cidade={dados.cidade} estado={dados.estado} id={dados.id} idade={dados.idade} key={dados.id} nome={dados.nome} />
+                    <CardUsuario load={false} cidade={dados.cidade} estado={dados.estado} id={dados.id} idade={dados.idade} key={dados.id} nome={dados.nome} />
                     {statusCandidato === "EM_ANALISE" && (
                         <button className="border rounded-lg p-1" onClick={() => abrirModal(`${dados.id}`, key)} key={key}>Avaliar</button>
                     )}

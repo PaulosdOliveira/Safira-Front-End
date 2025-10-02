@@ -47,7 +47,10 @@ h6 {
     letter-spacing: 0.05em;
 }
 
-
+pre{
+    text-wrap: wrap;
+    font-family: Arial, Helvetica, sans-serif;
+}
 
 
 select,

@@ -181,7 +181,7 @@ export default function PagePerfilCandidato() {
     if (perfil) {
         return (
             <div className="w-[100%] min-h-[100vh] max-h-fit bg-gray-200">
-               <Header/>
+                <Header />
                 <main className="bg-gray-020 py-5">
                     <div className=" w-[100vw] sm:w-[570px] md:w-[755px] lg:w-[900px] bg-white  flex items-center  px-2 pb-2 sm:m-auto border border-gray-300 shadow-lg">
                         <div className="">
@@ -200,9 +200,23 @@ export default function PagePerfilCandidato() {
                             )}
                         </div>
                     </div>
-                    <span onClick={() => setAba("informacoes")} className={` ${id === sessao.getSessao()?.id ? '' : 'hidden'} mx-3 cursor-pointer ${aba === "informacoes" ? 'underline' : ''}`}>Informações</span>
-                    <span onClick={buscarCandidaturas} className={`${id === sessao.getSessao()?.id ? '' : 'hidden'} mx-3 cursor-pointer ${aba === "candidaturas" ? 'underline' : ''}`}>Minhas candidaturas</span>
-                    <span onClick={() => setAba("Editar")} className={`${id === sessao.getSessao()?.id ? '' : 'hidden'} mx-3 cursor-pointer ${aba === "candidaturas" ? 'underline' : ''}`}>Editar perfil</span>
+                    <section className="flex gap-x-4 justify-center cursor-pointer pt-4">
+                        <div onClick={() => setAba("informacoes")} className="flex flex-wrap bg-white p-1 rounded-lg">
+                            <i className="material-symbols">person</i>
+                            <span className={` ${id === sessao.getSessao()?.id ? '' : 'hidden'} mx-3 cursor-pointer ${aba === "informacoes" ? '' : 'hidden'}`}>Informações</span>
+                        </div>
+
+                        <div onClick={buscarCandidaturas} className="flex bg-white p-1 rounded-lg cursor-pointer">
+                            <i className="material-symbols">work</i>
+                            <span className={`${id === sessao.getSessao()?.id ? '' : 'hidden'} mx-3 cursor-pointer ${aba === "candidaturas" ? '' : 'hidden'}`}>Minhas candidaturas</span>
+
+                        </div>
+
+                        <div onClick={() => setAba("Editar")} className="flex bg-white p-1 rounded-lg cursor-pointer">
+                            <i className="material-symbols">edit</i>
+                            <span className={`${id === sessao.getSessao()?.id ? '' : 'hidden'} mx-3 cursor-pointer ${aba === "Editar" ? '' : 'hidden'}`}>Editar perfil</span>
+                        </div>
+                    </section>
                     {aba === "informacoes" && (
                         <div className="bg-white border border-gray-300 shadow-lg lg:w-[900px] md:w-[750px]  sm:w-[575px] w-[100vw] rounded-sm px-5 pb-10 m-auto mt-5 ">
                             <h3>Sobre</h3>
