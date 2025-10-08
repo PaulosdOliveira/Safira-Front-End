@@ -4,7 +4,7 @@
 
 import { CadastroFormacao } from "@/resources/formacao/formacaoResource"
 import { qualificacaoUsuario } from "@/resources/qualificacao/qualificacaoResource";
-import React from "react";
+import React, { useState } from "react";
 
 
 
@@ -17,9 +17,11 @@ interface formacaoProps extends CadastroFormacao {
 // PADROZIÇÃO DE FORMAÇÃO DO USUÁRIO
 export const Formacao: React.FC<formacaoProps> = ({ curso, instituicao, nivel, click, situacao }) => {
     return (
-        <div style={{ boxShadow: '1px 1px 1px 1px rgba(0,0,0,0.4)' }}
-            className="border border-gray-500  flex flex-col gap-y-1  p-2 rounded-md my-5 w-fit shrink-0">
-            <span title="Apagar" onClick={click} className="-mt-2 cursor-pointer text-gray-900 material-symbols -ml-2">close</span>
+        <div
+            className="border border-gray-500 bg-gray-50 shadow shadow-gray-300 flex flex-col gap-y-1  p-2 rounded-md my-5 w-fit shrink-0">
+            <div className="text-right -mt-1 -mb-5 -mr-2.5">
+                <span title="Apagar" onClick={click} className="-mt-2 cursor-pointer text-gray-900 material-symbols scale-75">delete</span>
+            </div>
             <span className="font-bold">{instituicao}</span>
             <span className="font-bold">{curso}</span>
             <span className="font-bold">{nivel}</span>
@@ -37,16 +39,24 @@ interface experienciaPros {
 }
 
 
-// EXIBIÇÃO DE EXPERIÊNCIAS
-export const Experiencia: React.FC<experienciaPros> = ({ cargo, empresa, descricao, click, duracao }) => {
+//ACCORDION DE EXPERIÊNCIAS ADICIONADAS NO FORMULÁRIO
+export const ExperienciaAccordion: React.FC<experienciaPros> = ({ cargo, empresa, descricao, click, duracao }) => {
+    const [open, setOpen] = useState(false);
     return (
-        <div style={{ boxShadow: '1px 1px 1px 1px rgba(0,0,0,0.4)' }}
-            className="border h-fit pb-3 min-w-32 max-w-fit flex flex-col gap-x-4 rounded-md px-2 pt-1 text-justify">
-            <i onClick={click} className="material-symbols cursor-pointer -ml-2 text-right">close</i>
-            <span className="font-bold"> {empresa}</span>
-            <span className="font-bold">{cargo}</span>
-            <span className="font-bold">{duracao}</span>
-            <span className="font-bold">{descricao}</span>
+        <div className={`border-2 border-gray-400 bg-gray-100 w-full h-fit p-1 px-2 m-auto flex flex-col gap-x-4 rounded-md  shrink-0 `}>
+            <i onClick={() => setOpen(!open)} className="material-symbols -mb-5 transition-all duration-700 cursor-pointer -ml-2 text-right z-10">{open ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}</i>
+            <span className="font-bold flex items-center gap-x-3 pl-3 text-[1.2em]"> 
+                <i onClick={click} className="material-symbols  cursor-pointer -ml-2 text-right text-red-700 z-20">delete</i>
+                <p className="text-">{cargo}</p>
+            </span>
+            {open && (
+                <div className={`grid  text-gray-600 font-semibold px-1 `}>
+                    <hr className="-mx-1 mt-1 text-gray-400" />
+                    <span className=""><strong>Empresa:</strong>  {empresa}</span>
+                    <span className=""><strong>Periodo:</strong> {duracao}</span>
+                    <pre className="text-justify "><strong>Descrição:</strong><br /> {descricao}</pre>
+                </div>
+            )}
         </div>
     )
 }
@@ -61,12 +71,12 @@ interface cursoProps {
 export const Curso: React.FC<cursoProps> = ({ curso, instituicao, carga, click }) => {
     return (
         <div style={{ boxShadow: '1px 1px 1px 1px rgba(0,0,0,0.4)' }}
-            className="flex flex-col min-w-36 max-w-fit h-fit  p-1.5 border border-gray-500 rounded-md text-nowrap text-justify shrink-0 mb-4">
-            <span className="flex flex-row-reverse"><i onClick={click} className="cursor-pointer material-symbols scale-90">close</i></span>
+            className="flex flex-col w-56 text-wrap  h-fit  p-1.5 border border-gray-500 rounded-md  shrink-0 mb-4">
+            <span className="flex flex-row-reverse"><i onClick={click} className="cursor-pointer material-symbols scale-90">delete</i></span>
             <label>Instituição:</label>
             <span className="font-bold">{instituicao}</span>
             <label>Curso:</label>
-            <span className="font-bold">{curso}</span>
+            <pre className="font-bold">{curso}</pre>
             <label>Carga Horária:</label>
             <span className="font-bold">{carga}</span>
         </div>
@@ -77,16 +87,15 @@ interface qualificacaoProps extends qualificacaoUsuario {
     click: () => void
 }
 
+// COMPONENTE DE XIXBIÇÃO DE QUALIFICAÇÕES SELECIONADAS NO FORMULÁRIO
 export const QualificacaoComponent: React.FC<qualificacaoProps> = ({ click, idQualificacao, nivel, nome }) => {
     return (
-        <div className="w-fit flex flex-col items-end shrink-0">
-            <div onClick={click}
-                className=" text-right w-fit" >
-                    <i className="material-symbols cursor-pointer">close</i>
-                    </div>
-            <div className="w-fit border border-gray-500 p-1 rounded-lg" key={idQualificacao}>
-                {nome}-{nivel}
-            </div>
-        </div>
+
+        <span style={{ boxShadow: '1px 1px 1px rgba(0,0,0,0.800)' }}
+            className="w-fit flex items-center px-0.5 border border-gray-500 bg-gray-50  text-[.8em] rounded-lg relative" key={idQualificacao}>
+            {nome}-{nivel}
+            <i onClick={click} className="material-symbols cursor-pointer -top-2 scale-50 ">delete</i>
+        </span>
+
     )
 }

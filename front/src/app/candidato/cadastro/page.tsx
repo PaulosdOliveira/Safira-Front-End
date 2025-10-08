@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { CadastroFormacao } from "@/resources/formacao/formacaoResource";
 import { CadastroExperiencia } from "@/resources/experiencia/experineciaResource";
 import { CadastroCurso } from "@/resources/curso/cursoResource";
-import { Curso, Experiencia, Formacao, QualificacaoComponent } from "@/components/perfilCandidato/CompoentsCadastroCandidato";
+import { Curso, ExperienciaAccordion, Formacao, QualificacaoComponent } from "@/components/perfilCandidato/CompoentsCadastroCandidato";
 import { dadosFormCadastroEmpresa } from "@/app/empresa/cadastro/formSchema";
 import AsyncSelect from "react-select/async";
 import { Footer } from "@/components/footer";
@@ -234,7 +234,7 @@ const FormCadastro = () => {
 
     const renderizarExperiencias = () => {
         return experiencias.map(e => {
-            return (<Experiencia click={() => setExperiencias(prev => prev.filter(item => item.empresa !== e.cargo && item.cargo !== e.cargo))}
+            return (<ExperienciaAccordion click={() => setExperiencias(prev => prev.filter(item => item.empresa !== e.cargo && item.cargo !== e.cargo))}
                 key={crypto.randomUUID()} empresa={`${e.empresa}`} cargo={e.cargo + ""} descricao={`${e.descricao}`} duracao={`${e.duracao}`} />)
         }
         )

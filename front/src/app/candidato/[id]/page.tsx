@@ -17,11 +17,14 @@ import { useParams } from "next/navigation"
 import React, { useEffect, useRef, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { cidade, estado, UtilsService } from "@/resources/utils/utils";
-import { Curso, Experiencia, Formacao, QualificacaoComponent } from "@/components/perfilCandidato/CompoentsCadastroCandidato";
+import { Curso, ExperienciaAccordion, Formacao, QualificacaoComponent } from "@/components/perfilCandidato/CompoentsCadastroCandidato";
 import { FormacaoService } from "@/resources/formacao/fiormacaoService";
 import { ExperienciaService } from "@/resources/experiencia/experienciaService";
 import { CursoService } from "@/resources/curso/cursoService";
 import { Header, Menu } from "@/components/header";
+import { Footer } from "@/components/footer";
+import AsyncSelect from "react-select/async";
+import { SectionOverflow } from "@/components/sectionOverflow";
 
 
 
@@ -60,19 +63,19 @@ export default function PagePerfilCandidato() {
                 let confirma = confirm(`Excluir ${q.nome}?`);
                 if (confirma) {
                     qualificacaoService.deletarQualificacaoUsuario(q.idQualificacao, `${sessao.getSessao()?.accessToken}`);
-                    setPerfil(pre => ({
-                        ...pre!,
-                        qualificacoes: pre?.qualificacoes?.filter(
-                            item => item.idQualificacao !== q.idQualificacao
-                        ) || []
-                    }))
+                    setTimeout(() => {
+                        setPerfil(pre => ({
+                            ...pre!,
+                            qualificacoes: pre?.qualificacoes?.filter(
+                                item => item.idQualificacao !== q.idQualificacao
+                            ) || []
+                        }))
+                    }, 500)
                 }
             }
             return (
-                <div key={index} className="grid w-fit relative pt-1">
-                    <span onClick={apagar}
-                        className={`text-red-700 pr-4 top-[-5%] left-[10%]  cursor-pointer absolute text-[.7em] ${titular ? '' : 'hidden'}`}>Excluir</span>
-                    <Qualificao key={q.idQualificacao} nivel={q.nivel} nome={q.nome} />
+                <div key={index} className="grid w-fit relative pt-1 shrink-0">
+                    <Qualificao click={apagar} key={q.idQualificacao} nivel={q.nivel} nome={q.nome} />
                 </div>
             )
         })
@@ -96,7 +99,7 @@ export default function PagePerfilCandidato() {
             return (
                 <div key={index} className="grid  relative pt-1">
                     <span onClick={apagar}
-                        className={`text-red-700 pr-4 top-[10%] left-[90%]  cursor-pointer absolute text-[.9em] ${titular ? '' : 'hidden'}`}>Excluir</span>
+                        className={`material-symbols  top-[10%]  left-[92%] sm:left-[94%] lg:left-[96%] cursor-pointer absolute text-[.9em] ${titular ? '' : 'hidden'}`}>delete</span>
                     <FormacaoJSX key={f.id} curso={f.curso} id={f.id}
                         instituicao={f.instituicao} nivel={f.nivel} situacao={f.situacao} />
                 </div>
@@ -121,7 +124,7 @@ export default function PagePerfilCandidato() {
             return (
                 <div key={index} className="grid  relative pt-1">
                     <span onClick={apagar}
-                        className={`text-red-700 pr-4 top-[10%] left-[90%]  cursor-pointer absolute text-[.9em] ${titular ? '' : 'hidden'}`}>Excluir</span>
+                        className={`material-symbols  top-[10%] left-[92%] sm:left-[94%] lg:left-[96%] cursor-pointer absolute text-[.9em] ${titular ? '' : 'hidden'}`}>delete</span>
                     <CursoJSX cargaHoraria={c.cargaHoraria} curso={c.curso} id={c.id}
                         instituicao={c.instituicao} key={c.id} />
                 </div>
@@ -148,7 +151,7 @@ export default function PagePerfilCandidato() {
 
                 <div key={index} className="grid  relative pt-1">
                     <span onClick={apagar}
-                        className={`text-red-700 pr-4 top-[10%] left-[90%]  cursor-pointer absolute text-[.9em] ${titular ? '' : 'hidden'}`}>Excluir</span>
+                        className={`material-symbols  top-[10%] left-[92%] sm:left-[94%] lg:left-[96%] cursor-pointer absolute text-[.9em] ${titular ? '' : 'hidden'}`}>delete</span>
                     <ExperienciaJSX cargo={e.cargo} descricao={e.descricao} duracao={e.duracao}
                         empresa={e.empresa} id={e.id} key={e.id} />
                 </div>
@@ -180,10 +183,10 @@ export default function PagePerfilCandidato() {
 
     if (perfil) {
         return (
-            <div className="w-[100%] min-h-[100vh] max-h-fit bg-gray-200">
+            <div className="w-full min-h-[100vh] max-h-fit bg-gray-200">
                 <Header />
                 <main className="bg-gray-020 py-5">
-                    <div className=" w-[100vw] sm:w-[570px] md:w-[755px] lg:w-[900px] bg-white  flex items-center  px-2 pb-2 sm:m-auto border border-gray-300 shadow-lg">
+                    <div className=" w-full sm:w-[570px] md:w-[755px] lg:w-[900px] bg-white flex items-center  px-2 pb-2 sm:m-auto border border-gray-300 shadow-lg">
                         <div className="">
 
                             <div style={{ backgroundImage: `url(http://localhost:8080/candidato/foto/${id})` }}
@@ -218,7 +221,7 @@ export default function PagePerfilCandidato() {
                         </div>
                     </section>
                     {aba === "informacoes" && (
-                        <div className="bg-white border border-gray-300 shadow-lg lg:w-[900px] md:w-[750px]  sm:w-[575px] w-[100vw] rounded-sm px-5 pb-10 m-auto mt-5 ">
+                        <div className="bg-white border border-gray-400 shadow-lg shadow-gray-400 lg:w-[900px] md:w-[750px]  sm:w-[575px] w-[100vw] rounded-sm px-5  py-10 m-auto mt-5 ">
                             <h3>Sobre</h3>
                             <pre className="font-[arial]  text-wrap">{perfil?.descricao}</pre>
                             <hr className="my-2 text-gray-300" />
@@ -228,42 +231,54 @@ export default function PagePerfilCandidato() {
                                 <span className="font-semibold pl-1 mb-1">{`${perfil?.email}`}</span>
                             </div>
 
-                            <div className="flex items-center">
+                            <div className="flex items-center ">
                                 <i className="material-symbols scale-95">call</i>
                                 <span className="font-semibold pl-1 ">{`${perfil?.tel}`}</span>
                             </div>
-                            <hr className="my-6 text-gray-300" />
-                            <h4>Qualificações</h4>
+                            <br />
+                            <h3 className="my-6">Qualificações</h3>
                             {
                                 perfil.qualificacoes?.length ? (
-                                    <div className="max-h-[300px] flex flex-wrap gap-x-7 overflow-auto">
+                                    <div className="max-h-[300px] gap-2.5 mt-2 -mx-3 flex flex-wrap  overflow-auto">
                                         {renderizarQualificacoes()}
                                     </div>
                                 ) : (<h3>Usuário não possui qualificações cadastradas</h3>)
                             }
-                            <hr className="my-6 text-gray-300" />
-                            <h3>Formações</h3>
-                            {renderizarFormacoes()}
-                            <hr className="my-6 text-gray-300" />
-                            <h3>Certificações</h3>
-                            {renderizarCertificacoes()}
-                            <hr className="my-6 text-gray-300" />
-                            <h3>Experiências</h3>
-                            {renderizarExperiencias()}
+
+                            <h3 className="my-6">Formações</h3>
+                            <SectionOverflow qtdItems={perfil.formacoes?.length!}>
+                                {renderizarFormacoes()}
+                            </SectionOverflow>
+                            <h3 className="my-6">Certificações</h3>
+                            <SectionOverflow qtdItems={perfil.cursos?.length ? perfil.cursos?.length : 0}>
+                                {renderizarCertificacoes()}
+                            </SectionOverflow>
+                            <h3 className="my-6">Experiências</h3>
+                            {/** ----->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> */}
+                            <SectionOverflow qtdItems={perfil.experiencias?.length ? perfil.experiencias?.length : 0} >
+                                {renderizarExperiencias()}
+                            </SectionOverflow>
                         </div>
                     )}
                     {aba === "candidaturas" && (
-                        <>
-                            <div className="my-7" />
-                            <span onClick={() => setCandidaturasFinalizadas(false)} className={`mx-5 cursor-pointer transition duration-700  p-1 rounded-md  ${candidaturasFinalizadas ? '' : 'bg-white'}`}>Em análise</span>
-                            <span onClick={() => setCandidaturasFinalizadas(true)} className={`cursor-pointer transition duration-700  p-1 rounded-md ${candidaturasFinalizadas ? 'bg-white' : ''}`}>Finalizadas</span>
-                            {renderizarCandidaturas()}
-                        </>
+
+                        <div className="my-7 flex flex-col min-h-[700px] max-h-fit lg:w-[950px] md:w-[750px]  sm:w-[500px] w-full m-auto bg-white border border-gray-400 shadow-2xl shadow-gray-400 rounded-md pt-5" >
+                            <div className="flex items-center pl-10 gap-x-2">
+                                <i onClick={() => setCandidaturasFinalizadas(!candidaturasFinalizadas)}
+                                    className="material-symbols scale-150 cursor-pointer">{candidaturasFinalizadas ? 'toggle_off' : 'toggle_on'}</i>
+                                <span className={`p-1 font-bold`}>{!candidaturasFinalizadas ? 'Em análise' : 'Finalizadas'}</span>
+                            </div>
+                            <section className="flex flex-wrap gap-4 pl-4 pt-10  pb-20">
+                                {renderizarCandidaturas()}
+                            </section>
+                        </div>
                     )
                     }
                     {
                         aba === "Editar" && (
-                            <FormEditar perfil={perfil} />
+                            <div className="px-2 sm:px-0">
+                                <FormEditar perfil={perfil} />
+                            </div>
                         )
                     }
                     {modalIsOpen && (
@@ -277,6 +292,7 @@ export default function PagePerfilCandidato() {
                         draggable={false}
                     />
                 </main>
+                <Footer />
             </div>
         )
     }
@@ -284,12 +300,19 @@ export default function PagePerfilCandidato() {
 }
 
 
-
-export const Qualificao: React.FC<QualificacaoSalva> = ({ nome, nivel }) => {
+interface qualificacaoProps extends QualificacaoSalva {
+    click: () => void
+}
+export const Qualificao: React.FC<qualificacaoProps> = ({ nome, nivel, click }) => {
+    const [removido, setRemovido] = useState(false);
+    function remover() {
+        setRemovido(true);
+        click();
+    }
     return (
-        <div className="text-[.9em] inline-block border-2 border-gray-700 w-fit px-2 py-1 rounded-full m-2">
-            <span>{`${nome} - `}</span>
-            <span>{nivel}</span>
+        <div className={`flex text-[.9em]  border border-gray-700 bg-gray-50 w-fit px-2 py-1 rounded-full transition-all duration-700 ${removido ? 'scale-0' : ''}`}>
+            <span className="font-black">{`${nome} -  ${nivel}`}</span>
+            <i onClick={remover} className="material-symbols cursor-pointer scale-75">delete</i>
         </div>
     )
 }
@@ -304,10 +327,10 @@ const Candidaturas: React.FC<candidaturaProps> = ({ candidatura }) => {
     let cor = candidatura.status !== "Em análise" ? (candidatura.status === "Selecionado" ? "text-green-900" : "text-red-600") : "text-black";
 
     return (
-        <div className="bg-white border border-gray-300 shadow-md w-52 rounded-lg p-1 mt-4 font-[arial] cursor-pointer">
+        <div className="bg-white border border-gray-400 shadow-md shadow-gray-300 w-52 rounded-lg p-1  font-[arial] cursor-pointer">
             <p className="font-bold font-[arial]">{candidatura.tituloVaga}</p>
             <p className="hover:underline"><a href={`/empresa/${candidatura.idEmpresa}`} target="_blank">{candidatura.nomeEmpresa}</a></p>
-            <p className={`${cor}`}>{candidatura.status}</p>
+            <p className={`${cor} font-bold`}>{candidatura.status}</p>
             <a href={`/vaga/${candidatura.idVaga}`} target="_blank" className="text-blue-700 hover:underline">ver vaga</a>
         </div>
     )
@@ -420,7 +443,6 @@ interface editarProps {
 }
 const FormEditar: React.FC<editarProps> = ({ perfil }) => {
 
-
     const service = CandidatoService();
     const utils = UtilsService();
     const [dadosSalvos, setDadosSalvos] = useState<DadosSalvosCandidato>();
@@ -453,7 +475,6 @@ const FormEditar: React.FC<editarProps> = ({ perfil }) => {
         enableReinitialize: true
     })
 
-
     useEffect(() => {
         (async () => {
             const dados: DadosSalvosCandidato = await service.buscarDadosSalvos(`${ServicoSessao().getSessao()?.accessToken}`);
@@ -468,10 +489,6 @@ const FormEditar: React.FC<editarProps> = ({ perfil }) => {
 
     // SELEÇÃO QUALIFICAÇÃO
     const qualificacaoService = QualificacaoService();
-    const [resultQualificacoes, setResultQualificacoes] = useState<Qualificacao[]>([]);
-    const [idQualificacaoSelecionada, setIdQualificacaoSelecionada] = useState<number | undefined>(undefined);
-
-
 
     async function submit() {
         await service.editarPerfil(values, `${ServicoSessao().getSessao()?.accessToken}`)
@@ -480,30 +497,10 @@ const FormEditar: React.FC<editarProps> = ({ perfil }) => {
 
     // BUSCANDO QUALIFICAÇÕES NO BANCO DE DADOS
     async function buscarQualificacoes(nome: string) {
-        if (!nome || nome.trim().length === 0) {
-            setResultQualificacoes([]);
-        } else {
-            const qualificacoesEncontradas: Qualificacao[] = await qualificacaoService.buscarQualificacoes(nome);
-            setResultQualificacoes(qualificacoesEncontradas);
-        }
-    }
-    // RENDERIZAR RESULTADO DA BUSCA PRO QUALIFICAÇÕES
-    const renderizarQUalificacoesEncontradas = () => {
-        return resultQualificacoes.map(q => {
-
-            function mudarTexto() {
-                const inputNomeQualificacao = document.getElementById("nome_qualificacao") as HTMLInputElement;
-                inputNomeQualificacao.value = `${q.nome}`;
-                setIdQualificacaoSelecionada(q.id);
-                setResultQualificacoes([]);
-            }
-            return (
-                <p className="cursor-pointer hover:bg-gray-100"
-                    key={q.nome} onClick={mudarTexto}>
-                    {q.nome}
-                </p>
-            )
-        })
+        const qualificacoesEncontradas: Qualificacao[] = await qualificacaoService.buscarQualificacoes(nome);
+        return qualificacoesEncontradas.map((q) => ({
+            value: q.id, label: q.nome
+        }))
     }
 
     async function selecionarEstado(estado: HTMLSelectElement) {
@@ -577,28 +574,6 @@ const FormEditar: React.FC<editarProps> = ({ perfil }) => {
         })
     }
 
-    function selecionarQualificacao() {
-        if (idQualificacaoSelecionada) {
-            const inputNomeQualificacao = document.getElementById("nome_qualificacao") as HTMLInputElement;
-            const nivel = document.getElementById("nivel") as HTMLSelectElement;
-            if (idQualificacaoSelecionada && nivel.length && inputNomeQualificacao.value.length) {
-
-                if (!values.qualificacoes?.some((item) => item.idQualificacao === idQualificacaoSelecionada
-                )) {
-                    //PARA ENVIAR AO BACK END
-                    const qualificacao: qualificacaoUsuario = {
-                        idQualificacao: idQualificacaoSelecionada,
-                        nivel: nivel.value, nome: inputNomeQualificacao.value
-                    };
-                    setFieldValue("qualificacoes", [
-                        ...values.qualificacoes ? values.qualificacoes : [],
-                        qualificacao
-                    ])
-                }
-                inputNomeQualificacao.value = "";
-            }
-        }
-    }
 
     // ADICIONAR EXPERIENCIA
     function adicionarExperiencia() {
@@ -618,9 +593,6 @@ const FormEditar: React.FC<editarProps> = ({ perfil }) => {
         }
     }
 
-
-
-
     const renderizarExperiencias = () => {
         return values.experiencias?.map(e => {
             async function apagar() {
@@ -632,7 +604,7 @@ const FormEditar: React.FC<editarProps> = ({ perfil }) => {
                 }
             }
 
-            return (<Experiencia click={apagar}
+            return (<ExperienciaAccordion click={apagar}
                 key={crypto.randomUUID()} empresa={`${e.empresa}`} cargo={e.cargo + ""} descricao={`${e.descricao}`} duracao={`${e.duracao}`} />)
         }
         )
@@ -672,13 +644,13 @@ const FormEditar: React.FC<editarProps> = ({ perfil }) => {
 
     return (
 
-        <div className="border border-gray-300 mt-10  w-[370px] sm:w-[650px] h-fit bg-white mb-56 m-auto ">
+        <div className="border border-gray-400 rounded-sm mt-10 pt-10 w-fit  sm:w-[600px] md:w-[700px] h-fit px-4 bg-white shadow mb-56 m-auto ">
             <h3 className="text-center">Editar perfil</h3>
 
             <div className="flex flex-col items-center gap-y-5">
                 <label>
                     <div style={{ backgroundImage: `url(${urlFoto})` }}
-                        className="h-36 w-36 rounded-full bg-cover flex cursor-pointer">
+                        className="h-36 w-36 rounded-full bg-cover flex cursor-pointer ">
                         <input onChange={(event) => selecionarFoto(event)} id="foto" type="file" className="hidden" />
                     </div>
                 </label>
@@ -687,20 +659,20 @@ const FormEditar: React.FC<editarProps> = ({ perfil }) => {
 
             <form onSubmit={handleSubmit}
                 className="w-fit m-auto">
-                <div className=" grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5  m-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-5 py-5  justify-items-center m-auto ">
                     <div className="grid">
                         <label>Nome:</label>
-                        <input value={values.nome} onChange={handleChange} id="nome" placeholder="Nome completo" className="border border-gray-400  h-10 rounded-sm w-[260px] " />
+                        <input value={values.nome} onChange={handleChange} id="nome" placeholder="Nome completo" className="border border-gray-400 pl-1  h-10 rounded-sm w-[260px]" />
                     </div>
 
                     <div className="grid">
                         <label>Tel:</label>
-                        <input value={values.tel} onChange={handleChange} id="tel" placeholder="(**) *****-****" className="border border-gray-400  h-10 rounded-sm w-[260px] " />
+                        <input value={values.tel} onChange={handleChange} id="tel" placeholder="(**) *****-****" className="border border-gray-400 pl-1 h-10 rounded-sm w-[260px] " />
                     </div>
 
                     <div className="grid">
                         <label>Estado:</label>
-                        <select value={values.idEstado} id="idEstado" name="idEstado" onChange={(event) => selecionarEstado(event.target)} className="border border-gray-400  h-10 w-[260px] rounded-sm">
+                        <select value={values.idEstado} id="idEstado" name="idEstado" onChange={(event) => selecionarEstado(event.target)} className="border border-gray-400 h-10 w-[260px] rounded-sm">
                             {renderizarOptionEstados()}
                         </select>
                     </div>
@@ -714,7 +686,7 @@ const FormEditar: React.FC<editarProps> = ({ perfil }) => {
 
                     <div className="grid">
                         <label>PCD:</label>
-                        <select value={values.pcd + ''} onChange={handleChange} id="pcd" className="border border-gray-400  h-10 rounded-sm sm:w-[260px] ">
+                        <select value={values.pcd + ''} onChange={handleChange} id="pcd" className="border border-gray-400  h-10 rounded-sm  w-[260px]">
                             <option value="false">Não</option>
                             <option value="true">Sim</option>
                         </select>
@@ -722,7 +694,7 @@ const FormEditar: React.FC<editarProps> = ({ perfil }) => {
 
                     <div className="grid">
                         <label>Está empregado:</label>
-                        <select value={values.trabalhando + ""} onChange={handleChange} id="trabalhando" className="border border-gray-400  h-10 rounded-sm sm:w-[260px] ">
+                        <select value={values.trabalhando + ""} onChange={handleChange} id="trabalhando" className="border border-gray-400  h-10 rounded-sm w-[260px] ">
                             <option value="false">Não</option>
                             <option value="true">Sim</option>
                         </select>
@@ -730,7 +702,7 @@ const FormEditar: React.FC<editarProps> = ({ perfil }) => {
 
                     <div className="grid">
                         <label>Sexo:</label>
-                        <select value={values.sexo} id="sexo" onChange={handleChange} className="border border-gray-400  h-10 rounded-sm sm:w-[260px] ">
+                        <select value={values.sexo} id="sexo" onChange={handleChange} className="border border-gray-400  h-10 rounded-sm w-[260px] ">
                             <option value="MASCULINO">Maculino</option>
                             <option value="FEMININO">Feminino</option>
                         </select>
@@ -739,136 +711,177 @@ const FormEditar: React.FC<editarProps> = ({ perfil }) => {
                     <div className="grid">
                         <label>Data de nascimento</label>
                         <input value={values.dataNascimento ? `${values.dataNascimento}` : new Date().toDateString()} type="date" id="dataNascimento"
-                            className="border border-gray-400  h-10 rounded-sm sm:w-[260px] " onChange={handleChange} />
+                            className="border border-gray-400  h-10 rounded-sm w-[260px] " onChange={handleChange} />
                     </div>
                 </div>
-                <div className="grid grid-cols-1 pt-5 px-3 m-auto w-[370px] sm:w-[650px]">
+                <div className="grid grid-cols-1 pt-5 px-3 m-auto w-[100%]">
                     <label htmlFor="descricao">Descrição:</label>
-                    <textarea id="descricao" name="descricao" placeholder="Fale sobre seu eu profissional" className="rounded-lg mt-3 h-32 sm:h-56 pl-1 " value={values.descricao} onChange={handleChange} />
+                    <textarea id="descricao" name="descricao" placeholder="Fale sobre seu eu profissional" className="rounded-sm mt-3 h-32 sm:h-40 pl-1 border border-gray-400 bg-white" value={values.descricao} onChange={handleChange} />
                 </div>
-                <h4>Qualificações</h4>
-                <i onClick={() => setAddQualificacoes(!addQualificacoes)} className="material-symbols cursor-pointer">{addQualificacoes ? "done" : "add"}</i>
-                {addQualificacoes && (
-                    <>
-                        <div className="grid  gap-2 w-fit">
-                            <div className="grid ">
-                                <label htmlFor="nivel">Nivel:</label>
-                                <select className="border border-gray-500 pl-2 w-fit h-8" id="nivel" onChange={handleChange}>
-                                    <option value="BASICO">Básico</option>
-                                    <option value="INTERMEDIARIO">Intermediario</option>
-                                    <option value="AVANCADO">Avançado</option>
-                                </select>
-                            </div>
-                            <div className="gri relative">
+                {/*COMPLETAR PERFIL*/}
+                <section className="mt-7 grid px-4 gap-y-4 m-auto ">
+                    <div className="text-[1.2em] font-semibold flex items-center">Qualificações
+                        <i onClick={() => setAddQualificacoes(!addQualificacoes)} className="material-symbols cursor-pointer ml-2">{addQualificacoes ? "done" : "add"}</i>
+                    </div>
+                    {addQualificacoes && (
+                        <>
+                            <div className="grid sm:grid-cols-2 justify-items-center gap-8 mb-8">
+                                <div className="grid ">
+                                    <label htmlFor="nivel">Nivel:</label>
+                                    <select className="border border-gray-500 pl-2 h-10 rounded-sm w-[260px]" id="nivel" onChange={handleChange}>
+                                        <option value="BASICO">Básico</option>
+                                        <option value="INTERMEDIARIO">Intermediario</option>
+                                        <option value="AVANCADO">Avançado</option>
+                                    </select>
+                                </div>
                                 <div className="grid relative">
+                                    <div className="grid ">
+                                        <label htmlFor="nome_qualificacao">Qualificação:</label>
+                                        <AsyncSelect
+                                            className="h-10 rounded-sm w-[260px]"
+                                            placeholder="Buscar"
+                                            loadOptions={buscarQualificacoes}
+                                            onChange={(event) => {
+                                                const nivel = document.getElementById("nivel") as HTMLSelectElement;
+                                                if (!values.qualificacoes?.some((item) => item.idQualificacao === event?.value
+                                                )) {
+                                                    //PARA ENVIAR AO BACK END
 
-                                    <label htmlFor="nome_qualificacao">Qualificação:</label>
-                                    <input onChange={(event) => buscarQualificacoes(event.target.value)} id="nome_qualificacao" type="text" placeholder="Busque aqui" className="w-[210px] rounded-md h-8" />
+                                                    const qualificacao: qualificacaoUsuario = {
+                                                        idQualificacao: event?.value,
+                                                        nivel: nivel.value, nome: event?.label!
+                                                    };
+                                                    alert(JSON.stringify(qualificacao))
+                                                    setFieldValue("qualificacoes", [
+                                                        ...values.qualificacoes ? values.qualificacoes : [],
+                                                        qualificacao
+                                                    ])
+                                                }
+                                            }
+                                            }
+
+                                        />
+                                    </div>
+
                                 </div>
-                                <div className={`border border-gray-200 w-[210px] absolute top-[100%] z-10  bg-white `}>
-                                    {renderizarQUalificacoesEncontradas()}
+                            </div>
+                            <h3>Qualificações adicionadas:</h3>
+                            <section className="text-nowrap flex gap-x-3  px-4  pb-4 overflow-x-auto mb-4">
+                                {renderizarQualificacoes()}
+                            </section>
+                        </>
+                    )
+                    }
+
+                    <div className="text-[1.2em] font-semibold flex items-center">
+                        Formações
+                        <i onClick={() => setAddFormacao(!addFormacao)} className="material-symbols cursor-pointer">{addFormacao ? "done" : "add"}</i>
+                    </div>
+                    {addFormacao && (
+                        <>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 justify-items-center gap-6  mb-8">
+                                <div className="grid">
+                                    <input id="fInstituicao" type="text" placeholder="Instituição"
+                                        className="h-10 rounded-sm w-[260px] border pl-1" />
+                                </div>
+                                <div className="grid">
+                                    <input id="fCurso" type="text" placeholder="Curso"
+                                        className="h-10 rounded-sm w-[260px] border pl-1" />
+                                </div>
+                                <div className="grid">
+                                    <label htmlFor="fNivel" className="">Nivel: </label>
+                                    <select className="border h-10 rounded-sm w-[260px]" id="fNivel">
+                                        <option>TECNICO </option>
+                                        <option>TECNOLOGO </option>
+                                        <option>GRADUACAO </option>
+                                        <option>POS_GRADUACAO </option>
+                                        <option>MESTRADO </option>
+                                        <option>DOUTORADO </option>
+                                    </select>
+                                </div>
+                                <div className="grid">
+                                    <label htmlFor="fSituacao" className="">Situação: </label><div />
+                                    <select className="border h-10 rounded-sm w-[260px]" id="fSituacao">
+                                        <option value="CONCLUIDO">Concluido</option>
+                                        <option value="EM_ANDAMENTO">Em andamento</option>
+                                    </select>
+                                </div>
+                                <div className="" >
+                                    <div className="h-10 rounded-sm w-[260px] pt-2 border  text-white  bg-gray-900 text-center  cursor-pointer" onClick={adicionarFormacao}>Adicionar</div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="w-36 h-9 flex flex-col justify-center border text-center my-5 rounded-md cursor-pointer" onClick={selecionarQualificacao}>Adicionar</div>
+                            <h3>Formações adicionadas:</h3>
+                            <section className="flex gap-x-8 -mt-4 overflow-auto">
+                                {renderizarFormacoes()}
+                            </section>
+                        </>
+                    )}
+                    <div className="text-[1.2em] font-semibold flex items-center">
+                        Experiências
+                        <i onClick={() => setAddExperiencia(!addExperiencia)} className="material-symbols cursor-pointer">{addExperiencia ? "done" : "add"}</i>
+                    </div>
+                    {addExperiencia && (
+                        <>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 justify-items-center gap-6 mb-8">
+                                <div className="grid">
+                                    <label htmlFor="eEmpresa">Empresa:</label>
+                                    <input id="eEmpresa" type="text" placeholder="Empresa" className="h-10 rounded-sm w-[260px] border pl-1" />
+                                </div>
+                                <div className="grid">
+                                    <label htmlFor="eCargo">Cargo:</label>
+                                    <input id="eCargo" type="text" placeholder="Cargo" className="h-10 rounded-sm w-[260px] border pl-1" />
+                                </div>
+                                <div className="grid">
+                                    <label htmlFor="eDuracao">Duração:</label>
+                                    <input id="eDuracao" type="text" placeholder="Ex: 1 ano e 7 meses"
+                                        className="h-10 rounded-sm w-[260px] border pl-1" />
+                                </div>
+                            </div>
 
-                        <div className=" text-nowrap flex gap-x-3 px-4 overflow-x-auto ">
-                            {renderizarQualificacoes()}
-                        </div>
-                    </>
-                )
-                }
-                <h4>Formações</h4>
-                <i onClick={() => setAddFormacao(!addFormacao)} className="material-symbols cursor-pointer">{addFormacao ? "done" : "add"}</i>
-                {addFormacao && (
-                    <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit">
-                            <div className="grid">
-                                <input id="fInstituicao" type="text" placeholder="Instituição"
-                                    className=" h-8 rounded-md " />
+                            <div className="grid grid-cols-1 ">
+                                <label htmlFor="eDescricao">Descrição:</label>
+                                <textarea id="eDescricao" placeholder="Descrição" className="rounded-lg mt-3 h-32 sm:h-40 mb-5 border pl-1" />
                             </div>
-                            <div className="grid">
-                                <input id="fCurso" type="text" placeholder="Curso"
-                                    className=" h-8 rounded-sm" />
-                            </div>
-                            <div className="grid">
-                                <label htmlFor="fNivel" className="">Nivel: </label>
-                                <select className="border  h-9 rounded-sm" id="fNivel">
-                                    <option>TECNICO </option>
-                                    <option>TECNOLOGO </option>
-                                    <option>GRADUACAO </option>
-                                    <option>POS_GRADUACAO </option>
-                                    <option>MESTRADO </option>
-                                    <option>DOUTORADO </option>
-                                </select>
-                            </div>
-                            <div className="grid">
-                                <label htmlFor="fSituacao" className="">Situação: </label><div />
-                                <select className="border  h-9 rounded-sm" id="fSituacao">
-                                    <option value="CONCLUIDO">Concluido</option>
-                                    <option value="EM_ANDAMENTO">Em andamento</option>
-                                </select>
-                            </div>
-                            <div className="" >
-                                <div className="w-36 h-9 flex flex-col justify-center border text-center  rounded-md cursor-pointer" onClick={adicionarFormacao}>Adicionar</div>
-                            </div>
-                        </div>
-                        {renderizarFormacoes()}
-                    </>
-                )}
-                <h4>Experiências</h4>
-                <i onClick={() => setAddExperiencia(!addExperiencia)} className="material-symbols cursor-pointer">{addExperiencia ? "done" : "add"}</i>
-                {addExperiencia && (
-                    <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit">
-                            <div>
-                                <input id="eEmpresa" type="text" placeholder="Empresa" className="w-[210px] h-8 rounded-sm" />
-                            </div>
-                            <div>
-                                <input id="eCargo" type="text" placeholder="Cargo" className="w-[210px] h-8 rounded-sm" />
 
+                            <div className="">
+                                <div className="m-auto h-10 rounded-sm w-[260px] border  text-white  bg-gray-900 text-center pt-2 cursor-pointer" onClick={adicionarExperiencia}>Adicionar</div>
                             </div>
-                            <div className="grid">
-                                <label htmlFor="eDuracao">Duração:</label>
-                                <input id="eDuracao" type="text" placeholder="Ex: 1 ano e 7 meses"
-                                    className=" h-8 rounded-sm" />
-                            </div>
-                        </div>
+                            <h3>Experiências adicionadas:</h3>
+                            <section className="grid gap-y-3 overflow-auto h-56">
+                                {renderizarExperiencias()}
+                            </section>
+                            <hr className="text-gray-400 mt-5 mb-2 w-[90%] m-auto" />
+                        </>
 
-                        <div className="grid grid-cols-1 pt-10">
-                            <label htmlFor="eDescricao">Descrição:</label>
-                            <textarea id="eDescricao" placeholder="Descrição" className="rounded-lg mt-3 h-32 pl-1 mb-5" />
-                        </div>
-
-                        <div className="">
-                            <div className="m-auto w-36 h-9 flex flex-col justify-center border text-center  rounded-md cursor-pointer" onClick={adicionarExperiencia}>Adicionar</div>
-                        </div>
-                        {renderizarExperiencias()}
-                    </>
-
-                )}
-                <h4>Certificações</h4>
-                <i onClick={() => setAddCurso(!addCurso)} className="material-symbols cursor-pointer">{addCurso ? "done" : "add"}</i>
-                {addCurso && (
-                    <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-fit">
-                            <div className="grid">
-                                <label htmlFor="cInstituicao">Instituição:</label>
-                                <input id="cInstituicao" type="text" placeholder="Instituição" className="h-8 w-[220px]" />
+                    )}
+                    <div className="text-[1.2em] font-semibold flex items-center">
+                        Certificações
+                        <i onClick={() => setAddCurso(!addCurso)} className="material-symbols cursor-pointer">{addCurso ? "done" : "add"}</i>
+                    </div>
+                    {addCurso && (
+                        <>
+                            <div className="grid grid-cols-1 justify-items-center sm:grid-cols-2 gap-6 ">
+                                <div className="grid">
+                                    <label htmlFor="cInstituicao">Instituição:</label>
+                                    <input id="cInstituicao" type="text" placeholder="Instituição" className="h-10  w-[260px] border pl-1 rounded-sm" />
+                                </div>
+                                <div className="grid">
+                                    <label htmlFor="cCurso">Curso:</label>
+                                    <input id="cCurso" type="text" placeholder="Nome do curso" className="h-10  w-[260px] border pl-1 rounded-sm" />
+                                </div>
+                                <input id="cCargaHoraria" type="number" placeholder="Carga horária" className="h-10 w-[260px] border pl-1 rounded-sm" />
+                                <div className="h-10 w-[260px] border text-center pt-2 rounded-sm cursor-pointer text-white  bg-gray-900" onClick={adicionarCurso}>Adicionar</div>
                             </div>
-                            <div className="grid">
-                                <label htmlFor="cCurso">Curso:</label>
-                                <input id="cCurso" type="text" placeholder="Nome do curso" className="h-8 w-[220px]" />
-                            </div>
-                            <input id="cCargaHoraria" type="number" placeholder="Carga horária" className="h-8 w-[220px]" />
-                            <div className="w-36 h-8  flex flex-col justify-center border text-center rounded-sm cursor-pointer" onClick={adicionarCurso}>Adicionar</div>
-                        </div>
-                        {renderizarCurso()}
-                    </>
-                )
-                }
+                            <section className="min-h-56 flex overflow-auto gap-x-5 p-1">
+                                {renderizarCurso()}
+                            </section>
+                        </>
+                    )
+                    }
+                </section>
+                <hr className="text-gray-400 my-8 w-[90%] m-auto" />
                 <div className="flex justify-center mt-12 mb-16">
-                    <input value="Salvar" type="submit" className="cursor-pointer  w-20 py-1 text-center text-white  bg-gray-700 " />
+                    <input value="Salvar" type="submit" className="cursor-pointer h-10 rounded-sm w-[260px] py-1 text-center text-white  bg-gray-900 " />
                 </div>
             </form>
         </div>

@@ -17,8 +17,8 @@ export const Header: React.FC<headerProps> = ({ logado }) => {
 
     return (
         <header className="border-b border-gray-200 bg-white shadow-sm shadow-gray-300 flex items-end py-2 z-10 text-center">
-            <div onClick={() => router.push("/")} className={`flex items-center gap-x-3 cursor-pointer ${logado? 'pl-3.5' : 'm-auto'}`}>
-                <img className="h-[50px] w-[50px]" src="/favi_safira.png" />
+            <div onClick={() => router.push("/")} className={`flex pl-2 items-center gap-x-3 cursor-pointer ${logado? 'pl-3.5' : 'm-auto'}`}>
+                <img className="h-[50px] w-[50px] " src="/favi_safira.png" />
                 <h1 style={{ WebkitBackgroundClip: 'text', backgroundImage: 'linear-gradient(to left, #191970 0%, #182848 100%)' }}
                     className="pt-1 font-[Belleza] text-transparent ">SAFIRA</h1>
             </div>
