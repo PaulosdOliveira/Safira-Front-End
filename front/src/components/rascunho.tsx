@@ -11,16 +11,12 @@ interface cardRascunhoProps extends ModeloDeProposta {
 
 export const CardRascunho: React.FC<cardRascunhoProps> = ({ apagarRascunho, descricao, id, titulo }) => {
 
-    const [moreOpen, setMoreOpen] = useState<boolean>(false);
 
     return (
-        <div className="flex my-4 w-fit">
-            <div className="border border-gray-500 w-[210px] text-center rounded-md  flex items-start pl-2  bg-white">
+        <div className="grid justify-items-center  w-fit">
+            <div className="border border-gray-500 w-[210px] text-center rounded  flex items-center pl-2 py-1  bg-white">
                 <p className="text-[1.3em] px-1  w-[91%]">{titulo}</p>
-                <i onClick={() => setMoreOpen(!moreOpen)} className="material-symbols  scale-75 cursor-pointer">more_vert</i>
-            </div>
-            <div id="mais_opcoes" className={`border  w-[49px] h-fit ml-2 rounded-md  bg-white ${moreOpen ? '' : 'hidden'}`}>
-                <span onClick={apagarRascunho} className="cursor-pointer">Excluir</span>
+                <i onClick={apagarRascunho} className="material-symbols  scale-75 cursor-pointer">delete</i>
             </div>
         </div>
     )
@@ -50,14 +46,24 @@ export const GerenciadorDeRascunhos: React.FC<gerente> = ({ children, condition,
         }
     }
     return (
-        <div className="w-full  max-h-[69vh] overflow-auto">
+        <div className="w-full mb-10">
             {
                 visualizar ? (
-                    <div className="flex flex-col items-center">
-                        <div className="text-right  w-[210px] ">
-                            <i onClick={() => setVisualizar(!visualizar)} title="Novo" className="material-symbols cursor-pointer">Note_Add</i>
+
+                    <div className="flex flex-col items-center cursor-pointer">
+
+                        <h4>Meus rascunhos</h4>
+                        <div className="w-full px-10 flex mb-8">
+                            <div onClick={() => setVisualizar(!visualizar)}
+                                className="bg-white flex justify-center  font-[arial] font-semibold items-center gap-2 p-3 rounded-2xl border border-gray-300 shadow-sm shadow-gray-400 mb-4">
+                                <i title="Novo" className="material-symbols cursor-pointer">add</i>
+                                Novo
+                            </div>
                         </div>
-                        {children}
+
+                        <div className="w-full flex flex-wrap   justify-center gap-5">
+                            {children}
+                        </div>
                     </div>
 
                 ) : (

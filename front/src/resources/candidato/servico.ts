@@ -41,9 +41,7 @@ class ServiceClass {
             }
 
         })
-
         alert(resultado.status)
-
         if (resultado.status === 404) {
             alert("Usuário não encontrado")
             return null;
@@ -92,10 +90,8 @@ class ServiceClass {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             }
-
         })
     }
-
 
     async buscarCandidatosPorQualificacoes(dadosConsulta: dadosConsultaCandidato, token: string) {
         const resultado = await fetch(`${this.urlBase}/qualificacao-candidato/buscar-candidatos`, {
@@ -133,6 +129,15 @@ class ServiceClass {
                 'Authorization': `Bearer ${token}`
             }
         })
+    }
+
+    // BUSCAR CURRÍCULO DO CANDIDATO
+    async buscarCurriculo(id: string): Promise<Blob | null> {
+        const url = `${this.urlBase}/curriculo/${id}`;
+        const curriculo = await fetch(url, {
+            method: 'GET'
+        });
+        return curriculo.blob();
     }
 
 }

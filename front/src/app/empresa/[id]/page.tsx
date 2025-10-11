@@ -1,28 +1,27 @@
 'use client'
 
-import { Qualificao } from "@/app/candidato/[id]/page";
 import { Option } from "@/app/candidato/page";
-import { Vaga } from "@/app/vaga/[idVaga]/page";
+import VagaPage, { DadosVaga } from "@/app/vaga/[idVaga]/page";
 import { dadosCadastroVaga } from "@/app/vaga/cadastro/formSchema";
 import { CardUsuario } from "@/components/cadUsuario";
-import { Menu } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
 import { CardRascunho, GerenciadorDeRascunhos } from "@/components/rascunho";
-import { SelectEstadoCidade } from "@/components/Select";
 import { CandidatoCadastrado, PerfilCandidato } from "@/resources/candidato/candidatoResource";
 import { CandidatoService } from "@/resources/candidato/servico";
 import { perfilEmpresa } from "@/resources/empresa/model";
 import { CadastroModeloDeProposta, ModeloDeProposta } from "@/resources/empresa/rascunho/rascunhoResource";
 import { ServicoEmpresa } from "@/resources/empresa/sevico"
-import { CadastroMensagemDTO, MensagemDTO } from "@/resources/mensagem/mensagemResource";
-import { QualificacaoSalva } from "@/resources/qualificacao/qualificacaoResource";
+import { CadastroMensagemDTO } from "@/resources/mensagem/mensagemResource";
 import { ServicoSessao } from "@/resources/sessao/sessao";
 import { cidade, estado, UtilsService } from "@/resources/utils/utils";
-import { dadosVaga, VagaEmpresaDTO } from "@/resources/vaga_emprego/DadosVaga";
+import { dadosVaga, PageVagaEmprego } from "@/resources/vaga_emprego/DadosVaga";
 import { VagaService } from "@/resources/vaga_emprego/service";
 import { Client } from "@stomp/stompjs";
 import { useFormik } from "formik";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import ReactPaginate from "react-paginate";
 
 
 export default function PerfilEmpresa() {
@@ -32,24 +31,35 @@ export default function PerfilEmpresa() {
     const vagaService = VagaService();
     const sessao = ServicoSessao();
     const [perfil, setPerfil] = useState<perfilEmpresa>();
-    const [vagas, setVagas] = useState<VagaEmpresaDTO[]>([]);
+    // VAGAS DA EMPRESA
+    const [vagas, setVagas] = useState<PageVagaEmprego[]>([]);
+    // TAMNHO DE ELEMENTOS DA PAGINA ATUAL
+    const [totalPages, setTotalPages] = useState(0);
+    // USADO PARA ROLAR AO TOPO QUANDO NECESSÁRIO
+    const divRef = useRef<HTMLDivElement | null>(null);
     const [rascunhos, setRascunhos] = useState<ModeloDeProposta[]>([]);
     const [candidatosVaga, setCandidatosVaga] = useState<CandidatoCadastrado[]>([]);
     const [indexListaCandidato, setIndexListaCandidato] = useState<number>();
+    // PARA NAVEGAÇÃO NA ABA DE CANDIDATURAS
     const [statusCandidato, setStatusCandidato] = useState<string>("EM_ANALISE");
-    const [dadosModalCandidato, setDadosModalCandidato] = useState<PerfilCandidato | null>(null)
     const [idVagaSelecionada, setIdVagaSelecionada] = useState<string | null>(null);
-    const [cardVaga, setCardVaga] = useState<dadosVaga | null>(null);
+
+    // VAGA SELECIONADA PARA VISUALIZAÇÃO
+    const [vagaSelecionada, setVagaSelecionada] = useState<dadosVaga | null>(null);
     const [dadosCadastraisVaga, setDadosCadastraisVaga] = useState<dadosCadastroVaga | null>(null);
     const [aba, setAba] = useState<"vagas" | "rascunhos">("vagas");
     const [nav, setNav] = useState<string>("dados");
+    // DADOS DO CANDIDATO PARA EXÍBIR NO MODAL
+    const [dadosModalCandidato, setDadosModalCandidato] = useState<PerfilCandidato | null>(null);
+    // DEFINE SE MODAL ESTÁ ABERTO OU NÃO
     const [modalIsOpen, setmodalOpen] = useState<boolean>(false);
+    // URL PARA EXÍBIR CURRÍCULO DA CONDIDATO VISUALIZADO
+    const [urlCurriculo, setUrlCurriculo] = useState("");
     const clientRef = useRef<Client | null>(null);
     const [popUpPropostaIsOpen, setPopUpPropostaIsOpen] = useState<boolean>(false);
     /* USADO PARA INDICAR SE O USUÁRIO DESEJA SELECIONAR UM CANDIDATO
-    * CONSIDERA-SE QUE DESEJA DISPENSAR O MESMO ↓   */
+    * CONSIDERA-SE QUE DESEJA DISPENSAR O MESMO CASO SEJA 'FALSE' ↓   */
     const [selecionar, setSelecionar] = useState<boolean>(true);
-
 
 
     // Execuutando efeitos ao carregar a página
@@ -58,7 +68,10 @@ export default function PerfilEmpresa() {
         (async () => {
             const perfilEncontrado = await service.carregarPerfil(`${id}`);
             setPerfil(perfilEncontrado)
-            const vagas = await vagaService.buscarVagasEmpresa(`${id}`);
+            const vagas = await vagaService.buscarVagasEmpresa(`${id}`, 0).then((result) => {
+                setTotalPages(result.totalPages);
+                return result.content;
+            });
             setVagas(vagas);
             if (sessao.getSessao()?.perfil === "empresa") {
                 const rascunhos = await service.buscarRascunhos(`${sessao.getSessao()?.accessToken}`);
@@ -92,10 +105,11 @@ export default function PerfilEmpresa() {
         (async () => {
             if (idVagaSelecionada) {
                 const dados: dadosVaga = await vagaService.carregarVaga(`${idVagaSelecionada}`, `${sessao.getSessao()?.accessToken}`);
-                setCardVaga(dados);
+                setVagaSelecionada(dados);
             }
         })()
     }, [idVagaSelecionada])
+
 
 
     // Enviado mensagem para candidato
@@ -129,7 +143,7 @@ export default function PerfilEmpresa() {
     }
 
     // Transformando dados da vaga em componente JSX
-    function vagaObjectToComponent(dados: VagaEmpresaDTO) {
+    function vagaObjectToComponent(dados: PageVagaEmprego) {
         return <MiniCardVaga id={dados.id} tempo_decorrido={dados.tempo_decorrido} titulo={dados.titulo} key={dados.id}
             candidaturas={dados.qtd_candidatos}
             click={() => sessao.getSessao()?.id === id ? setIdVagaSelecionada(`${dados.id}`) : router.push(`/vaga/${dados.id}`)} />
@@ -175,13 +189,10 @@ export default function PerfilEmpresa() {
         document.body.classList.add("overflow-hidden");
         const dadosCandidato = await CandidatoService().carregarPerfil(idCandidato);
         setDadosModalCandidato(dadosCandidato);
+        const curriculo = await CandidatoService().buscarCurriculo(dadosCandidato.id);
+        setUrlCurriculo(curriculo?.size ? URL.createObjectURL(curriculo) : "");
         setIndexListaCandidato(indexListaCandidato);
     }
-
-    const toQualificacao = (qualificacao: QualificacaoSalva, key: number) => {
-        return <Qualificao key={key} nivel={qualificacao.nivel} nome={qualificacao.nome} />
-    }
-    const renderizarQualificacoes = () => { return dadosModalCandidato?.qualificacoes?.map(toQualificacao) }
 
     const fecharModal = () => { setmodalOpen(false), document.body.classList.remove("overflow-hidden"), setDadosModalCandidato(null) }
 
@@ -196,7 +207,7 @@ export default function PerfilEmpresa() {
     function voltar() {
         setNav("dados");
         setCandidatosVaga([]);
-        setCardVaga(null);
+        setVagaSelecionada(null);
         setIdVagaSelecionada(null);
         setDadosCadastraisVaga(null)
     }
@@ -205,10 +216,13 @@ export default function PerfilEmpresa() {
     function candidatoToCard(dados: CandidatoCadastrado, key: number) {
         if (statusCandidato === dados.status)
             return (
-                <div className="flex items-center" key={"1" + key}>
+                <div className="flex flex-col gap-y-2 items-center" key={"1" + key}>
                     <CardUsuario load={false} cidade={dados.cidade} estado={dados.estado} id={dados.id} idade={dados.idade} key={dados.id} nome={dados.nome} />
                     {statusCandidato === "EM_ANALISE" && (
-                        <button className="border rounded-lg p-1" onClick={() => abrirModal(`${dados.id}`, key)} key={key}>Avaliar</button>
+                        <div className="flex gap-x-2">
+                            <button className="rounded-lg py-1 px-2 bg-black text-white" onClick={() => abrirModal(`${dados.id}`, key)} key={key}>Avaliar</button>
+
+                        </div>
                     )}
                 </div>
             )
@@ -220,22 +234,22 @@ export default function PerfilEmpresa() {
 
     return (
         <>
-            <div className="h-[200vh] w-full bg-gray-200">
-                <header className="h-20 w-full  bg-gray-100">
-                    <div className=" h-full flex flex-row-reverse items-end">
-                        <Menu />
-                    </div>
-                </header>
-                <main className=" ">
+            <div ref={divRef}
+                className="min-h-screen max-h-fit w-full bg-gray-50">
+                <Header />
+                <main className="mb-5">
                     <section id="informacoes" className="" >
-                        <div className="z-30 pb-3  flex flex-row-reverse items-center justify-center">
-                            <img id="capa" className=" h-48 w-[98%] rounded-2xl mt-2  z-0"
+                        <div className="z-30 pb-3  flex flex-col  ">
+                            <img id="capa" className=" h-48 w-[98%] rounded-2xl mt-2 m-auto z-0"
                                 src={`http://localhost:8080/empresa/capa/${id}`} />
-                            <div id="foto" className="border-2 border-gray-800 h-32 w-32 rounded-full  -mr-32 mt-28 bg-no-repeat bg-contain z-10"
-                                style={{ backgroundImage: `url(http://localhost:8080/empresa/foto/${id})` }} />
+
+                            <div className="z-10 -mt-10 ml-5 flex items-end">
+                                <div id="foto" className="border-2 border-white h-32 w-32  rounded-full   bg-no-repeat bg-contain "
+                                    style={{ backgroundImage: `url(http://localhost:8080/empresa/foto/${id})` }} />
+                                <h2 className="pl-2 pb-7">{perfil?.nome}</h2>
+                            </div>
                         </div>
-                        <h2 className="pl-2 pb-3">{perfil?.nome}</h2>
-                        <pre className="text-wrap font-[arial] text-justify px-2 text-[.9em] mb-6">{perfil?.descricao}</pre>
+                        <pre className="text-wrap pl-9 font-[arial] text-justify px-2 text-[.9em] mb-6">{perfil?.descricao}</pre>
                     </section>
                     <hr className="mt-9 w-[97%] m-auto hidden" />
                     <section >
@@ -260,9 +274,36 @@ export default function PerfilEmpresa() {
                         <div className="flex flex-wrap items-start gap-1 mt-16    rounded-md m-auto">
                             {aba === "vagas" ? (
                                 !idVagaSelecionada ? (
-                                    <section className="flex flex-wrap justify-center w-full gap-x-3  p-2">
-                                        {renderizarVagas()}
-                                    </section>
+                                    <>
+                                        <section className="flex flex-wrap justify-center w-full gap-x-3  p-2">
+                                            {renderizarVagas()}
+                                        </section>
+                                        <div className="flex justify-center  w-full my-10">
+                                            <ReactPaginate
+                                                className="flex gap-3"
+                                                pageClassName="border px-3 py-2 rounded cursor-pointer hover:bg-gray-800"
+                                                pageCount={totalPages}
+                                                previousLabel="arrow_left"
+                                                nextLabel="arrow_right"
+                                                nextClassName="material-symbols cursor-pointer"
+                                                previousClassName="material-symbols cursor-pointer"
+                                                activeClassName="bg-gray-800 text-white"
+                                                onPageChange={async (index) => {
+                                                    const vagasEncontradas = await vagaService.buscarVagasEmpresa(`${id}`, index.selected).then((result) => {
+                                                        setTotalPages(result.totalPages);
+                                                        return result.content;
+                                                    });
+
+                                                    setVagas(vagasEncontradas);
+                                                    divRef.current?.scrollIntoView({
+                                                        behavior: 'instant',
+                                                        block: 'start'
+                                                    })
+                                                }
+                                                }
+                                            />
+                                        </div>
+                                    </>
                                 ) : (
                                     <div className="flex flex-col w-full">
                                         <nav className="mb-10 pl-4">
@@ -289,11 +330,11 @@ export default function PerfilEmpresa() {
                                             </ul>
                                         </nav>
                                         <br />
-                                        {cardVaga?.id && (
+                                        {vagaSelecionada?.id && (
                                             <div className="flex w-full">
                                                 {nav === "dados" && (
                                                     <div className="w-full">
-                                                        <Vaga vaga={cardVaga} />
+                                                        <DadosVaga vaga={vagaSelecionada} />
                                                     </div>
                                                 )}
                                                 {nav === "candidatos" && (
@@ -309,37 +350,30 @@ export default function PerfilEmpresa() {
                                                             {renderizarCardCandidato()}
                                                         </section>
                                                         {modalIsOpen && (
-                                                            <div className="fixed inset-0  z-50 overflow-hidden">
+                                                            <div className="fixed inset-0  z-50 overflow-hidden font-[arial]">
                                                                 <div className="inset-0 bg-black  absolute overflow-hidden opacity-50" />
-                                                                <div style={{ transform: 'translate(-50%, -50%)' }} className="absolute bg-white top-[50%] left-[50%] w-[78%] p-6 rounded-lg">
+                                                                <div style={{ transform: 'translate(-50%, -50%)' }} className="absolute bg-gray-200  top-[50%] left-[50%] w-[90%] min-h-[300px] flex flex-col justify-center sm:w-[460px] py-5 rounded-sm border-2">
                                                                     <div className=" text-right">
                                                                         <button onClick={fecharModal}
-                                                                            className="h-8 w-8 text-2xl  text-black cursor-pointer absolute font-extrabold -top-2 left-[95%]" >
-                                                                            x
+                                                                            className="material-symbols text-black cursor-pointer absolute font-extrabold -top-0 left-[92%] sm:left-[94.5%]" >
+                                                                            close
                                                                         </button>
                                                                     </div>
-                                                                    <br />
-                                                                    <div className="flex items-center">
-                                                                        <div style={{ backgroundImage: `url(http://localhost:8080/candidato/foto/${dadosModalCandidato?.id}` }}
-                                                                            className="h-20 w-20 rounded-full bg-cover bg-no-repeat mr-3" />
-                                                                        <span className="text-[1.3em] font-semibold">{dadosModalCandidato?.nome}</span><br />
-
+                                                                    {urlCurriculo.trim().length ? (
+                                                                        <iframe className="border m-auto mb-5 h-[500px] w-[100%]"
+                                                                            src={urlCurriculo}
+                                                                        />
+                                                                    ) : (
+                                                                        <div className="flex-1/2 flex items-center">
+                                                                            <h4 className="text-center  mb-7 border-dashed border-y w-full">Candidato não possui currículo cadastrado</h4>
+                                                                        </div>
+                                                                    )}
+                                                                    <div className="flex flex-wrap gap-3 justify-center flex-0">
+                                                                        <a href={`/candidato/${dadosModalCandidato?.id}`} target="_blank" className="rounded-lg p-2 bg-blue-700 border-2 border-black text-white">Ver perfil</a>
+                                                                        <button onClick={() => { setPopUpPropostaIsOpen(true), setSelecionar(true) }} className="bg-gray-950 border-2  text-white p-2 rounded-lg">Selecionar</button>
+                                                                        <button onClick={() => { setPopUpPropostaIsOpen(true), setSelecionar(false) }} className="p-2 rounded-lg  bg-red-700 text-white border-2 border-black">Dispensar</button>
                                                                     </div>
-                                                                    <p>{`${dadosModalCandidato?.idade} anos`}</p>
-                                                                    <span>{`${dadosModalCandidato?.cidade}, ${dadosModalCandidato?.estado}`}</span>
-                                                                    <span>{ }</span>
-                                                                    <hr className="my-4 w-[95%] m-auto text-gray-300" />
-                                                                    <h3>Descrição</h3>
-                                                                    <p className="mx-2 text-justify">{dadosModalCandidato?.descricao}</p>
-                                                                    <hr className="my-4 w-[95%] m-auto text-gray-300" />
-                                                                    <h3>Contato</h3>
-                                                                    <p>{dadosModalCandidato?.email}</p>
-                                                                    <p>{dadosModalCandidato?.tel}</p>
-                                                                    <h3>Qualificações</h3>
-                                                                    {renderizarQualificacoes()}<br />
-                                                                    <button onClick={() => { setPopUpPropostaIsOpen(true), setSelecionar(true) }} className="bg-gray-950 text-white p-2 rounded-lg">Selecionar</button>
-                                                                    <button onClick={() => { setPopUpPropostaIsOpen(true), setSelecionar(false) }} className="p-2 rounded-lg ml-5 border">Dispensar</button>
-                                                                    <PopUp selecionar={selecionar} isOpen={popUpPropostaIsOpen} click={enviarMensagem} mensagemPadrao={selecionar ? cardVaga.mensagemConvocacao : cardVaga.mensagemDispensa} close={() => setPopUpPropostaIsOpen(false)} />
+                                                                    <PopUp selecionar={selecionar} isOpen={popUpPropostaIsOpen} click={enviarMensagem} mensagemPadrao={selecionar ? vagaSelecionada.mensagemConvocacao : vagaSelecionada.mensagemDispensa} close={() => setPopUpPropostaIsOpen(false)} />
                                                                 </div>
                                                             </div>
                                                         )}
@@ -357,12 +391,11 @@ export default function PerfilEmpresa() {
                                     </GerenciadorDeRascunhos>
                                 </>
                             )
-
                             }
                         </div>
                     </section>
                 </main>
-
+                <Footer />
             </div >
         </>
     )
@@ -379,7 +412,7 @@ interface popUpProps {
 }
 
 
-
+// USADO PARA O ENVIO DE FEEDBACK AO CANDIDATO
 const PopUp: React.FC<popUpProps> = ({ click, isOpen, mensagemPadrao, selecionar, close }) => {
 
     interface mensagemForm {
@@ -394,13 +427,13 @@ const PopUp: React.FC<popUpProps> = ({ click, isOpen, mensagemPadrao, selecionar
 
     return (
         <div style={{ transform: 'translate(-50%,-50%)' }}
-            className={`border border-gray-400 p-5 absolute top-[50%] left-[50%] bg-white rounded-lg ${isOpen ? '' : 'hidden'}`}>
-            <span className="absolute text-2xl -top-[3%] left-[94%] z-30 cursor-pointer font-extrabold" onClick={close}>x</span>
-            <h3>{selecionar ? 'Selecionar candidato' : 'Dispensar candidato'}</h3>
+            className={`border border-gray-800 h-80 p-5 absolute top-[50%] left-[50%] bg-white rounded-md ${isOpen ? '' : 'hidden'}`}>
+            <span className="absolute text-2xl -top-[0%] left-[92%] z-30 cursor-pointer font-extrabold material-symbols" onClick={close}>close</span>
+            <h3 className="text-center">{selecionar ? 'Selecionar candidato' : 'Dispensar candidato'}</h3>
             <label className="block mb-2" htmlFor="mensagem"><strong>Mensagem:</strong></label>
-            <textarea id="mensagem" onChange={handleChange} value={values.mensagem} className="h-20 w-72 rounded-md" /><br />
+            <textarea id="mensagem" onChange={handleChange} value={values.mensagem} className="h-28 w-72 rounded-md border" /><br />
             <div className="flex justify-center pt-6">
-                <button onClick={() => click(values.mensagem)} className="bg-gray-700 text-white p-1 rounded-md">Enviar</button>
+                <button onClick={() => click(values.mensagem)} className="bg-gray-900 text-white w-28 p-1 rounded-sm">Enviar</button>
             </div>
         </div>
     )
@@ -415,13 +448,14 @@ interface miniCardVagaProps {
     click: (event: any) => void
 }
 
+// CARD DE VAGAS PUBLICADAS NO PERFIL DA EMPRESA
 const MiniCardVaga: React.FC<miniCardVagaProps> = ({ id, tempo_decorrido, titulo, click, candidaturas }) => {
     return (
-        <div className="border border-gray-400 bg-white w-[260px]  h-[170px] rounded-[25px] p-2 cursor-pointer my-4" onClick={click}>
+        <div className="border-2 border-gray-900 bg-white w-[260px] rounded-lg p-2 cursor-pointer my-4 font-[arial]" onClick={click}>
             <div className="mt-2 pl-2">
-                <h4 className="text-wrap h-fit">{titulo}</h4>
-                <span className="flex  gap-x-1 h-fit"><i className="material-symbols">acute</i>{tempo_decorrido}</span>
-                <p className="h-fit">{candidaturas}</p>
+                <span className="text-wrap h-fit  font-extrabold">{titulo} Vaga para testra um titulo muito grande</span>
+                <span className="flex  gap-x-1 h-fit mt-2"><i className="material-symbols">acute</i>{tempo_decorrido}</span>
+                <p className="h-fit font-bold">{candidaturas}</p>
                 <p className="text-blue-700 hover:underline">Mais detalhes</p>
 
             </div>

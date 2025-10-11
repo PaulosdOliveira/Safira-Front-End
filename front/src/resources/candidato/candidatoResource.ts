@@ -46,8 +46,6 @@ export class PerfilCandidato {
     formacoes?: Formacao[];
     cursos?: Curso[];
     experiencias?: Experiencia[];
-
-
 }
 
 

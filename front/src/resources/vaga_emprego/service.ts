@@ -93,8 +93,8 @@ class Service {
     }
 
 
-    async buscarVagasEmpresa(id_empresa: string) {
-        const resultado = await fetch(`${this.urlBase}?idEmpresa=${id_empresa}`);
+    async buscarVagasEmpresa(id_empresa: string, pageNumber: number) {
+        const resultado = await fetch(`${this.urlBase}?idEmpresa=${id_empresa}&pageNumber=${pageNumber}`);
         return resultado.json();
     }
 

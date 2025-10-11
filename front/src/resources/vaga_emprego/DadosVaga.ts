@@ -47,12 +47,13 @@ export interface dadosVaga {
 }
 
 
-
-export class VagaEmpresaDTO {
+// PAGINA DE VAGAS CADASTRADAS POR UMA EMPRESA
+export class PageVagaEmprego {
     id?: string;
     titulo?: string;
     tempo_decorrido?: string;
     qtd_candidatos?: string;
+    totalPages?: number;
 }
 
 

@@ -179,7 +179,7 @@ export default function MainEmpresa() {
                     </div>
 
                 </div>
-                <section className="mt-1 overflow-auto  p-1 pb-4"
+                <section className="mt-1 overflow-auto  p-1 pb-4 flex mb-3"
                     id="filtros-selecionados">
                     {renderizarQualificacoesSelecionadas()}
                 </section>
