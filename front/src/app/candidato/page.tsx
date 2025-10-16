@@ -136,11 +136,12 @@ export default function MainCandidato() {
 
   return (
     <div ref={divRef} className="min-h-[100vh] h-auto bg-[rgb(249,249,249)] font-[arial]">
-      <Header logado={true}/>
+      <Header logado={true} />
       <div className="pb-1">
         <div className="w-[100%] flex justify-center items-center h-20">
           <div className="flex items-center justify-center w-full">
-            <input id="titulo" onChange={handleChange} type="text" placeholder="Titulo da vaga" className="rounded-lg pt-0.5 sm:w-[360px] w-[320px] h-[50px] pl-3 pr-13 border border-gray-800 bg-white shadow-xl shadow-gray-400" />
+            <input style={{boxShadow: '1px 1px .5px .5px rgba(0,0,0,0.300)'}}
+              id="titulo" onChange={handleChange} type="text" placeholder="Titulo da vaga" className="rounded-lg pt-0.5 sm:w-[360px] w-[320px] h-[50px] pl-3 pr-13 border border-gray-400 bg-white shadow-gray-200" />
             <i onClick={() => { setPageNumber(0), pesquisar() }} className="material-symbols scale-125 text-gray-600 -ml-9 cursor-pointer">search</i>
           </div>
         </div>
@@ -210,17 +211,17 @@ export default function MainCandidato() {
                   <div className="h-16 w-16 border-t-4 rounded-full border-pink-500 animate-spin"></div>
                 </div>
               ) : (
-                <h2 className="font-[Fredericka_the_Great]">Nenhuma vaga encontrada</h2>)
+                <h2 className="font-[Fredericka_the_Great]">Nenhuma vaga à exibir</h2>)
               }
             </>
           )}
         </section>
         <div className="pt-2 h-fit my-10 w-fit m-auto flex items-center justify-center gap-x-3 ">
-          <ReactPaginate
+          <ReactPaginate 
             previousLabel="arrow_left"
             nextLabel="arrow_right"
             pageCount={vagas?.totalPages!}
-            containerClassName="flex gap-2"
+            containerClassName={`flex gap-2 ${vagas?.totalPages! < 1? 'hidden' : ''}`}
             pageClassName="px-3 py-2 border rounded cursor-pointer hover:bg-gray-700"
             activeClassName="bg-blue-500 text-white"
             nextLinkClassName="material-symbols cursor-pointer"

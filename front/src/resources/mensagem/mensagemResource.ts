@@ -26,10 +26,11 @@ export class ContatosProps {
    click?: () => void;
    load?: () => void;
    mensagens?: MensagemDTO[] = [];
+   rascunho?: string;
 }
 
 export class DadosContato {
    nome?: string;
    urlFoto?: string;
-   
+
 }

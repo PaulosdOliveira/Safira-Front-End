@@ -17,7 +17,7 @@ export const Header: React.FC<headerProps> = ({ logado }) => {
 
     return (
         <header className="border-b border-gray-200 bg-white shadow-sm shadow-gray-300 flex items-end py-2 z-10 text-center">
-            <div onClick={() => router.push("/")} className={`flex pl-2 items-center gap-x-3 cursor-pointer ${logado? 'pl-3.5' : 'm-auto'}`}>
+            <div onClick={() => router.push("/")} className={`flex pl-2 items-center gap-x-3 cursor-pointer ${logado ? 'pl-3.5' : 'm-auto'}`}>
                 <img className="h-[50px] w-[50px] " src="/favi_safira.png" />
                 <h1 style={{ WebkitBackgroundClip: 'text', backgroundImage: 'linear-gradient(to left, #191970 0%, #182848 100%)' }}
                     className="pt-1 font-[Belleza] text-transparent ">SAFIRA</h1>
@@ -36,7 +36,7 @@ export const Menu = () => {
     const router = useRouter();
     const mensagemService = MensagemService();
     const [menuAberto, setMenuAberto] = useState<boolean>(false);
-
+    const [montado, setMontado] = useState(false);
     const [notificacoes, setNotificacoes] = useState<string[]>([])
     const notificacoesRef = useRef<string[]>([])
     const clientRef = useRef<Client | null>(null);
@@ -72,18 +72,18 @@ export const Menu = () => {
                 clientRef.current = client;
             }
         })()
-
+        setMontado(true);
     }, [])
 
     function sair() {
         ServicoSessao().sair();
-        router.push("/empresa/login")
+        router.push(`/${sessao?.nome}/login`)
     }
-
+    if (!montado) return false;
     return (
-        <div className="flex justify-end items-end h-6 w-full   pr-4">
+        <div className="flex justify-end items-end h-6 w-full pr-4">
             <div className="flex relative">
-                <i title="Mensagens" className="material-symbols  cursor-pointer mx-5" onClick={() => router.push("/mensagem")}>chat</i>
+                <a href="/mensagem" title="Mensagens" className="material-symbols mx-5">chat</a>
                 <span onClick={() => alert(JSON.stringify(notificacoes))}
                     className={`${notificacoes.length > 0 ? '' : 'hidden'} absolute left-8 border rounded-full h-5 w-5  flex justify-center items-center text-white bg-gray-800`}
                     id="qtd_mensagens">{notificacoes.length}</span>

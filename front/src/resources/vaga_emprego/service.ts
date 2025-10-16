@@ -99,8 +99,8 @@ class Service {
     }
 
     // Buscando candidatos cadastrados em uma vaga
-    async buscarCandidatosVaga(idVaga: string, token: string) {
-        const resultado = await fetch(`${this.urlBase}/candidatos/${idVaga}`, {
+    async buscarCandidatosVaga(idVaga: string, status: string, token: string, pageNumber: number) {
+        const resultado = await fetch(`${this.urlBase}/candidatos/${idVaga}/${status}/${pageNumber}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`

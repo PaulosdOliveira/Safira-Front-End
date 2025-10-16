@@ -46,7 +46,7 @@ export const GerenciadorDeRascunhos: React.FC<gerente> = ({ children, condition,
         }
     }
     return (
-        <div className="w-full mb-10">
+        <div className="w-full my-10 ">
             {
                 visualizar ? (
 
@@ -67,7 +67,7 @@ export const GerenciadorDeRascunhos: React.FC<gerente> = ({ children, condition,
                     </div>
 
                 ) : (
-                    <div className="sm:w-[400px] w-full sm:m-auto  pt-10 p-2 pb-10 border border-gray-400 rounded-lg bg-white ">
+                    <div className="sm:w-[400px] w-full sm:m-auto  pt-10 p-2 pb-10 border border-gray-400 shadow-sm shadow-gray-400 rounded-lg bg-white ">
                         <h2 className="text-center mb-10">Cadastrar rascunho</h2>
                         <form className="flex flex-col items-center gap-3 gap-y-5" onSubmit={handleSubmit}>
                             <div className="grid">

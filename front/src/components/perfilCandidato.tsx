@@ -10,7 +10,6 @@ import { ServicoSessao } from "@/resources/sessao/sessao";
 import { useEffect, useRef, useState } from "react";
 import { CandidaturaCandidato } from "@/resources/vaga_emprego/DadosVaga";
 import { DadosSalvosCandidato, PerfilCandidato } from "@/resources/candidato/candidatoResource";
-import { useParams } from "next/navigation";
 import { VagaService } from "@/resources/vaga_emprego/service";
 import { SectionOverflow } from "./sectionOverflow";
 import { toast, ToastContainer } from "react-toastify";
@@ -43,6 +42,7 @@ export const PerfilCandidatoComponent: React.FC<{ idCandidato: string }> = ({ id
 
     useEffect(() => {
         (async () => {
+
             if (idCandidato) {
                 const perfilCandidato = await CandidatoService().carregarPerfil(`${idCandidato}`);
                 if (perfilCandidato.id) {
@@ -199,10 +199,10 @@ export const PerfilCandidatoComponent: React.FC<{ idCandidato: string }> = ({ id
                         )}
                     </div>
                 </div>
-                <section className="flex gap-x-4 justify-center cursor-pointer pt-4">
+                <section className={`flex gap-x-4 justify-center cursor-pointer pt-4 ${titular ? '' : 'hidden'}`}>
                     <div onClick={() => setAba("informacoes")} className="flex flex-wrap bg-white p-1 rounded-lg">
                         <i className="material-symbols">person</i>
-                        <span className={` ${idCandidato === sessao.getSessao()?.id ? '' : 'hidden'} mx-3 cursor-pointer ${aba === "informacoes" ? '' : 'hidden'}`}>Informações</span>
+                        <span className={`${idCandidato === sessao.getSessao()?.id ? '' : 'hidden'} mx-3 cursor-pointer ${aba === "informacoes" ? '' : 'hidden'}`}>Informações</span>
                     </div>
                     <div onClick={buscarCandidaturas} className="flex bg-white p-1 rounded-lg cursor-pointer">
                         <i className="material-symbols">work</i>

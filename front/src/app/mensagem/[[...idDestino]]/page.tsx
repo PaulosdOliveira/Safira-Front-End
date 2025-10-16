@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from "next/navigation"
-import { useEffect, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { MensagemService } from "@/resources/mensagem/mensagemService";
 import { CadastroMensagemDTO, ContatosProps, DadosContato, MensagemDTO } from "@/resources/mensagem/mensagemResource";
 import { ServicoSessao, Sessao } from "@/resources/sessao/sessao";
@@ -13,20 +13,22 @@ export default function Chat() {
 
     const mensagemService = MensagemService();
     const [contatos, setContatos] = useState<ContatosProps[]>([]);
-    const [dadosContato, setDadosContato] = useState<DadosContato>({ nome: 'Usuário de nao sei', urlFoto: 'http://' });
+    const [dadosContato, setDadosContato] = useState<DadosContato>({ nome: 'Usuário', urlFoto: 'http://' });
     const [chatAberto, setChatAberto] = useState<boolean>(false);
     const { idDestino } = useParams();
     const idDestinoRef = useRef<string>(`` + idDestino);
     const service = MensagemService();
-    const sessao: Sessao | undefined = ServicoSessao().getSessao();
+    const sessao = ServicoSessao().getSessao();
     const [indexContato, setIndexContato] = useState<number>(100);
     const [mensagens, setMensagens] = useState<MensagemDTO[]>([]);
+    // RASCUNHO QUE APARECERÁ NA CAIXA DE TEXTO
+    const [rascunho, setRascunho] = useState('');
     const clientRef = useRef<Client | null>(null);
     const subscriptionRef = useRef<StompSubscription | null>(null);
     const subscriptionRefnotify = useRef<StompSubscription | null>(null);
     const subscriptionVisualizarRef = useRef<StompSubscription | null>(null);
     const divRef = useRef<HTMLDivElement | null>(null);
-
+    const [montado, setMontado] = useState(false);
 
 
     useEffect(() => {
@@ -61,6 +63,9 @@ export default function Chat() {
             clientRef.current = client;
         }
 
+        setMontado(true);
+
+        // DESMONTANDO CONEXÃO COM WS 
         return () => {
             subscriptionRef.current?.unsubscribe();
             subscriptionRefnotify.current?.unsubscribe();
@@ -71,7 +76,9 @@ export default function Chat() {
 
     // CONEXÕES COM O WS QUE NÃO DEPENDEM DE UM ID DE DESTINO
     useEffect(() => {
-        if (!clientRef.current?.connected) return;
+        if (!clientRef.current?.connected) {
+            return
+        };
 
         clientRef.current.onConnect = () => { }
         // RECEBENDO NOTIFICAÇÃO
@@ -142,6 +149,7 @@ export default function Chat() {
                 ))
             }
             setMensagens(contato.mensagens);
+            setRascunho(contato.rascunho ? contato.rascunho : '');
         }
         return <CardContato load={load} naoVizualizadas={contato.naoVizualizadas} key={key} id={contato.id} nome={contato.nome} ultimaMensagem={contato.ultimaMensagem} urlFoto={contato.urlFoto} click={click} />
     }
@@ -169,6 +177,7 @@ export default function Chat() {
 
     // MONTANDO CONEXÃO ENTRE USUÁRIOS
     useEffect(() => {
+
         (async () => {
             if (!clientRef.current?.connected) {
                 return
@@ -200,10 +209,14 @@ export default function Chat() {
         return mensagens.map(mensagemToComponent);
     };
 
+
+    function digitar(valor: string) {
+        setRascunho(valor);
+        contatos[indexContato].rascunho = valor;
+    }
+
     function enviarMensagem() {
-        const input = document.getElementById("mensagem") as HTMLInputElement;
-        const valor = input.value;
-        if (valor.length) {
+        if (rascunho.length) {
             const isCandidato = sessao?.perfil === "candidato";
             const idCandidato = parseInt(isCandidato ? `${sessao?.id}` : `${idDestinoRef.current}`);
             const idEmpresa = !isCandidato ? sessao?.id : `${idDestinoRef.current}`;
@@ -211,7 +224,7 @@ export default function Chat() {
                 perfilRemetente: `${sessao?.perfil}`,
                 idCandidato: idCandidato,
                 idEmpresa: idEmpresa,
-                texto: valor
+                texto: rascunho
             }
             clientRef.current?.publish({
                 destination: `/app/receber-mensagem/${sessao?.id}/${idDestinoRef.current}`,
@@ -241,13 +254,14 @@ export default function Chat() {
                 idCandidato: idCandidato,
                 idEmpresa: idEmpresa,
                 perfilRemetente: sessao?.perfil,
-                texto: valor
+                texto: rascunho
             }
             setMensagens(pre => [novaMensagem, ...pre]);
         }
-        input.value = "";
+        setRascunho('');
     }
 
+    if (!montado) return;
 
     return (
         <div className="font-[arial] ">
@@ -269,7 +283,7 @@ export default function Chat() {
                         <div className="border border-gray-200 flex items-center py-2 gap-3  h-[75px] ">
                             <div style={{ backgroundImage: `url(${dadosContato.urlFoto})` }}
                                 className="border border-gray-200 sm:w-15 sm:h-15 h-12 w-12 rounded-full ml-3 bg-cover " />
-                            <a href={`/empresa/${idDestinoRef.current}`} target="_blank" className="text-[1em] font-bold" >{dadosContato.nome}</a>
+                            <a href={`/${sessao?.perfil == 'candidato' ? 'empresa' : 'candidato'}/${idDestinoRef.current}`} target="_blank" className="text-[1em] font-bold" >{dadosContato.nome}</a>
                         </div>
                         <div ref={divRef}
                             className="border-b flex flex-col-reverse border-gray-300 bg-gray-100 h-[77vh]  overflow-auto px-3 bg-cover bg-no-repeat"
@@ -277,7 +291,8 @@ export default function Chat() {
                             {renderizarMensagens()}
                         </div>
                         <div className="h-[12.36vh] flex sm:m-auto pt-4 sm:w-[440px] md:w-[500px] lg:w-[700px]">
-                            <input onKeyDown={(event) => { if (event.key === "Enter") { enviarMensagem() } }} id="mensagem" className="h-10 w-full rounded-full border border-gray-400 pl-4 pr-15" type="text" placeholder="Mensagem" />
+                            <input value={rascunho} onChange={(event) => digitar(event.target.value)}
+                                onKeyDown={(event) => { if (event.key === "Enter") { enviarMensagem() } }} id="mensagem" className="h-10 w-full rounded-full border border-gray-400 pl-4 pr-15" type="text" placeholder="Mensagem" />
                             <div className="h-10 flex items-center">
                                 <i className="material-symbols  scale-125 -ml-9">send</i>
                             </div>
@@ -299,7 +314,7 @@ interface mensagenProps {
 const Mensagem: React.FC<mensagenProps> = ({ horaEnvio, texto }) => {
     return (
         <div
-            id="balao" className="inline-block max-w-[300px] md:max-w-[450px]  px-1 border border-gray-400 rounded-lg bg-gray-100 text-left ">
+            id="balao" className="inline-block max-w-[300px] md:max-w-[450px]  px-1 border border-gray-600 rounded-lg bg-white text-left ">
             <p className="break-words">{texto}</p>
             <p className=" text-right text-[.7em] -mt-1 ">{horaEnvio}</p>
         </div>

@@ -48,7 +48,7 @@ export const CardContato: React.FC<ContatosProps> = ({ id, nome, ultimaMensagem,
 
     return (
         <div onClick={clicar} onLoad={() => alert("Apareceu")}
-            className="border border-gray-200 hover:bg-gray-100 cursor-pointer">
+            className="border-y-2 border-gray-200 hover:bg-gray-100 cursor-pointer">
             <div className="flex py-1">
                 <div style={{ backgroundImage: `url(${urlFoto})` }}
                     className="border border-gray-200 w-14 h-14 md:w-14 md:h-14  sm:w-10 sm:h-10 rounded-full bg-cover" />

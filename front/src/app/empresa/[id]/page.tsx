@@ -38,7 +38,14 @@ export default function PerfilEmpresa() {
     // USADO PARA ROLAR AO TOPO QUANDO NECESSÁRIO
     const divRef = useRef<HTMLDivElement | null>(null);
     const [rascunhos, setRascunhos] = useState<ModeloDeProposta[]>([]);
-    const [candidatosVaga, setCandidatosVaga] = useState<CandidatoCadastrado[]>([]);
+
+    // CANDIDATOS DA VAGA  E SUA PAGINAÇÃO ATUAL
+    const [candidatosEmAnalise, setCandidatosEmAnalise] = useState<CandidatoCadastrado[]>([]);
+    const [pageAnalise, setPageAnalise] = useState(0);
+    const [candidatosSelecionados, setCandidatosSelecionados] = useState<CandidatoCadastrado[]>([]);
+    const [pageSelecionados, setPageSelecionados] = useState(0);
+    const [candidatosDispensados, setCandidatosDispensados] = useState<CandidatoCadastrado[]>([]);
+    const [pageDispensados, setPageDispensados] = useState(0);
     const [indexListaCandidato, setIndexListaCandidato] = useState<number>();
     // PARA NAVEGAÇÃO NA ABA DE CANDIDATURAS
     const [statusCandidato, setStatusCandidato] = useState<string>("EM_ANALISE");
@@ -61,12 +68,14 @@ export default function PerfilEmpresa() {
     * CONSIDERA-SE QUE DESEJA DISPENSAR O MESMO CASO SEJA 'FALSE' ↓   */
     const [selecionar, setSelecionar] = useState<boolean>(true);
 
+    const [montatdo, setMontado] = useState(false);
 
     // Execuutando efeitos ao carregar a página
     useEffect(() => {
         // Carregando perfil da empresa e suas vagas publicadas
         (async () => {
             const perfilEncontrado = await service.carregarPerfil(`${id}`);
+            if (!perfilEncontrado.id) return (<h1>Nenhum perfil encontrado</h1>);
             setPerfil(perfilEncontrado)
             const vagas = await vagaService.buscarVagasEmpresa(`${id}`, 0).then((result) => {
                 setTotalPages(result.totalPages);
@@ -80,33 +89,45 @@ export default function PerfilEmpresa() {
         })()
 
         // OBJETO DE CONEXÃO COM WS
-        /*  const client = new Client({
-              brokerURL: 'ws:localhost:8080/conect',
-              reconnectDelay: 15000,
-              heartbeatIncoming: 10000,
-              heartbeatOutgoing: 10000,
-              connectHeaders: {
-                  'Authorization': `Bearer ${sessao.getSessao()?.accessToken}`
-              }
-          })
-  
-          client.onStompError = (erro) => {  }
-          if (!clientRef.current?.connected) {
-              client.onConnect = () => {
-                  console.log("CONECTOU!!!!!!!!!!")
-              }
-              client.activate();
-              clientRef.current = client;
-          }*/
+        const client = new Client({
+            brokerURL: 'ws:localhost:8080/conect',
+            reconnectDelay: 15000,
+            heartbeatIncoming: 10000,
+            heartbeatOutgoing: 10000,
+            connectHeaders: {
+                'Authorization': `Bearer ${sessao.getSessao()?.accessToken}`
+            }
+        })
+
+        client.onStompError = (erro) => { }
+        if (!clientRef.current?.connected) {
+            client.onConnect = () => {
+                console.log("CONECTOU!!!!!!!!!!")
+            }
+            client.activate();
+            clientRef.current = client;
+        }
+
+        setMontado(true);
     }, [])
 
 
+    // EXECUUTADO AO SELECIONAR UMA VAGA
     useEffect(() => {
         (async () => {
             if (idVagaSelecionada) {
                 const dados: dadosVaga = await vagaService.carregarVaga(`${idVagaSelecionada}`, `${sessao.getSessao()?.accessToken}`);
                 setVagaSelecionada(dados);
+                // CARREGANDO CANDIDATOS DA VAGA
+                const emAnalise = await vagaService.buscarCandidatosVaga(idVagaSelecionada, "EM_ANALISE", `${sessao.getSessao()?.accessToken}`, 0);
+                const selecionados = await vagaService.buscarCandidatosVaga(idVagaSelecionada, "SELECIONADO", `${sessao.getSessao()?.accessToken}`, 0);
+                const dispensados = await vagaService.buscarCandidatosVaga(idVagaSelecionada, "DISPENSADO", `${sessao.getSessao()?.accessToken}`, 0);
+                setCandidatosEmAnalise(emAnalise.content);
+                setCandidatosSelecionados(selecionados.content);
+                setCandidatosDispensados(dispensados.content);
             }
+
+
         })()
     }, [idVagaSelecionada])
 
@@ -116,7 +137,7 @@ export default function PerfilEmpresa() {
     function enviarMensagem(mensagem: string) {
         const mensagemDTO: CadastroMensagemDTO = { idCandidato: parseInt(`${dadosModalCandidato?.id}`), idEmpresa: `${sessao.getSessao()?.id}`, texto: mensagem, perfilRemetente: `${sessao.getSessao()?.perfil}` }
         clientRef.current?.publish({
-            destination: `/app/receber-mensagem/${id}${dadosModalCandidato?.id}`,
+            destination: `/app/receber-mensagem/${id}/${dadosModalCandidato?.id}`,
             body: JSON.stringify(mensagemDTO)
         })
 
@@ -124,11 +145,15 @@ export default function PerfilEmpresa() {
         else dispensarCandidato();
     }
 
-    /// Selecionando candidato
+    /// SELECIONANDO CANDIDATO
     async function selecionarCandidato() {
         const token = sessao.getSessao()?.accessToken + "";
         await VagaService().selecionarCandidato(`${dadosModalCandidato?.id}`, `${idVagaSelecionada}`, token);
-        if (indexListaCandidato != null) candidatosVaga[indexListaCandidato].status = 'SELECIONADO'
+        if (indexListaCandidato != null) {
+            const removidos = candidatosEmAnalise.splice(indexListaCandidato, 1);
+            setCandidatosSelecionados(pre => [...pre, removidos[0]]);
+        }
+
         fecharModal();
         setPopUpPropostaIsOpen(false);
     }
@@ -137,7 +162,10 @@ export default function PerfilEmpresa() {
     async function dispensarCandidato() {
         const token = sessao.getSessao()?.accessToken + "";
         await VagaService().dispesarCandidato(`${dadosModalCandidato?.id}`, `${idVagaSelecionada}`, token);
-        if (indexListaCandidato != null) candidatosVaga[indexListaCandidato].status = 'DISPENSADO'
+        if (indexListaCandidato != null) {
+            const removidos = candidatosEmAnalise.splice(indexListaCandidato, 1);
+            setCandidatosDispensados(pre => [...pre, removidos[0]]);
+        }
         fecharModal();
         setPopUpPropostaIsOpen(false);
     }
@@ -175,14 +203,6 @@ export default function PerfilEmpresa() {
         setRascunhos(pre => [...pre, modeloSalvo]);
     }
 
-    async function buscarCandidatos() {
-        if (idVagaSelecionada && !candidatosVaga.length) {
-            const candidatos = await vagaService.buscarCandidatosVaga(idVagaSelecionada, `${sessao.getSessao()?.accessToken}`)
-            setCandidatosVaga(candidatos);
-        }
-        setNav("candidatos")
-    }
-
     // Abrindo modal de candidato
     async function abrirModal(idCandidato: string, indexListaCandidato: number) {
         setmodalOpen(true);
@@ -206,7 +226,6 @@ export default function PerfilEmpresa() {
 
     function voltar() {
         setNav("dados");
-        setCandidatosVaga([]);
         setVagaSelecionada(null);
         setIdVagaSelecionada(null);
         setDadosCadastraisVaga(null)
@@ -214,187 +233,269 @@ export default function PerfilEmpresa() {
 
 
     function candidatoToCard(dados: CandidatoCadastrado, key: number) {
-        if (statusCandidato === dados.status)
-            return (
-                <div className="flex flex-col gap-y-2 items-center" key={"1" + key}>
-                    <CardUsuario load={false} cidade={dados.cidade} estado={dados.estado} id={dados.id} idade={dados.idade} key={dados.id} nome={dados.nome} />
-                    {statusCandidato === "EM_ANALISE" && (
-                        <div className="flex gap-x-2">
-                            <button className="rounded-lg py-1 px-2 bg-black text-white" onClick={() => abrirModal(`${dados.id}`, key)} key={key}>Avaliar</button>
-
-                        </div>
-                    )}
-                </div>
-            )
+        return (
+            <div className="flex flex-col gap-y-2 items-center" key={"1" + key}>
+                <CardUsuario load={false} cidade={dados.cidade} estado={dados.estado} id={dados.id} idade={dados.idade} key={dados.id} nome={dados.nome} />
+                {statusCandidato === "EM_ANALISE" && (
+                    <div className="flex gap-x-2">
+                        <button className="rounded-sm py-1 px-2 bg-black text-white" onClick={() => abrirModal(`${dados.id}`, key)} key={key}>Avaliar</button>
+                    </div>
+                )}
+            </div>
+        )
     }
 
-    const renderizarCardCandidato = () => { return candidatosVaga.map(candidatoToCard) }
+    // RENDERIZANDO CANDIDATOS EM ANALISE
+    const renderizarCardCandidatos = () => {
+        return candidatosEmAnalise.map(candidatoToCard);
+    }
 
 
+    // RENDERIZANDO CANDIDATOS SELECIONADDOS
+    const renderizarCardCandidatosSelecionados = () => {
+        return candidatosSelecionados.map(candidatoToCard);
+    }
 
+    // RENDERIZANDO CANDIDATOS DISPENSADOS
+    const renderizarCardCandidatosDispensados = () => {
+        return candidatosDispensados.map(candidatoToCard);
+    }
+
+
+    if (!montatdo) return;
     return (
         <>
             <div ref={divRef}
-                className="min-h-screen max-h-fit w-full bg-gray-50">
+                className="min-h-screen max-h-fit w-full flex flex-col">
                 <Header />
-                <main className="mb-5">
-                    <section id="informacoes" className="" >
-                        <div className="z-30 pb-3  flex flex-col  ">
-                            <img id="capa" className=" h-48 w-[98%] rounded-2xl mt-2 m-auto z-0"
-                                src={`http://localhost:8080/empresa/capa/${id}`} />
-
-                            <div className="z-10 -mt-10 ml-5 flex items-end">
-                                <div id="foto" className="border-2 border-white h-32 w-32  rounded-full   bg-no-repeat bg-contain "
-                                    style={{ backgroundImage: `url(http://localhost:8080/empresa/foto/${id})` }} />
-                                <h2 className="pl-2 pb-7">{perfil?.nome}</h2>
+                {perfil ? (
+                    <main className="mb-5">
+                        <section id="informacoes" className="" >
+                            <div className="z-30 pb-3 pt-5  flex flex-col  ">
+                                <div className="z-10 ml-5 flex items-end">
+                                    <div id="foto" className="border-2 border-white h-32 w-32  rounded-full   bg-no-repeat bg-contain "
+                                        style={{ backgroundImage: `url(http://localhost:8080/empresa/foto/${id})` }} />
+                                    <h2 className="pl-2 pb-10">{perfil?.nome}</h2>
+                                </div>
                             </div>
-                        </div>
-                        <pre className="text-wrap pl-9 font-[arial] text-justify px-2 text-[.9em] mb-6">{perfil?.descricao}</pre>
-                    </section>
-                    <hr className="mt-9 w-[97%] m-auto hidden" />
-                    <section >
-                        <nav className="" >
-                            <ul className="bg-white border border-gray-300 w-fit px-3 h-14 pl-3 rounded-[23px] flex items-center m-auto">
-                                <li onClick={() => setAba("vagas")} className={`${aba === "vagas" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`}>
-                                    <div className="flex">
-                                        <i className={` material-symbols`}>work</i>
-                                        <span className={`${aba == 'vagas' ? 'block' : 'hidden'}`}>Vagas</span>
-                                    </div>
-                                </li>
-                                {sessao.getSessao()?.perfil === "empresa" && (
-                                    <li onClick={() => setAba("rascunhos")} className={`${perfil?.id == id ? '' : 'hidden'} cursor-pointer ${aba === "rascunhos" ? 'bg-gray-200' : ''} p-1 rounded-lg transition duration-700 w-fit`}>
+                            <pre className="text-wrap pl-9 font-[arial] text-justify px-2 text-[.9em] mb-6">{perfil?.descricao}</pre>
+                        </section>
+
+                        {/*VAGAS DA EMPRESA E OUTROS DADOS QUE FICAM EM BAIXO */}
+                        <section className="border-b min-h-[500px] border-x border-gray-300 mx-1" >
+                            <nav className="" >
+                                <ul className="mb-0.5 border border-gray-300 py-1 pl-10 flex gap-3 items-center m-auto">
+                                    <li onClick={() => setAba("vagas")} className={`${aba === "vagas" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`}>
                                         <div className="flex">
-                                            <i className={`material-symbols`}>Note_Alt</i>
-                                            <span className={`${aba == "rascunhos" ? 'block' : 'hidden'}`}>Rascunhos</span>
+                                            <i className={` material-symbols`}>work</i>
+                                            <span className={`${aba == 'vagas' ? 'block' : 'hidden'}`}>Vagas</span>
                                         </div>
                                     </li>
-                                )}
-                            </ul>
-                        </nav>
-                        <div className="flex flex-wrap items-start gap-1 mt-16    rounded-md m-auto">
-                            {aba === "vagas" ? (
-                                !idVagaSelecionada ? (
-                                    <>
-                                        <section className="flex flex-wrap justify-center w-full gap-x-3  p-2">
-                                            {renderizarVagas()}
-                                        </section>
-                                        <div className="flex justify-center  w-full my-10">
-                                            <ReactPaginate
-                                                className="flex gap-3"
-                                                pageClassName="border px-3 py-2 rounded cursor-pointer hover:bg-gray-800"
-                                                pageCount={totalPages}
-                                                previousLabel="arrow_left"
-                                                nextLabel="arrow_right"
-                                                nextClassName="material-symbols cursor-pointer"
-                                                previousClassName="material-symbols cursor-pointer"
-                                                activeClassName="bg-gray-800 text-white"
-                                                onPageChange={async (index) => {
-                                                    const vagasEncontradas = await vagaService.buscarVagasEmpresa(`${id}`, index.selected).then((result) => {
-                                                        setTotalPages(result.totalPages);
-                                                        return result.content;
-                                                    });
-
-                                                    setVagas(vagasEncontradas);
-                                                    divRef.current?.scrollIntoView({
-                                                        behavior: 'instant',
-                                                        block: 'start'
-                                                    })
-                                                }
-                                                }
-                                            />
-                                        </div>
-                                    </>
-                                ) : (
-                                    <div className="flex flex-col w-full">
-                                        <nav className="mb-10 pl-4">
-                                            <ul className="bg-white border border-gray-300 w-fit px-3 h-14 pl-3 rounded-[23px] flex items-center gap-x-2 m-auto">
-                                                <li onClick={voltar} className={`cursor-pointer p-1 rounded-lg transition duration-700 material-symbols`} title="Voltar">arrow_Back</li>
-                                                <li onClick={() => setNav("dados")} className={`${nav === "dados" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`} title="Dados">
-                                                    <div className="flex">
-                                                        <i className={` material-symbols`}>Data_check</i>
-                                                        <span className={`${nav == 'dados' ? 'block' : 'hidden'}`}>Dados</span>
-                                                    </div>
-                                                </li>
-                                                <li onClick={buscarCandidatos} className={`${nav === "candidatos" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`} title="Candidatos">
-                                                    <div className="flex">
-                                                        <i className={` material-symbols`}>Person</i>
-                                                        <span className={`${nav == 'candidatos' ? 'block' : 'hidden'}`}>Candidatos</span>
-                                                    </div>
-                                                </li>
-                                                <li onClick={buscarDadosCadastrais} className={`${nav === "editar" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`} title="Editar vaga">
-                                                    <div className="flex">
-                                                        <i className={` material-symbols`}>edit</i>
-                                                        <span className={`${nav == 'editar' ? 'block' : 'hidden'}`}>Editar</span>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </nav>
-                                        <br />
-                                        {vagaSelecionada?.id && (
-                                            <div className="flex w-full">
-                                                {nav === "dados" && (
-                                                    <div className="w-full">
-                                                        <DadosVaga vaga={vagaSelecionada} />
-                                                    </div>
-                                                )}
-                                                {nav === "candidatos" && (
-                                                    <div className="w-full">
-                                                        <nav>
-                                                            <ul className="bg-white border border-gray-300 w-fit px-3 h-14 pl-3 rounded-[23px] flex items-center gap-x-2 m-auto">
-                                                                <li onClick={() => setStatusCandidato("EM_ANALISE")} className={`${statusCandidato === "EM_ANALISE" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`} title="Dados">Em análise</li>
-                                                                <li onClick={() => setStatusCandidato("SELECIONADO")} className={`${statusCandidato === "SELECIONADO" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`} title="Dados">Selecionados</li>
-                                                                <li onClick={() => setStatusCandidato("DISPENSADO")} className={`${statusCandidato === "DISPENSADO" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`} title="Dados">Dispensados</li>
-                                                            </ul>
-                                                        </nav>
-                                                        <section className="ml-4 flex flex-wrap gap-5 mt-10">
-                                                            {renderizarCardCandidato()}
-                                                        </section>
-                                                        {modalIsOpen && (
-                                                            <div className="fixed inset-0  z-50 overflow-hidden font-[arial]">
-                                                                <div className="inset-0 bg-black  absolute overflow-hidden opacity-50" />
-                                                                <div style={{ transform: 'translate(-50%, -50%)' }} className="absolute bg-gray-200  top-[50%] left-[50%] w-[90%] min-h-[300px] flex flex-col justify-center sm:w-[460px] py-5 rounded-sm border-2">
-                                                                    <div className=" text-right">
-                                                                        <button onClick={fecharModal}
-                                                                            className="material-symbols text-black cursor-pointer absolute font-extrabold -top-0 left-[92%] sm:left-[94.5%]" >
-                                                                            close
-                                                                        </button>
-                                                                    </div>
-                                                                    {urlCurriculo.trim().length ? (
-                                                                        <iframe className="border m-auto mb-5 h-[500px] w-[100%]"
-                                                                            src={urlCurriculo}
-                                                                        />
-                                                                    ) : (
-                                                                        <div className="flex-1/2 flex items-center">
-                                                                            <h4 className="text-center  mb-7 border-dashed border-y w-full">Candidato não possui currículo cadastrado</h4>
-                                                                        </div>
-                                                                    )}
-                                                                    <div className="flex flex-wrap gap-3 justify-center flex-0">
-                                                                        <a href={`/candidato/${dadosModalCandidato?.id}`} target="_blank" className="rounded-lg p-2 bg-blue-700 border-2 border-black text-white">Ver perfil</a>
-                                                                        <button onClick={() => { setPopUpPropostaIsOpen(true), setSelecionar(true) }} className="bg-gray-950 border-2  text-white p-2 rounded-lg">Selecionar</button>
-                                                                        <button onClick={() => { setPopUpPropostaIsOpen(true), setSelecionar(false) }} className="p-2 rounded-lg  bg-red-700 text-white border-2 border-black">Dispensar</button>
-                                                                    </div>
-                                                                    <PopUp selecionar={selecionar} isOpen={popUpPropostaIsOpen} click={enviarMensagem} mensagemPadrao={selecionar ? vagaSelecionada.mensagemConvocacao : vagaSelecionada.mensagemDispensa} close={() => setPopUpPropostaIsOpen(false)} />
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-                                                {nav === "editar" && (<FormEditarVaga idVaga={idVagaSelecionada} vaga={dadosCadastraisVaga} />)}
+                                    {sessao.getSessao()?.perfil === "empresa" && (
+                                        <li onClick={() => setAba("rascunhos")} className={`${perfil?.id == id ? '' : 'hidden'} cursor-pointer ${aba === "rascunhos" ? 'bg-gray-200' : ''} p-1 rounded-lg transition duration-700 w-fit`}>
+                                            <div className="flex">
+                                                <i className={`material-symbols`}>Note_Alt</i>
+                                                <span className={`${aba == "rascunhos" ? 'block' : 'hidden'}`}>Rascunhos</span>
                                             </div>
-                                        )}
-                                    </div>
+                                        </li>
+                                    )}
+                                </ul>
+                            </nav>
+                            <div className="flex flex-wrap  items-start gap-1  rounded-md m-auto">
+                                {aba === "vagas" ? (
+                                    !idVagaSelecionada ? (
+                                        <>
+                                            <section className="flex flex-wrap justify-center w-full gap-x-3  p-2">
+                                                {renderizarVagas()}
+                                            </section>
+                                            <div className="flex justify-center  w-full my-10">
+                                                <ReactPaginate
+                                                    className={`flex gap-3 ${totalPages < 1 ? 'hidden' : ''}`}
+                                                    pageClassName="border px-3 py-2 rounded cursor-pointer hover:bg-gray-800"
+                                                    pageCount={totalPages}
+                                                    previousLabel="arrow_left"
+                                                    nextLabel="arrow_right"
+                                                    nextClassName="material-symbols cursor-pointer"
+                                                    previousClassName="material-symbols cursor-pointer"
+                                                    activeClassName="bg-gray-800 text-white"
+                                                    onPageChange={async (index) => {
+                                                        const vagasEncontradas = await vagaService.buscarVagasEmpresa(`${id}`, index.selected).then((result) => {
+                                                            setTotalPages(result.totalPages);
+                                                            return result.content;
+                                                        });
+
+                                                        setVagas(vagasEncontradas);
+                                                        divRef.current?.scrollIntoView({
+                                                            behavior: 'instant',
+                                                            block: 'start'
+                                                        })
+                                                    }
+                                                    }
+                                                />
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="flex flex-col w-full">
+                                            <nav className=" my-5">
+                                                <ul className="bg-white border border-gray-300 w-fit px-3 h-14 pl-3 rounded-[23px] flex items-center gap-x-2 m-auto">
+                                                    <li onClick={voltar} className={`cursor-pointer p-1 rounded-lg transition duration-700 material-symbols`} title="Voltar">arrow_Back</li>
+                                                    <li onClick={() => setNav("dados")} className={`${nav === "dados" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`} title="Dados">
+                                                        <div className="flex">
+                                                            <i className={` material-symbols`}>Data_check</i>
+                                                            <span className={`${nav == 'dados' ? 'block' : 'hidden'}`}>Dados</span>
+                                                        </div>
+                                                    </li>
+                                                    <li onClick={() => setNav("candidatos")} className={`${nav === "candidatos" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`} title="Candidatos">
+                                                        <div className="flex">
+                                                            <i className={` material-symbols`}>Person</i>
+                                                            <span className={`${nav == 'candidatos' ? 'block' : 'hidden'}`}>Candidatos</span>
+                                                        </div>
+                                                    </li>
+                                                    <li onClick={buscarDadosCadastrais} className={`${nav === "editar" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`} title="Editar vaga">
+                                                        <div className="flex">
+                                                            <i className={` material-symbols`}>edit</i>
+                                                            <span className={`${nav == 'editar' ? 'block' : 'hidden'}`}>Editar</span>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                            </nav>
+
+                                            {vagaSelecionada?.id && (
+                                                <div className="flex w-full">
+                                                    {nav === "dados" && (
+                                                        <div className="w-full">
+                                                            <DadosVaga vaga={vagaSelecionada} />
+                                                        </div>
+                                                    )}
+                                                    {nav === "candidatos" && (
+                                                        <div className="w-full">
+                                                            <nav>
+                                                                <ul className="pl-10 h-14 border border-gray-300 flex items-center gap-x-2 m-auto">
+                                                                    <li onClick={() => { setStatusCandidato("EM_ANALISE") }} className={`${statusCandidato === "EM_ANALISE" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`} title="Dados">Em análise</li>
+                                                                    <li onClick={() => { setStatusCandidato("SELECIONADO") }} className={`${statusCandidato === "SELECIONADO" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`} title="Dados">Selecionados</li>
+                                                                    <li onClick={() => { setStatusCandidato("DISPENSADO") }} className={`${statusCandidato === "DISPENSADO" ? 'bg-gray-200' : ''} cursor-pointer p-1 rounded-lg transition duration-700`} title="Dados">Dispensados</li>
+                                                                </ul>
+                                                            </nav>
+                                                            <h3 className="my-5 pl-3">Candidatos na vaga de {vagaSelecionada.titulo}</h3>
+                                                            <section className=" mt-10 min-h-[400px] mb-2">
+
+                                                                {statusCandidato == 'EM_ANALISE' &&
+                                                                    <div className="flex flex-wrap pl-5 items-center sm:justify-start justify-center gap-5">
+                                                                        {renderizarCardCandidatos()}
+                                                                        <ReactPaginate
+                                                                            initialPage={pageAnalise}
+                                                                            className={`flex gap-3 ${candidatosEmAnalise.length <= 20 ? 'hidden' : ''}`}
+                                                                            pageClassName="border px-3 py-2 rounded cursor-pointer hover:bg-gray-800"
+                                                                            pageCount={candidatosEmAnalise.length / 20}
+                                                                            previousLabel="arrow_left"
+                                                                            nextLabel="arrow_right"
+                                                                            nextClassName="material-symbols cursor-pointer"
+                                                                            previousClassName="material-symbols cursor-pointer"
+                                                                            activeClassName="bg-gray-800 text-white"
+                                                                            onPageChange={async (index) => {
+                                                                                setPageAnalise(index.selected);
+                                                                                const candidatos = await vagaService.buscarCandidatosVaga(idVagaSelecionada, statusCandidato, `${sessao.getSessao()?.accessToken}`, 0);
+                                                                                setCandidatosEmAnalise(candidatos.content);
+                                                                            }
+                                                                            }
+                                                                        />
+                                                                    </div>
+                                                                }
+                                                                {statusCandidato == 'SELECIONADO' &&
+                                                                    <div className="flex flex-wrap pl-5 items-center  sm:justify-start justify-center gap-5">
+                                                                        {renderizarCardCandidatosSelecionados()}
+                                                                        <ReactPaginate
+                                                                            initialPage={pageSelecionados}
+                                                                            className={`flex gap-3 ${candidatosSelecionados.length <= 20 ? 'hidden' : ''}`}
+                                                                            pageClassName="border px-3 py-2 rounded cursor-pointer hover:bg-gray-800"
+                                                                            pageCount={candidatosSelecionados.length / 20}
+                                                                            previousLabel="arrow_left"
+                                                                            nextLabel="arrow_right"
+                                                                            nextClassName="material-symbols cursor-pointer"
+                                                                            previousClassName="material-symbols cursor-pointer"
+                                                                            activeClassName="bg-gray-800 text-white"
+                                                                            onPageChange={async (index) => {
+                                                                                setPageSelecionados(index.selected);
+                                                                                const candidatos = await vagaService.buscarCandidatosVaga(idVagaSelecionada, statusCandidato, `${sessao.getSessao()?.accessToken}`, 0);
+                                                                                setCandidatosSelecionados(candidatos.content);
+                                                                            }
+                                                                            }
+                                                                        />
+                                                                    </div>
+                                                                }
+                                                                {statusCandidato == 'DISPENSADO' && (
+                                                                    <div>
+                                                                        {renderizarCardCandidatosDispensados()}
+                                                                        <ReactPaginate
+                                                                            initialPage={pageDispensados}
+                                                                            className={`flex gap-3 ${candidatosDispensados.length <= 20 ? 'hidden' : ''}`}
+                                                                            pageClassName="border px-3 py-2 rounded cursor-pointer hover:bg-gray-800"
+                                                                            pageCount={candidatosDispensados.length / 20}
+                                                                            previousLabel="arrow_left"
+                                                                            nextLabel="arrow_right"
+                                                                            nextClassName="material-symbols cursor-pointer"
+                                                                            previousClassName="material-symbols cursor-pointer"
+                                                                            activeClassName="bg-gray-800 text-white"
+                                                                            onPageChange={async (index) => {
+                                                                                setPageDispensados(index.selected);
+                                                                                const candidatos = await vagaService.buscarCandidatosVaga(idVagaSelecionada, statusCandidato, `${sessao.getSessao()?.accessToken}`, 0);
+                                                                                setCandidatosDispensados(candidatos.content);
+                                                                            }
+                                                                            }
+                                                                        />
+                                                                    </div>
+                                                                )
+                                                                }
+                                                            </section>
+                                                            {modalIsOpen && (
+                                                                <div className="fixed inset-0  z-50 overflow-hidden font-[arial]">
+                                                                    <div className="inset-0 bg-black  absolute overflow-hidden opacity-50" />
+                                                                    <div style={{ transform: 'translate(-50%, -50%)' }} className="absolute bg-gray-200  top-[50%] left-[50%] w-[90%] min-h-[300px] flex flex-col justify-center sm:w-[460px] py-5 rounded-sm  border border-gray-800">
+                                                                        <div className=" text-right">
+                                                                            <button onClick={fecharModal}
+                                                                                className="material-symbols text-black cursor-pointer absolute font-extrabold -top-0 left-[92%] sm:left-[94.5%]" >
+                                                                                close
+                                                                            </button>
+                                                                        </div>
+                                                                        {urlCurriculo.trim().length ? (
+                                                                            <iframe className="border m-auto mb-5 h-[500px] w-[100%]"
+                                                                                src={urlCurriculo}
+                                                                            />
+                                                                        ) : (
+                                                                            <div className="flex-1/2 flex items-center">
+                                                                                <h4 className="text-center  mb-7 border-dashed border-y w-full">Candidato não possui currículo cadastrado</h4>
+                                                                            </div>
+                                                                        )}
+                                                                        <div className="flex flex-wrap gap-3 justify-center flex-0">
+                                                                            <a href={`/candidato/${dadosModalCandidato?.id}`} target="_blank" className="rounded-lg p-2 bg-blue-700 border-2 border-black text-white">Ver perfil</a>
+                                                                            <button onClick={() => { setPopUpPropostaIsOpen(true), setSelecionar(true) }} className="bg-gray-950 border-2  text-white p-2 rounded-lg">Selecionar</button>
+                                                                            <button onClick={() => { setPopUpPropostaIsOpen(true), setSelecionar(false) }} className="p-2 rounded-lg  bg-red-700 text-white border-2 border-black">Dispensar</button>
+                                                                        </div>
+                                                                        <PopUp selecionar={selecionar} isOpen={popUpPropostaIsOpen} click={enviarMensagem} mensagemPadrao={selecionar ? vagaSelecionada.mensagemConvocacao : vagaSelecionada.mensagemDispensa} close={() => setPopUpPropostaIsOpen(false)} />
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    {nav === "editar" && (<FormEditarVaga idVaga={idVagaSelecionada} vaga={dadosCadastraisVaga} />)}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                ) : (
+                                    <>
+                                        <GerenciadorDeRascunhos condition={true} enviarForm={CadastrarRascunho}>
+                                            {renderizarRascunhos()}
+                                        </GerenciadorDeRascunhos>
+                                    </>
                                 )
-                            ) : (
-                                <>
-                                    <GerenciadorDeRascunhos condition={true} enviarForm={CadastrarRascunho}>
-                                        {renderizarRascunhos()}
-                                    </GerenciadorDeRascunhos>
-                                </>
-                            )
-                            }
-                        </div>
-                    </section>
-                </main>
+                                }
+                            </div>
+                        </section>
+                    </main>
+                ) : (
+                    <h1 className="flex-1/2 text-center mt-10">Nada aqui</h1>
+                )}
                 <Footer />
             </div >
         </>
@@ -431,7 +532,7 @@ const PopUp: React.FC<popUpProps> = ({ click, isOpen, mensagemPadrao, selecionar
             <span className="absolute text-2xl -top-[0%] left-[92%] z-30 cursor-pointer font-extrabold material-symbols" onClick={close}>close</span>
             <h3 className="text-center">{selecionar ? 'Selecionar candidato' : 'Dispensar candidato'}</h3>
             <label className="block mb-2" htmlFor="mensagem"><strong>Mensagem:</strong></label>
-            <textarea id="mensagem" onChange={handleChange} value={values.mensagem} className="h-28 w-72 rounded-md border" /><br />
+            <textarea id="mensagem" onChange={handleChange} value={values.mensagem} className="h-36 w-80 p-2 rounded-md border" /><br />
             <div className="flex justify-center pt-6">
                 <button onClick={() => click(values.mensagem)} className="bg-gray-900 text-white w-28 p-1 rounded-sm">Enviar</button>
             </div>
@@ -533,25 +634,25 @@ const FormEditarVaga: React.FC<formEditProps> = ({ vaga, idVaga }) => {
         }
 
         return (
-            <div className="sm:w-[700px] w-[600px] bg-white border border-gray-500 shadow-2xl rounded-md  m-auto  font-[arial] pt-10">
+            <div className="sm:w-[700px] w-[600px] bg-white border border-gray-500 shadow-2xl rounded-md  m-auto  font-[arial] py-10">
                 <h2 className="text-center mb-10">Aditar dados da vaga</h2>
                 <form className="" onSubmit={handleSubmit}>
                     <div className="grid gap-4 sm:grid-cols-2">
                         <div className="grid w-[300px] m-auto">
                             <label>Adicione um titulo:</label>
-                            <input className="border h-10 rounded-md"
+                            <input className="border h-10 rounded-md pl-1"
                                 onChange={handleChange} value={values.titulo} id="titulo" type="text" placeholder="Titulo" />
                         </div>
 
                         <div className="grid  w-[300px] m-auto">
                             <label>Prazo em dias:</label>
-                            <input className="border h-10 rounded-md"
+                            <input className="border h-10 rounded-md pl-1"
                                 onChange={handleChange} id="diasEmAberto" onKeyDown={definirTeclasPermitidas} type="number" inputMode="numeric" pattern="[0-9]*" value={values.diasEmAberto} />
                         </div>
 
                         <div className="grid  w-[300px] m-auto">
                             <label>Salario:</label>
-                            <input className="border h-10"
+                            <input className="border h-10 pl-1"
                                 value={values.salario} onChange={handleChange} id="salario" type="text" placeholder="Salario" onKeyDown={definirTeclasPermitidas} />
                         </div>
 
@@ -621,44 +722,44 @@ const FormEditarVaga: React.FC<formEditProps> = ({ vaga, idVaga }) => {
 
                         <div className="grid">
                             <label>Adicione uma introdução para a  descrição:</label>
-                            <textarea className="h-40 rounded-lg" id="descricao" placeholder="Introdução" onChange={handleChange} value={values.descricao} />
+                            <textarea className="h-40 rounded-lg border pl-1" id="descricao" placeholder="Introdução" onChange={handleChange} value={values.descricao} />
                         </div>
 
 
                         <div className="grid ">
                             <label>Descreva as pricipais atividades:</label>
-                            <textarea className="h-40 rounded-lg" id="principais_atividades" placeholder="Principais atividades" onChange={handleChange} value={values.principais_atividades} />
+                            <textarea className="h-40 rounded-lg border pl-1" id="principais_atividades" placeholder="Principais atividades" onChange={handleChange} value={values.principais_atividades} />
                         </div>
 
                         <div className="grid ">
                             <label>Requisitos da vaga:</label>
-                            <textarea className="h-40 rounded-lg" id="requisitos" placeholder="Reuisitos" onChange={handleChange} value={values.requisitos} />
+                            <textarea className="h-40 rounded-lg border pl-1" id="requisitos" placeholder="Reuisitos" onChange={handleChange} value={values.requisitos} />
                         </div>
 
                         <div className="grid ">
                             <label>Diferenciais para a vaga:</label>
-                            <textarea className="h-40 rounded-lg" id="diferenciais" placeholder="Diferenciais" onChange={handleChange} value={values.diferenciais} />
+                            <textarea className="h-40 rounded-lg border pl-1" id="diferenciais" placeholder="Diferenciais" onChange={handleChange} value={values.diferenciais} />
                         </div>
 
                         <div className="grid ">
                             <label>Fale sobre o local de trabalho:</label>
-                            <textarea className="h-40 rounded-lg" id="local_de_trabalho" placeholder="Local de trabalho" onChange={handleChange} value={values.local_de_trabalho} />
+                            <textarea className="h-40 rounded-lg border pl-1" id="local_de_trabalho" placeholder="Local de trabalho" onChange={handleChange} value={values.local_de_trabalho} />
                         </div>
 
 
                         <div className="grid ">
                             <label>Informações sobre horario e escala:</label>
-                            <textarea className="h-40 rounded-lg" id="horario" placeholder="Horário" onChange={handleChange} value={values.horario} />
+                            <textarea className="h-40 rounded-lg border pl-1" id="horario" placeholder="Horário" onChange={handleChange} value={values.horario} />
                         </div>
 
                         <div className="grid ">
                             <label>Mensagem padrão:</label>
-                            <textarea className="h-40 rounded-lg" id="mensagemConvocacao" placeholder="Mensagem recebida pelo usuário ao ser avaliado" onChange={handleChange} value={values.mensagemConvocacao} />
+                            <textarea className="h-40 rounded-lg border pl-1" id="mensagemConvocacao" placeholder="Mensagem recebida pelo usuário ao ser avaliado" onChange={handleChange} value={values.mensagemConvocacao} />
                         </div>
 
                         <div className="grid ">
                             <label>Mensagem padrão:</label>
-                            <textarea className="h-40 rounded-lg" id="mensagemDispensa" placeholder="Mensagem recebida pelo usuário ao ser avaliado" onChange={handleChange} value={values.mensagemDispensa} />
+                            <textarea className="h-40 rounded-lg border pl-1" id="mensagemDispensa" placeholder="Mensagem recebida pelo usuário ao ser avaliado" onChange={handleChange} value={values.mensagemDispensa} />
                         </div>
                     </div>
                     <div className="flex justify-center mt-8">

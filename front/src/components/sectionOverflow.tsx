@@ -4,18 +4,17 @@ import React, { useEffect, useRef, useState } from "react"
 
 
 interface sectionProps {
-    children: React.ReactNode;
+    children?: React.ReactNode;
     qtdItems: number;
 }
 export const SectionOverflow: React.FC<sectionProps> = ({ children, qtdItems }) => {
 
     const divRef = useRef<HTMLDivElement | null>(null);
     const [alturaChildren, setAlturaChildren] = useState<number>();
-    const [montato, setMontado] = useState(false);
-
+    
     useEffect(() => {
         if (divRef.current) {
-            setAlturaChildren(divRef.current?.children[0].clientHeight);
+            setAlturaChildren(divRef.current?.children[0]?.clientHeight);
         }
     }, [divRef])
 
