@@ -21,7 +21,7 @@ export const CardVaga: React.FC<cardVagaProps> = ({ id, cidade, nome_empresa, es
 
     return (
         <a href={`/vaga/${id}`} target="_blank"
-            className={`border vaga border-gray-400 w-80 min-h-[370px] max-h-fit p-3 rounded-md bg-white shadow-sm shadow-gray-500 cursor-pointer m-5 ${load ? 'animate-pulse' : ''}`}>
+            className={`border vaga border-gray-400 w-80 min-h-[370px] max-h-fit p-3 rounded-md bg-white shadow-sm shadow-gray-300 cursor-pointer m-5 ${load ? 'animate-pulse' : ''}`}>
             <h2 className="pb-8 pt-4 text-center">{titulo}</h2>
             <div className="flex items-center gap-x-1 ">
                 <i className="material-symbols w-fit ">Domain</i>
@@ -56,7 +56,7 @@ export const CardVaga: React.FC<cardVagaProps> = ({ id, cidade, nome_empresa, es
             </div>
 
 
-            {!sexo_exclusivo && (
+            {sexo_exclusivo && (
                 <div>
                     <hr className="text-gray-400 my-2" />
                     <div className="flex">
@@ -67,7 +67,7 @@ export const CardVaga: React.FC<cardVagaProps> = ({ id, cidade, nome_empresa, es
             )}
 
 
-            {!exclusivo_pcd && (
+            {exclusivo_pcd && (
                 <div>
                     <hr className="text-gray-400 my-2" />
                     <div className="flex">

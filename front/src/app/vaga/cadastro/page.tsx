@@ -6,6 +6,8 @@ import { VagaService } from "@/resources/vaga_emprego/service";
 import { ServicoSessao } from "@/resources/sessao/sessao";
 import { cidade, estado, UtilsService } from "@/resources/utils/utils";
 import { Option } from "@/app/candidato/page";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 
 
@@ -72,7 +74,8 @@ export default function CadastroVaga() {
 
     return (
         <div className="font-[arial]">
-            <div className=" w-[400px] sm:w-[600px] md:w-[680px] lg:w-[720px] border border-gray-300 bg-white m-auto mt-12 rounded-lg shadow-2xl shadow-gray-600  p-5">
+            <Header />
+            <div className=" w-[400px] sm:w-[600px] md:w-[680px] lg:w-[720px] border border-gray-300 bg-white m-auto mt-12 rounded-lg shadow-sm shadow-gray-200  p-5 mb-20">
                 <h1 className="text-center ">Cadastro de vaga</h1>
                 <hr className="text-gray-400 my-20 w-[90%] m-auto" />
                 <form onSubmit={handleSubmit}>
@@ -146,47 +149,47 @@ export default function CadastroVaga() {
                             </select>
                         </div>
                     </div>
-                    <div  className="grid grid-cols-1 gap-y-10 mt-10">
+                    <div className="grid grid-cols-1 gap-y-10 mt-10">
 
                         <div className="grid ">
                             <label>Descrição:</label>
-                            <textarea className="h-[200px] rounded-lg" id="descricao" onChange={handleChange} placeholder="Adicione uma introdução para a  descrição" />
+                            <textarea className="h-[200px] border border-gray-400 pl-1 rounded-sm" id="descricao" onChange={handleChange} placeholder="Adicione uma introdução para a  descrição" />
                         </div>
 
 
                         <div className="grid ">
                             <label>pricipais atividades:</label>
-                            <textarea className="h-[200px] rounded-lg" id="principais_atividades" onChange={handleChange} placeholder="Descreva as pricipais atividades" />
+                            <textarea className="h-[200px] border border-gray-400 pl-1 rounded-sm" id="principais_atividades" onChange={handleChange} placeholder="Descreva as pricipais atividades" />
                         </div>
 
                         <div className="grid ">
                             <label>Requisitos:</label>
-                            <textarea className="h-[200px] rounded-lg" id="requisitos" onChange={handleChange} placeholder="Requisitos" />
+                            <textarea className="h-[200px] border border-gray-400 pl-1 rounded-sm" id="requisitos" onChange={handleChange} placeholder="Requisitos" />
                         </div>
 
                         <div className="grid ">
                             <label>Diferenciais:</label>
-                            <textarea className="h-[200px] rounded-lg" id="diferenciais" onChange={handleChange} placeholder="Diferenciais" />
+                            <textarea className="h-[200px] border border-gray-400 pl-1 rounded-sm" id="diferenciais" onChange={handleChange} placeholder="Diferenciais" />
                         </div>
 
                         <div className="grid ">
                             <label>Local de trabalho:</label>
-                            <textarea className="h-[200px] rounded-lg" id="local_de_trabalho" onChange={handleChange} placeholder="Local de trabalho" />
+                            <textarea className="h-[200px] border border-gray-400 pl-1 rounded-sm" id="local_de_trabalho" onChange={handleChange} placeholder="Local de trabalho" />
                         </div>
 
 
                         <div className="grid ">
                             <label>Horario:</label>
-                            <textarea className="h-[200px] rounded-lg" id="horario" onChange={handleChange} placeholder="Informações sobre horario e escala" />
+                            <textarea className="h-[200px] border border-gray-400 pl-1 rounded-sm" id="horario" onChange={handleChange} placeholder="Informações sobre horario e escala" />
                         </div>
 
                         <div className="grid ">
-                            <label>Texto selecionar candidato:</label> 
-                            <textarea className="h-[200px] rounded-lg" value={values.mensagemConvocacao} id="mensagemConvocacao" onChange={handleChange} placeholder="Mensagem que candidato receberá ao ser selecionado" />
+                            <label>Texto selecionar candidato:</label>
+                            <textarea className="h-[200px] border border-gray-400 pl-1 rounded-sm" value={values.mensagemConvocacao} id="mensagemConvocacao" onChange={handleChange} placeholder="Mensagem que candidato receberá ao ser selecionado" />
                         </div>
                         <div className="grid ">
                             <label>Texto dispensar candidato:</label>
-                            <textarea className="h-[200px] rounded-lg" value={values.mensagemDispensa} id="mensagemDispensa" onChange={handleChange} placeholder="Mensagem que candidato receberá ao ser dispensado" />
+                            <textarea className="h-[200px] border border-gray-400 pl-1 rounded-sm" value={values.mensagemDispensa} id="mensagemDispensa" onChange={handleChange} placeholder="Mensagem que candidato receberá ao ser dispensado" />
                         </div>
                     </div>
                     <div className="flex justify-center mt-8">
@@ -194,6 +197,7 @@ export default function CadastroVaga() {
                     </div>
                 </form>
             </div>
+            <Footer />
         </div>
     )
 }

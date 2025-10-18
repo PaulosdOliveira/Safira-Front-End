@@ -40,7 +40,6 @@ class SessaoService {
                 perfil: tokenDecodificado.perfil,
                 expiracao: tokenDecodificado.exp
             }
-            alert(sessao.nome)
             this.setSessao(sessao);
         } else {
             alert("ERRO: " + token)

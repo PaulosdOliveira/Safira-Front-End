@@ -77,7 +77,7 @@ export const Menu = () => {
 
     function sair() {
         ServicoSessao().sair();
-        router.push(`/${sessao?.nome}/login`)
+        router.push(`/${sessao?.perfil}/login`)
     }
     if (!montado) return false;
     return (

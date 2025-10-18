@@ -5,6 +5,7 @@ import { Header } from "@/components/header";
 import { CandidatoService } from "@/resources/candidato/servico"
 import { accessToken, dadosLogin, formLoginValidator, ServicoSessao, valoresIniciais } from "@/resources/sessao/sessao";
 import { useFormik } from "formik";
+import { useRouter } from "next/navigation";
 
 
 export default function LoginPageCandidato() {
@@ -12,6 +13,7 @@ export default function LoginPageCandidato() {
 
     const service = CandidatoService();
     const sessao = ServicoSessao();
+    const router = useRouter();
     const { handleChange, errors, handleSubmit, values } = useFormik<dadosLogin>({
         initialValues: valoresIniciais,
         onSubmit: submit,
@@ -26,7 +28,10 @@ export default function LoginPageCandidato() {
 
         }
         const token: accessToken = await service.logar(dados);
-        await sessao.criarSessao(token);
+        if (token.token) {
+            await sessao.criarSessao(token);
+            router.push("/");
+        }
 
     }
 
@@ -35,7 +40,6 @@ export default function LoginPageCandidato() {
         <div className="w-full flex flex-col min-h-screen">
             <Header />
             <main className="w-full  flex-1/2  bg-slate-100  py-20 sm:px-0 px-1">
-
                 <div className="sm:border border-gray-400 sm:bg-white w-full sm:w-[460px] rounded-2xl max-h-screen m-auto py-9 font-[arial]">
                     <h2 className="text-center">Bem vindo de volta!</h2>
                     <form onSubmit={handleSubmit} className="text-center">
