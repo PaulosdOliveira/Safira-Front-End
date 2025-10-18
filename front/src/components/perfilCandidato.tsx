@@ -190,12 +190,11 @@ export const PerfilCandidatoComponent: React.FC<{ idCandidato: string }> = ({ id
                         <div style={{ backgroundImage: `url(http://localhost:8080/candidato/foto/${idCandidato})` }}
                             className="w-24 h-24  rounded-full bg-cover bg-no-repeat mr-4" />
                     </div>
-                    <div className="mt-7 ">
+                    <div className="mt-7">
                         <p className="text-[1.4em] font-semibold">{perfil?.nome}</p>
-                        <p className="font-bold">PROFISSÃO</p>
                         <span className="text-gray-700">{`${perfil?.idade} Anos / ${perfil.cidade} - ${perfil.estado}`}</span>
                         {sessao.getSessao()?.perfil === "empresa" && (
-                            <button onClick={() => setModalIsOpen(true)} className="bg-gray-700 text-white p-2 text-[.9em] rounded-lg block mt-5">Enviar proposta</button>
+                            <button onClick={() => setModalIsOpen(true)} className="bg-white/20 border border-white/30 backdrop-blur-md  shadow-sm p-2 text-[.9em] rounded-2xl block mt-5">Enviar proposta</button>
                         )}
                     </div>
                 </div>
@@ -388,7 +387,7 @@ const ModalProposta: React.FC<modalPorps> = ({ close, idCandidato }) => {
         if (mensagem.length) {
             const cadastroMensagem: CadastroMensagemDTO = { idCandidato: parseInt(idCandidato), idEmpresa: `${sessao.getSessao()?.id}`, perfilRemetente: sessao.getSessao()?.perfil, texto: mensagem }
             clientRef.current?.publish({
-                destination: `/app/receber-mensagem/${sessao.getSessao()?.id}${idCandidato}`,
+                destination: `/app/receber-mensagem/${sessao.getSessao()?.id}/${idCandidato}`,
                 body: JSON.stringify(cadastroMensagem)
             });
         }
@@ -409,7 +408,7 @@ const ModalProposta: React.FC<modalPorps> = ({ close, idCandidato }) => {
                 <h2 className="text-center">Enviar proposta</h2>
                 <div id="Rascunhos">
                     <h3 className="text-center">Selecione um racunho</h3>
-                    <div className="h-36 grid justify-center  gap-3 overflow-auto py-4">
+                    <div className="h-36  grid justify-center  gap-3 overflow-auto py-4">
                         {rascunhos.length ? (
                             renderizarRascunhos()
                         ) : <h2>Sem rascunhos</h2>}
@@ -417,7 +416,7 @@ const ModalProposta: React.FC<modalPorps> = ({ close, idCandidato }) => {
                     </div>
                 </div>
                 <div className=" text-center">
-                    <textarea id="mensagem" className="h-24 w-96 mt-20 ml-16s" /><br />
+                    <textarea id="mensagem" className="h-28 w-96 mt-20  border" /><br />
                     <button onClick={enviarMensagem} className="bg-gray-900 rounded-md p-1 text-white mt-8 w-28">Enviar</button>
                 </div>
             </div>
