@@ -25,8 +25,8 @@ Frontend da plataforma de recrutamento, desenvolvido em React e Next.js, que per
 3. Caso não esteja habilitada a execução de scripts no terminal, abrir o PowerShell como admnistrado e executar o comando "<strong>Set-executionPolicy RemoteSigned</strong>"
 4. Rodar o projeto no terimal dentro do VsCode
 - Abrir o projeto no VsCode
-- Executar o comando "<strong>npm install</strong> no terminal para baixar as dependencias do projeto
-- Executar o comando "<strong>npm run dev</strong> no terminal para rodar
+- Executar o comando "<strong>npm install</strong>" no terminal para baixar as dependencias do projeto
+- Executar o comando "<strong>npm run dev</strong>" no terminal para rodar
 
 ## O projeto roda por padrão na porta 3000, é só abrir o navegador de digitar "localhost:3000" para abri a página inicial do projeto
 
