@@ -52,13 +52,10 @@ class Service {
     }
 
 
-    async carregarVaga(id: string, token: string) {
+    async carregarVaga(id: string) {
 
-        const resultado = await fetch(`${this.urlBase}/${id}`, {
+        const resultado = await fetch(`${this.urlBase}?id=${id}`, {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
         })
         return resultado.json();
     }
@@ -70,7 +67,7 @@ class Service {
                 'Authorization': `Bearer ${token}`
             }
         })
-        return resultado.status;
+        return resultado.json();
     }
 
     async buscar_candidaturas(token: string): Promise<CandidaturaCandidato[]> {

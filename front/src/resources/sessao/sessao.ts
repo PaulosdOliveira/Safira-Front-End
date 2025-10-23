@@ -57,9 +57,13 @@ class SessaoService {
     getSessao() {
         try {
             const sessao = localStorage.getItem("sessao");
+            if (!sessao) {
+                return null
+            };
             const login: Sessao = JSON.parse(sessao ? sessao : '');
             return login;
         } catch (erro) {
+            console.log(erro)
             return null;
         }
     }

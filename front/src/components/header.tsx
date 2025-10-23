@@ -94,7 +94,7 @@ export const Menu = () => {
                 <i onClick={() => setMenuAberto(!menuAberto)} className="material-symbols cursor-pointer">arrow_drop_down</i>
             </div>
             <div className="relative">
-                <nav className={`border border-gray-400 mt-0.5  z-30 bg-white w-20 text-center absolute -left-21 ${!menuAberto ? 'hidden' : ''}`}>
+                <nav className={`border border-gray-400 mt-0.5 z-50 bg-white w-20 text-center absolute -left-21 ${!menuAberto ? 'hidden' : ''}`}>
                     <ul>
                         <li onClick={() => router.push("/")} className="cursor-pointer hover:bg-gray-200 rounded-md p-0.5">Início</li>
                         <li onClick={() => router.push(`/${sessao?.perfil}/${sessao?.id}`)} className="cursor-pointer hover:bg-gray-200 rounded-md p-0.5">Perfil</li>

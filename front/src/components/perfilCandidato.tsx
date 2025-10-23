@@ -58,6 +58,7 @@ export const PerfilCandidatoComponent: React.FC<{ idCandidato: string }> = ({ id
     // Renderizando lista de qualificações
     const renderizarQualificacoes = () => {
         return perfil?.qualificacoes?.map((q, index) => {
+            let removido = false;
             function apagar() {
                 let confirma = confirm(`Excluir ${q.nome}?`);
                 if (confirma) {
@@ -70,11 +71,12 @@ export const PerfilCandidatoComponent: React.FC<{ idCandidato: string }> = ({ id
                             ) || []
                         }))
                     }, 500)
+                    removido = true;
                 }
             }
             return (
                 <div key={index} className="grid w-fit relative pt-1 shrink-0">
-                    <QualificacaoPerfil click={apagar} key={q.idQualificacao} nivel={q.nivel} nome={q.nome} />
+                    <QualificacaoPerfil titular={titular} removido={removido} click={apagar} key={q.idQualificacao} nivel={q.nivel} nome={q.nome} />
                 </div>
             )
         })
@@ -97,8 +99,10 @@ export const PerfilCandidatoComponent: React.FC<{ idCandidato: string }> = ({ id
 
             return (
                 <div key={index} className="grid  relative pt-1">
-                    <span onClick={apagar}
-                        className={`material-symbols  top-[10%]  left-[92%] sm:left-[94%] lg:left-[96%] cursor-pointer absolute text-[.9em] ${titular ? '' : 'hidden'}`}>delete</span>
+                    <div className={`w-fit ${titular ? '' : 'hidden'}`}>
+                        <i onClick={apagar}
+                            className={`material-symbols   top-[10%]  left-[92%] sm:left-[94%] lg:left-[96%] cursor-pointer absolute text-[.9em] `}>delete</i>
+                    </div>
                     <FormacaoJSX key={f.id} curso={f.curso} id={f.id}
                         instituicao={f.instituicao} nivel={f.nivel} situacao={f.situacao} />
                 </div>
@@ -122,8 +126,10 @@ export const PerfilCandidatoComponent: React.FC<{ idCandidato: string }> = ({ id
             }
             return (
                 <div key={index} className="grid  relative pt-1">
-                    <span onClick={apagar}
-                        className={`material-symbols  top-[10%] left-[92%] sm:left-[94%] lg:left-[96%] cursor-pointer absolute text-[.9em] ${titular ? '' : 'hidden'}`}>delete</span>
+                    <div className={`w-fit ${titular ? '' : 'hidden'}`}>
+                        <span onClick={apagar}
+                            className={`material-symbols  top-[10%] left-[92%] sm:left-[94%] lg:left-[96%] cursor-pointer absolute text-[.9em] ${titular ? '' : 'hidden'}`}>delete</span>
+                    </div>
                     <CursoJSX cargaHoraria={c.cargaHoraria} curso={c.curso} id={c.id}
                         instituicao={c.instituicao} key={c.id} />
                 </div>
@@ -149,8 +155,10 @@ export const PerfilCandidatoComponent: React.FC<{ idCandidato: string }> = ({ id
             return (
 
                 <div key={index} className="grid  relative pt-1">
-                    <span onClick={apagar}
-                        className={`material-symbols  top-[10%] left-[92%] sm:left-[94%] lg:left-[96%] cursor-pointer absolute text-[.9em] ${titular ? '' : 'hidden'}`}>delete</span>
+                    <div className={`w-fit ${titular ? '' : 'hidden'}`}>
+                        <span onClick={apagar}
+                            className={`material-symbols  top-[10%] left-[92%] sm:left-[94%] lg:left-[96%] cursor-pointer absolute text-[.9em] ${titular ? '' : 'hidden'}`}>delete</span>
+                    </div>
                     <ExperienciaJSX cargo={e.cargo} descricao={e.descricao} duracao={e.duracao}
                         empresa={e.empresa} id={e.id} key={e.id} />
                 </div>
@@ -185,7 +193,7 @@ export const PerfilCandidatoComponent: React.FC<{ idCandidato: string }> = ({ id
     if (perfil) {
         return (
             <main className="bg-gray-020 py-5">
-                <div className=" w-full sm:w-[570px] md:w-[755px] lg:w-[900px] bg-white flex items-center  px-2 pb-2 sm:m-auto border border-gray-300 shadow-lg">
+                <div className=" w-full sm:w-[570px] md:w-[755px] lg:w-[900px] bg-white flex   px-2 py-2 sm:m-auto border border-gray-300 shadow-lg">
                     <div className="">
                         <div style={{ backgroundImage: `url(http://localhost:8080/candidato/foto/${idCandidato})` }}
                             className="w-24 h-24  rounded-full bg-cover bg-no-repeat mr-4" />
@@ -232,7 +240,7 @@ export const PerfilCandidatoComponent: React.FC<{ idCandidato: string }> = ({ id
                         <h3 className="my-6">Qualificações</h3>
                         {
                             perfil.qualificacoes?.length ? (
-                                <div className="max-h-[300px] gap-2.5 mt-2 -mx-3 flex flex-wrap  overflow-auto">
+                                <div className="max-h-[300px] gap-2 mt-2 -mx-5 flex flex-wrap pl-1 overflow-auto">
                                     {renderizarQualificacoes()}
                                 </div>
                             ) : (<h3>Usuário não possui qualificações cadastradas</h3>)
@@ -291,18 +299,19 @@ export const PerfilCandidatoComponent: React.FC<{ idCandidato: string }> = ({ id
 
 
 interface qualificacaoProps extends QualificacaoSalva {
-    click: () => void
+    click: () => void;
+    removido: boolean;
+    titular: boolean;
 }
-export const QualificacaoPerfil: React.FC<qualificacaoProps> = ({ nome, nivel, click }) => {
-    const [removido, setRemovido] = useState(false);
-    function remover() {
-        setRemovido(true);
-        click();
-    }
+export const QualificacaoPerfil: React.FC<qualificacaoProps> = ({ nome, nivel, click, removido, titular }) => {
+
+
     return (
-        <div className={`flex text-[.9em]  border border-gray-700 bg-gray-50 w-fit px-2 py-1 rounded-full transition-all duration-700 ${removido ? 'scale-0' : ''}`}>
+        <div className={`flex text-[.9em]  border border-gray-700 bg-gray-50 w-fit px-2 py-1 rounded-full transition-all duration-700  ${removido ? 'scale-0' : ''}`}>
             <span className="font-black">{`${nome} -  ${nivel}`}</span>
-            <i onClick={remover} className="material-symbols cursor-pointer scale-75">delete</i>
+            <div className={`w-fit ${titular ? '' : 'hidden'}`}>
+                <i onClick={click} className="material-symbols cursor-pointer scale-75">delete</i>
+            </div>
         </div>
     )
 }
@@ -408,7 +417,7 @@ const ModalProposta: React.FC<modalPorps> = ({ close, idCandidato }) => {
                 <h2 className="text-center">Enviar proposta</h2>
                 <div id="Rascunhos">
                     <h3 className="text-center">Selecione um racunho</h3>
-                    <div className="h-36  grid justify-center  gap-3 overflow-auto py-4">
+                    <div className="h-36 grid justify-center  gap-3 overflow-auto py-4">
                         {rascunhos.length ? (
                             renderizarRascunhos()
                         ) : <h2>Sem rascunhos</h2>}

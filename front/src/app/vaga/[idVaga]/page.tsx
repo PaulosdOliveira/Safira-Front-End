@@ -1,19 +1,19 @@
 'use client'
 
 
+import LoginPageCandidato, { FormLoginCandidato } from "@/app/candidato/login/page";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { ServicoSessao, Sessao } from "@/resources/sessao/sessao";
 import { dadosVaga } from "@/resources/vaga_emprego/DadosVaga";
 import { VagaService } from "@/resources/vaga_emprego/service";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function VagaPage() {
 
     const idVaga = useParams().idVaga;
     const service = VagaService();
-    const sessao = ServicoSessao();
     const [vaga, setVaga] = useState<dadosVaga>();
 
 
@@ -21,7 +21,7 @@ export default function VagaPage() {
     useEffect(() => {
         (async () => {
             const vaga: dadosVaga = await service
-                .carregarVaga(idVaga + '', sessao.getSessao()?.accessToken + '');
+                .carregarVaga(idVaga + '');
             if (vaga.descricao) setVaga(vaga);
         })()
     }, [])
@@ -33,7 +33,7 @@ export default function VagaPage() {
     return vaga ? (
         <div className=" w-full min-h-screen max-h-fit bg-gray-100 font-[arial]">
             <Header logado={true} />
-            <div className="mt-20"/>
+            <div className="mt-20" />
             <DadosVaga vaga={vaga} />
             <Footer />
         </div>
@@ -51,45 +51,38 @@ export interface vagaProps {
 }
 
 export const DadosVaga: React.FC<vagaProps> = ({ vaga }) => {
-    const sessao = ServicoSessao();
+
+    const sessao = ServicoSessao().getSessao();
     const service = VagaService();
-    const [candidatou, setCandidatou] = useState<boolean>();
-
-
+    const [formOpen, setFormOpen] = useState(false)
     useEffect(() => {
-        if (vaga) setCandidatou(vaga.jaCandidatou);
+
     }, [])
 
 
-    async function candidatar() {
-        const token = ServicoSessao().getSessao()?.accessToken + '';
-        if (!candidatou) {
-            const status = await service.candidatar_a_vaga(token, vaga?.id + '');
-            if (status !== 201) alert("Erro ao se cadastrar");
-            else {
-                alert("Cadastro realizado com sucesso");
-                setCandidatou(!candidatou)
-            }
-        }
-        else {
-            await service.cancelar_candidatura(token, vaga?.id + '');
-            setCandidatou(!candidatou)
-        }
 
+    async function candidatar() {
+        const token = ServicoSessao().getSessao()?.accessToken;
+        if (token) {
+            await service.candidatar_a_vaga(token, vaga?.id + '').then(r => {
+                alert(r.Resultado)
+            });
+        } else {
+            setFormOpen(true);
+        }
     }
 
     return vaga ? (
-        <div className="m-auto  p-10 rounded-b-lg border border-gray-400 rounded-md bg-white w-[90vw]  sm:w-[500px] md:w-[600px] lg:w-[700px]  mb-36">
+        <div className="m-auto  py-10 px-5 rounded-b-lg border border-gray-400 rounded-md bg-white w-[90vw]  sm:w-[500px] md:w-[600px] lg:w-[700px]  mb-36">
             <div className=" flex flex-col items-center">
-                <h1 className="text-black font-bold sm:pl-12 pl-5">{vaga?.titulo}</h1>
-
-                <section className=" flex flex-wrap gap-3 pt-2 sm:pl-12 pl-5"
+                <h1 className="text-black font-bold">{vaga?.titulo}</h1>
+                <section className=" flex flex-wrap gap-3 pt-2"
                     id="detalhes_vaga">
                     <div className="flex items-center p-1 rounded-lg bg-gray-200 w-fit">
                         <i className="material-symbols">Domain</i>
                         <a href={`/empresa/${vaga.id_empresa}`} target="_blank" className="text-black inline-block hover:underline">{`${vaga?.nome_empresa}`}</a>
                     </div>
-                    
+
                     <div className="flex p-1 rounded-lg bg-gray-200 w-fit">
                         <i className="material-symbols">Distance</i>
                         <p className="text-black inline-block">{`${vaga?.cidade}, ${vaga?.estado}`}</p>
@@ -152,14 +145,22 @@ export const DadosVaga: React.FC<vagaProps> = ({ vaga }) => {
                         <pre className="text-black pl-1">{vaga?.horario}</pre>
                     </div>
                 </div>
-
+                <div className={`flex flex-col items-center mt-10 ${sessao?.perfil == 'empresa' ? 'hidden' : ''}`}>
+                    <button onClick={candidatar}
+                        className="p-2 rounded-sm bg-gray-800 text-white cursor-pointer">
+                        Candidatar-se
+                    </button>
+                </div>
                 {
-                    sessao.getSessao()?.perfil === "candidato" && (
-                        <div className=" flex flex-col items-center mt-10 ">
-                            <button onClick={candidatar}
-                                className="p-2 rounded-sm shadow-lg shadow-gray-800 bg-gray-800 text-white cursor-pointer">
-                                {!candidatou ? "Candidatar-se" : "Cancelar candidatura"}
-                            </button>
+                    //  FORMULÁRIO DE CADASTRO CASO O USUÁRIO NÃO ESTEJA LOGADO
+                    formOpen && (
+                        <div className="inset-0  fixed z-20 overflow-hidden">
+                            <div className="fixed inset-0 overflow-hidden bg-black opacity-50" />
+                            <div style={{ transform: 'translate(-50%, -50%)' }}
+                                className=" absolute grid top-[50%] left-[50%]">
+                                <p onClick={() => setFormOpen(false)} className="material-symbols text-right cursor-pointer">close</p>
+                                <FormLoginCandidato fecharModal={() => setFormOpen(false)} goToMain={false} />
+                            </div>
                         </div>
                     )
                 }

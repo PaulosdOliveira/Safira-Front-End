@@ -271,8 +271,8 @@ export default function PerfilEmpresa() {
                 {perfil ? (
                     <main className="mb-5">
                         <section id="informacoes" className="" >
-                            <div className="z-30 pb-3 pt-5  flex flex-col  ">
-                                <div className="z-10 ml-5 flex items-end">
+                            <div className="pb-3 pt-5  flex flex-col  ">
+                                <div className="bg-white ml-5 flex items-end">
                                     <div id="foto" className="border-2 border-white h-32 w-32  rounded-full   bg-no-repeat bg-contain "
                                         style={{ backgroundImage: `url(http://localhost:8080/empresa/foto/${id})` }} />
                                     <h2 className="pl-2 pb-10">{perfil?.nome}</h2>
